@@ -1,0 +1,13 @@
+{
+  "name": "@justadrop/types",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node && bun run tsc --emitDeclarationOnly",
+    "dev": "bun --watch src/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

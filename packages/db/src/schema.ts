@@ -1,0 +1,49 @@
+import { pgTable, text, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { createId } from '@paralleldrive/cuid2';
+
+export const opportunityStatusEnum = pgEnum('opportunity_status', ['open', 'closed', 'filled']);
+export const applicationStatusEnum = pgEnum('application_status', ['pending', 'accepted', 'rejected']);
+
+export const volunteers = pgTable('volunteers', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  skills: text('skills').array().notNull().default([]),
+  availability: text('availability').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const organizations = pgTable('organizations', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  description: text('description').notNull(),
+  website: text('website'),
+  verified: boolean('verified').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const opportunities = pgTable('opportunities', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  organizationId: text('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  skillsRequired: text('skills_required').array().notNull().default([]),
+  duration: text('duration').notNull(),
+  location: text('location').notNull(),
+  status: opportunityStatusEnum('status').notNull().default('open'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const applications = pgTable('applications', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  volunteerId: text('volunteer_id').notNull().references(() => volunteers.id, { onDelete: 'cascade' }),
+  opportunityId: text('opportunity_id').notNull().references(() => opportunities.id, { onDelete: 'cascade' }),
+  status: applicationStatusEnum('status').notNull().default('pending'),
+  message: text('message'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
