@@ -4,15 +4,17 @@ import { eq } from 'drizzle-orm';
 
 export const organizationsRouter = new Elysia({ prefix: '/organizations', tags: ['organizations'] })
   .get('/', async () => {
-    const allOrganizations = await db.select().from(organizations);
-    return allOrganizations;
+    const allOrganizations = await db.select().from(organizations)
+      .where(eq(organizations.approval_status, 'approved'));
+    return allOrganizations.map(org => ({ ...org, password_hash: undefined }));
   })
   .get('/:id', async ({ params: { id } }) => {
-    const organization = await db.select().from(organizations).where(eq(organizations.id, id));
-    if (organization.length === 0) {
+    const organization = await db.select().from(organizations)
+      .where(eq(organizations.id, id));
+    if (organization.length === 0 || organization[0].approval_status !== 'approved') {
       throw new Error('Organization not found');
     }
-    return organization[0];
+    return { ...organization[0], password_hash: undefined };
   })
   .post('/', async ({ body }) => {
     const newOrganization = await db.insert(organizations).values(body).returning();

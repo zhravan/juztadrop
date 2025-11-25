@@ -1,6 +1,8 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
+import { authRouter } from './routes/auth';
+import { adminRouter } from './routes/admin';
 import { volunteersRouter } from './routes/volunteers';
 import { organizationsRouter } from './routes/organizations';
 import { opportunitiesRouter } from './routes/opportunities';
@@ -17,6 +19,8 @@ const app = new Elysia()
           description: 'API for connecting volunteers with organizations',
         },
         tags: [
+          { name: 'auth', description: 'Authentication endpoints' },
+          { name: 'admin', description: 'Admin endpoints' },
           { name: 'volunteers', description: 'Volunteer endpoints' },
           { name: 'organizations', description: 'Organization endpoints' },
           { name: 'opportunities', description: 'Opportunity endpoints' },
@@ -27,6 +31,8 @@ const app = new Elysia()
   )
   .get('/', () => ({ message: 'Just a Drop API' }))
   .get('/health', () => ({ status: 'ok' }))
+  .use(authRouter)
+  .use(adminRouter)
   .use(volunteersRouter)
   .use(organizationsRouter)
   .use(opportunitiesRouter)

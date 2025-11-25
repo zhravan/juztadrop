@@ -3,24 +3,39 @@ import { createId } from '@paralleldrive/cuid2';
 
 export const opportunityStatusEnum = pgEnum('opportunity_status', ['open', 'closed', 'filled']);
 export const applicationStatusEnum = pgEnum('application_status', ['pending', 'accepted', 'rejected']);
+export const approvalStatusEnum = pgEnum('approval_status', ['pending', 'approved', 'rejected', 'blacklisted']);
 
 export const volunteers = pgTable('volunteers', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
+  password_hash: text('password_hash').notNull(),
   skills: text('skills').array().notNull().default([]),
   availability: text('availability').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+export const admins = pgTable('admins', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  password_hash: text('password_hash').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 export const organizations = pgTable('organizations', {
   id: text('id').primaryKey().$defaultFn(() => createId()),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
+  password_hash: text('password_hash').notNull(),
   description: text('description').notNull(),
   website: text('website'),
   verified: boolean('verified').notNull().default(false),
+  approval_status: approvalStatusEnum('approval_status').notNull().default('pending'),
+  approval_notes: text('approval_notes'),
+  approved_at: timestamp('approved_at'),
+  approved_by: text('approved_by').references(() => admins.id),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

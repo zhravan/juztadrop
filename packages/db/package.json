@@ -8,7 +8,8 @@
     "dev": "bun --watch src/index.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "bun run src/migrate.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "seed:admin": "bun run src/seed-admin.ts"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",

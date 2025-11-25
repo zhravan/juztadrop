@@ -1,4 +1,4 @@
-.PHONY: install dev build clean db-setup db-generate db-migrate db-studio
+.PHONY: install dev build clean db-setup db-generate db-migrate db-studio db-seed-admin
 
 install:
 	bun install
@@ -25,6 +25,9 @@ db-migrate:
 
 db-studio:
 	bun run db:studio
+
+db-seed-admin:
+	cd packages/db && bun run seed:admin
 
 db-stop:
 	docker stop justadrop-db

@@ -23,35 +23,40 @@ packages/
 
 ## Prerequisites
 
-- Bun >= 1.0 (install from https://bun.sh)
+- Bun >= 1.0 (install from <https://bun.sh>)
 - Docker (for PostgreSQL)
 
 ## Setup
 
 Install dependencies:
+
 ```bash
 make install
 # or: bun install
 ```
 
 Setup PostgreSQL (Docker):
+
 ```bash
 make db-setup
 ```
 
 Copy environment files:
+
 ```bash
 cp .env.example .env
 cp apps/web/.env.example apps/web/.env
 ```
 
 Generate and run migrations:
+
 ```bash
 make db-generate
 make db-migrate
 ```
 
 Build packages (required before first run):
+
 ```bash
 bun run build:packages
 ```
@@ -59,20 +64,58 @@ bun run build:packages
 ## Development
 
 Start both frontend and backend:
+
 ```bash
 make dev
 ```
 
 Or individually:
+
 ```bash
 bun run dev:web    # Frontend on :3000
 bun run dev:api    # Backend on :3001
 ```
 
 Database studio:
+
 ```bash
 make db-studio
 ```
+
+## Authentication
+
+The platform has three user types:
+
+- Volunteers: Auto-approved on registration
+- Organizations: Require admin approval before posting opportunities
+- Admins: Can approve/reject/blacklist organizations
+
+Create the first admin user:
+
+```bash
+make db-seed-admin
+# Default: admin@justadrop.xyz / admin123456
+```
+
+Override default admin credentials:
+
+```bash
+ADMIN_EMAIL=your@email.com ADMIN_PASSWORD=yourpassword ADMIN_NAME="Your Name" make db-seed-admin
+```
+
+API endpoints:
+
+- POST /auth/volunteer/register
+- POST /auth/volunteer/login
+- POST /auth/organization/register
+- POST /auth/organization/login
+- POST /auth/admin/login
+- GET /admin/organizations/pending (admin only)
+- PATCH /admin/organizations/:id/approve (admin only)
+- PATCH /admin/organizations/:id/reject (admin only)
+- PATCH /admin/organizations/:id/blacklist (admin only)
+
+OpenAPI docs available at <http://localhost:3001/swagger>
 
 ## Build
 
@@ -83,11 +126,13 @@ make build
 ## Database
 
 Stop PostgreSQL:
+
 ```bash
 make db-stop
 ```
 
 Remove PostgreSQL container:
+
 ```bash
 make db-remove
 ```
