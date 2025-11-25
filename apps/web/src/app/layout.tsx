@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: 'Just a Drop',
   description: 'Connect volunteers with organizations',
+  icons: {
+    icon: '/jad.png',
+    shortcut: '/jad.png',
+    apple: '/jad.png',
+  },
 };
 
 export default function RootLayout({
