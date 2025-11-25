@@ -1,0 +1,26 @@
+{
+  "name": "justadrop",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:web": "cd apps/web && bun run dev",
+    "dev:api": "cd apps/api && bun run dev",
+    "build": "bun run build:packages && bun run build:apps",
+    "build:packages": "bun run --filter './packages/*' build",
+    "build:apps": "bun run --filter './apps/*' build",
+    "db:generate": "cd packages/db && bun run db:generate",
+    "db:migrate": "cd packages/db && bun run db:migrate",
+    "db:studio": "cd packages/db && bun run db:studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "drizzle-kit": "^0.31.7",
+    "drizzle-orm": "^0.38.0",
+    "typescript": "^5.3.3"
+  }
+}
