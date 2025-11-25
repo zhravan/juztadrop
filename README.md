@@ -103,19 +103,24 @@ Override default admin credentials:
 ADMIN_EMAIL=your@email.com ADMIN_PASSWORD=yourpassword ADMIN_NAME="Your Name" make db-seed-admin
 ```
 
-API endpoints:
-
-- POST /auth/volunteer/register
-- POST /auth/volunteer/login
-- POST /auth/organization/register
-- POST /auth/organization/login
-- POST /auth/admin/login
-- GET /admin/organizations/pending (admin only)
-- PATCH /admin/organizations/:id/approve (admin only)
-- PATCH /admin/organizations/:id/reject (admin only)
-- PATCH /admin/organizations/:id/blacklist (admin only)
-
 OpenAPI docs available at <http://localhost:3001/swagger>
+
+## Email Notifications
+
+The platform uses Resend for sending email notifications.
+
+Setup email service:
+
+1. Sign up for a free account at <https://resend.com>
+2. Get your API key from the dashboard
+3. Add to your `.env` file:
+
+```bash
+RESEND_API_KEY=re_your_actual_api_key
+FROM_EMAIL=noreply@yourdomain.com
+```
+
+Note: Email sending will be skipped in development if RESEND_API_KEY is not configured.
 
 ## Build
 
