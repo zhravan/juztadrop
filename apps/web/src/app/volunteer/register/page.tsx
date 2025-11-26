@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -15,6 +15,7 @@ import { FormNavigation } from '@/components/multi-step-form/form-navigation'
 import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/auth-context'
 
 // Form validation schema
 const volunteerSchema = z.object({
@@ -79,6 +80,14 @@ export default function VolunteerRegisterPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+  const { user, isLoading } = useAuth()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push('/')
+    }
+  }, [user, isLoading, router])
 
   const {
     register,
@@ -95,6 +104,23 @@ export default function VolunteerRegisterPage() {
       agreeToTerms: false,
     },
   })
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <main className="flex-1 min-h-screen bg-gradient-to-b from-drop-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-drop-500"></div>
+          <p className="mt-4 text-slate-600">Loading...</p>
+        </div>
+      </main>
+    )
+  }
+
+  // Don't render register page if user is already logged in
+  if (user) {
+    return null
+  }
 
   const interests = watch('interests') || []
   const agreeToTerms = watch('agreeToTerms')

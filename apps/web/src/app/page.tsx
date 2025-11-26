@@ -1,10 +1,15 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Building2, Sparkles, Heart, Search, MapPin, Clock, Star, Award, Shield, Zap, Globe, TrendingUp, CheckCircle2, Quote, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuth } from '@/contexts/auth-context'
 
 export default function Home() {
+  const { user } = useAuth()
+
   return (
     <main className="flex-1">
       {/* Hero Section */}
@@ -35,9 +40,11 @@ export default function Home() {
                     Find Opportunities
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-2 border-drop-500 text-drop-600 hover:bg-drop-500 hover:text-white text-base font-semibold px-8 py-6 h-auto bg-white shadow-md hover:shadow-lg transition-all" asChild>
-                  <Link href="/organization/register">Register Organization</Link>
-                </Button>
+                {!user && (
+                  <Button size="lg" variant="outline" className="border-2 border-drop-500 text-drop-600 hover:bg-drop-500 hover:text-white text-base font-semibold px-8 py-6 h-auto bg-white shadow-md hover:shadow-lg transition-all" asChild>
+                    <Link href="/organization/register">Register Organization</Link>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -469,8 +476,12 @@ export default function Home() {
               <ul className="space-y-2">
                 <li><Link href="/opportunities" className="text-slate-400 hover:text-white transition-colors">Browse Opportunities</Link></li>
                 <li><Link href="/about" className="text-slate-400 hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/volunteer/register" className="text-slate-400 hover:text-white transition-colors">Become a Volunteer</Link></li>
-                <li><Link href="/organization/register" className="text-slate-400 hover:text-white transition-colors">Register Your NGO</Link></li>
+                {!user && (
+                  <>
+                    <li><Link href="/volunteer/register" className="text-slate-400 hover:text-white transition-colors">Become a Volunteer</Link></li>
+                    <li><Link href="/organization/register" className="text-slate-400 hover:text-white transition-colors">Register Your NGO</Link></li>
+                  </>
+                )}
               </ul>
             </div>
 
