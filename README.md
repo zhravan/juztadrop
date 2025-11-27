@@ -1,6 +1,12 @@
 # Just a Drop
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](docs/CONTRIBUTING.md)
+[![Code of Conduct](https://img.shields.io/badge/Code%20of%20Conduct-Contributor%20Covenant-blue.svg)](CODE_OF_CONDUCT.md)
+
 A platform connecting volunteers with organizations that need help.
+
+> **Open Source**: This project is open source and welcomes contributions from the community. See our [Contributing Guide](docs/CONTRIBUTING.md) to get started.
 
 ## Stack
 
@@ -201,3 +207,39 @@ pillars of curent setup:
 - Docker Compose orchestration
 
 </details>
+
+## Contributing
+
+We welcome contributions from the community! Just a Drop is an open source project, and we're excited to work with developers, designers, and volunteers who want to help improve the platform.
+
+### How to Contribute
+
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed contribution guidelines.
+
+## Community
+
+- **Code of Conduct**: We follow the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md)
+- **Issues**: [GitHub Issues](https://github.com/zhravan/justadrop.xyz/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/zhravan/justadrop.xyz/discussions)
+- **Security**: Report security vulnerabilities via our [Security Policy](SECURITY.md)
+
+## Documentation
+
+- **[Architecture](docs/ARCHITECTURE.md)**: Technical architecture and design decisions
+- **[Security Policy](SECURITY.md)**: Security best practices and vulnerability reporting
+- **[Changelog](CHANGELOG.md)**: Track changes across versions
+- **[Contributing](docs/CONTRIBUTING.md)**: How to contribute to the project
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [Bun](https://bun.sh), [Next.js](https://nextjs.org), [Elysia](https://elysiajs.com), and [Drizzle ORM](https://orm.drizzle.team)
+- UI components from [shadcn/ui](https://ui.shadcn.com)
+- Deployed with [Caddy](https://caddyserver.com) for automatic HTTPS
+
+---
+
+Made with ❤️ by the community
