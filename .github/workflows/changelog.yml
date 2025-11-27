@@ -29,22 +29,30 @@ jobs:
 
       - name: Generate changelog
         run: |
-          # Get the latest version tag or use v1.0.0 as baseline
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          # Check if any tags exist
+          if git describe --tags --abbrev=0 2>/dev/null; then
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+            echo "Latest tag found: ${LATEST_TAG}"
 
-          # Check if there are new commits since the tag
-          NEW_COMMITS=$(git log ${LATEST_TAG}..HEAD --oneline --no-merges)
+            # Check if there are new commits since the tag
+            NEW_COMMITS=$(git log ${LATEST_TAG}..HEAD --oneline --no-merges)
 
-          if [ -z "$NEW_COMMITS" ]; then
-            echo "No new commits since ${LATEST_TAG}"
+            if [ -z "$NEW_COMMITS" ]; then
+              echo "No new commits since ${LATEST_TAG}"
+              exit 0
+            fi
+
+            echo "Found new commits since ${LATEST_TAG}:"
+            echo "$NEW_COMMITS"
+          else
+            echo "No tags found - this appears to be the first run"
+            echo "Skipping changelog generation to avoid duplicates"
+            echo "The CHANGELOG.md has already been manually populated"
+            echo "Future runs will add new commits automatically"
             exit 0
           fi
 
-          echo "Found new commits since ${LATEST_TAG}:"
-          echo "$NEW_COMMITS"
-
           # Generate changelog only for commits since last tag
-          # -r 1 means only the most recent release
           conventional-changelog -p angular -i CHANGELOG.md -s
 
       - name: Commit and push changelog
