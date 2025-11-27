@@ -1,0 +1,62 @@
+name: Update Changelog
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install conventional-changelog-cli
+        run: npm install -g conventional-changelog-cli
+
+      - name: Generate changelog
+        run: |
+          # Get the latest version tag or use v1.0.0 as baseline
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+
+          # Check if there are new commits since the tag
+          NEW_COMMITS=$(git log ${LATEST_TAG}..HEAD --oneline --no-merges)
+
+          if [ -z "$NEW_COMMITS" ]; then
+            echo "No new commits since ${LATEST_TAG}"
+            exit 0
+          fi
+
+          echo "Found new commits since ${LATEST_TAG}:"
+          echo "$NEW_COMMITS"
+
+          # Generate changelog only for commits since last tag
+          # -r 1 means only the most recent release
+          conventional-changelog -p angular -i CHANGELOG.md -s
+
+      - name: Commit and push changelog
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changelog changes"
+            exit 0
+          fi
+
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md [skip ci]"
+          git push
