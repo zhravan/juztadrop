@@ -32,22 +32,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadAuthState = () => {
       try {
+        console.log('[Auth Context] Loading auth state from storage...');
+        
         // Check localStorage first (remember me)
         let storedToken = localStorage.getItem('authToken')
         let storedUserType = localStorage.getItem('userType')
         let storedUser = localStorage.getItem('user')
+
+        console.log('[Auth Context] localStorage check:', {
+          hasToken: !!storedToken,
+          hasUserType: !!storedUserType,
+          hasUser: !!storedUser
+        });
 
         // If not in localStorage, check sessionStorage
         if (!storedToken) {
           storedToken = sessionStorage.getItem('authToken')
           storedUserType = sessionStorage.getItem('userType')
           storedUser = sessionStorage.getItem('user')
+          
+          console.log('[Auth Context] sessionStorage check:', {
+            hasToken: !!storedToken,
+            hasUserType: !!storedUserType,
+            hasUser: !!storedUser
+          });
         }
 
         if (storedToken && storedUserType && storedUser) {
+          console.log('[Auth Context] Restoring auth state:', {
+            token: storedToken.substring(0, 20) + '...',
+            userType: storedUserType
+          });
           setToken(storedToken)
           setUserType(storedUserType as 'volunteer' | 'organization' | 'admin')
           setUser(JSON.parse(storedUser))
+        } else {
+          console.log('[Auth Context] No valid auth state found in storage');
         }
       } catch (error) {
         console.error('Error loading auth state:', error)
@@ -65,6 +85,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     newUserType: 'volunteer' | 'organization' | 'admin',
     remember: boolean = false
   ) => {
+    console.log('[Auth Context] Login called with:', { 
+      token: newToken ? `${newToken.substring(0, 20)}...` : 'null',
+      user: newUser,
+      userType: newUserType,
+      remember 
+    });
+
     setToken(newToken)
     setUser(newUser)
     setUserType(newUserType)
@@ -74,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storage.setItem('authToken', newToken)
     storage.setItem('userType', newUserType)
     storage.setItem('user', JSON.stringify(newUser))
+
+    console.log('[Auth Context] Token stored in:', remember ? 'localStorage' : 'sessionStorage');
+    console.log('[Auth Context] Verification - token from storage:', storage.getItem('authToken')?.substring(0, 20) + '...');
   }
 
   const logout = () => {
