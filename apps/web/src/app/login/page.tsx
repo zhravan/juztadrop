@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Droplet } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 type UserType = 'volunteer' | 'organization' | 'admin'
 
@@ -28,11 +29,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
     setIsSubmitting(true)
 
     try {
@@ -55,12 +54,15 @@ export default function LoginPage() {
       // Use auth context to store login state
       login(result.token, result.user, userType, rememberMe)
 
+      // Show success toast
+      toast.success(`Welcome back, ${result.user.name}!`)
+
       // Redirect to home page (will implement dashboard routing later)
       router.push('/')
     } catch (error) {
       console.error('Login error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.'
-      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -194,13 +196,6 @@ export default function LoginPage() {
                     Remember me
                   </label>
                 </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-800">{error}</p>
-                  </div>
-                )}
 
                 {/* Submit Button */}
                 <Button

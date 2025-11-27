@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 type VerificationStatus = 'verifying' | 'success' | 'error'
 
@@ -50,13 +51,16 @@ export default function VerifyEmailPage() {
       if (response.ok) {
         setStatus('success')
         setMessage(result.message || 'Email verified successfully!')
+        toast.success('Email verified successfully!')
       } else {
         setStatus('error')
         setMessage(result.message || 'Verification failed. Please try again.')
+        toast.error(result.message || 'Verification failed. Please try again.')
       }
     } catch (error) {
       setStatus('error')
       setMessage('An error occurred during verification. Please try again.')
+      toast.error('An error occurred during verification. Please try again.')
       console.error('Verification error:', error)
     }
   }

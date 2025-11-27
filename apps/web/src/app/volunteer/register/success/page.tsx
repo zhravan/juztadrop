@@ -5,22 +5,21 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Mail, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 export default function VolunteerRegistrationSuccessPage() {
   const [resendLoading, setResendLoading] = useState(false)
-  const [resendMessage, setResendMessage] = useState('')
 
   const handleResendEmail = async () => {
     // Try to get email from localStorage or session
     const email = localStorage.getItem('registrationEmail')
 
     if (!email) {
-      setResendMessage('Email address not found. Please register again.')
+      toast.error('Email address not found. Please register again.')
       return
     }
 
     setResendLoading(true)
-    setResendMessage('')
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
@@ -36,13 +35,13 @@ export default function VolunteerRegistrationSuccessPage() {
       const result = await response.json()
 
       if (response.ok) {
-        setResendMessage('✓ Verification email sent! Please check your inbox.')
+        toast.success('Verification email sent! Please check your inbox.')
       } else {
-        setResendMessage(`✗ ${result.message || 'Failed to resend email. Please try again.'}`)
+        toast.error(result.message || 'Failed to resend email. Please try again.')
       }
     } catch (error) {
       console.error('Resend error:', error)
-      setResendMessage('✗ An error occurred. Please try again later.')
+      toast.error('An error occurred. Please try again later.')
     } finally {
       setResendLoading(false)
     }
@@ -140,11 +139,6 @@ export default function VolunteerRegistrationSuccessPage() {
                     )}
                   </button>
                 </p>
-                {resendMessage && (
-                  <p className={`text-sm mt-2 ${resendMessage.startsWith('✓') ? 'text-green-600' : 'text-red-600'}`}>
-                    {resendMessage}
-                  </p>
-                )}
               </div>
             </CardContent>
           </Card>

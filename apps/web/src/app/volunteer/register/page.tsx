@@ -16,6 +16,7 @@ import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth-context'
+import { toast } from 'sonner'
 
 // Form validation schema
 const volunteerSchema = z.object({
@@ -186,12 +187,15 @@ export default function VolunteerRegisterPage() {
       // Store email in localStorage for resend functionality
       localStorage.setItem('registrationEmail', data.email)
 
+      // Show success toast
+      toast.success('Registration successful! Please check your email to verify your account.')
+
       // Redirect to verification pending page
       router.push('/volunteer/register/success')
     } catch (error) {
       console.error('Registration error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.'
-      alert(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }

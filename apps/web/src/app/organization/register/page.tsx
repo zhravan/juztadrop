@@ -13,6 +13,7 @@ import { StepIndicator } from '@/components/multi-step-form/step-indicator'
 import { FormNavigation } from '@/components/multi-step-form/form-navigation'
 import { Building2 } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 // Types
 type OrganizationType = 'ngo' | 'trust' | 'society' | 'non_profit_company' | 'section_8_company' | 'other'
@@ -304,11 +305,15 @@ export default function OrganizationRegisterPage() {
       // Store email in localStorage for resend functionality
       localStorage.setItem('registrationEmail', formData.email)
 
+      // Show success toast
+      toast.success('Registration successful! Please check your email to verify your account.')
+
       // Redirect to success page
       router.push('/organization/register/success')
     } catch (error) {
       console.error('Registration error:', error)
-      setErrors({ submit: error instanceof Error ? error.message : 'Registration failed. Please try again.' })
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.'
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -1002,12 +1007,6 @@ export default function OrganizationRegisterPage() {
                     </label>
                   </div>
                   {errors.agreeToTerms && <p className="text-sm text-red-500 mt-2">{errors.agreeToTerms}</p>}
-
-                  {errors.submit && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
-                      <p className="text-sm text-red-800">{errors.submit}</p>
-                    </div>
-                  )}
                 </>
               )}
 

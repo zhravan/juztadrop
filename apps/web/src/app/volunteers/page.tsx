@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Search, Users, MapPin, Heart, Clock, Briefcase, Mail, ChevronRight, Phone, Calendar, Award, Target, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -65,6 +66,7 @@ export default function VolunteersPage() {
       setFilteredVolunteers(verifiedVolunteers)
     } catch (error) {
       console.error('Error fetching volunteers:', error)
+      toast.error('Failed to load volunteers. Please try again later.')
     } finally {
       setLoading(false)
     }
@@ -103,12 +105,15 @@ export default function VolunteersPage() {
       if (type === 'email') {
         setEmailCopied(true)
         setTimeout(() => setEmailCopied(false), 2000)
+        toast.success('Email copied to clipboard!')
       } else {
         setPhoneCopied(true)
         setTimeout(() => setPhoneCopied(false), 2000)
+        toast.success('Phone number copied to clipboard!')
       }
     } catch (err) {
       console.error('Failed to copy:', err)
+      toast.error('Failed to copy to clipboard')
     }
   }
 
