@@ -56,40 +56,42 @@ export default function FilterSidebar({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 space-y-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-drop-800">Filters</h3>
-        <Button variant="ghost" size="sm" onClick={onReset}>
-          Reset
+    <div className="bg-white rounded-lg shadow-md sm:shadow-lg border border-slate-200 p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-5 md:space-y-6">
+      <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-200">
+        <h3 className="text-base sm:text-lg font-bold text-drop-800">Filters</h3>
+        <Button variant="ghost" size="sm" onClick={onReset} className="text-xs sm:text-sm hover:bg-drop-50 hover:text-drop-700 font-semibold">
+          Reset All
         </Button>
       </div>
 
       {/* Verified Only */}
-      <div>
+      <div className="bg-drop-50 p-3 sm:p-4 rounded-lg border border-drop-200">
         <div className="flex items-center space-x-2">
           <Checkbox
             id="verified"
             checked={filters.verified || false}
             onCheckedChange={checked => updateFilter('verified', checked)}
+            className="data-[state=checked]:bg-drop-600 data-[state=checked]:border-drop-600"
           />
-          <Label htmlFor="verified" className="text-sm font-medium">
-            Verified NGOs Only
+          <Label htmlFor="verified" className="text-xs sm:text-sm font-semibold text-drop-800 cursor-pointer">
+            ✓ Verified NGOs Only
           </Label>
         </div>
       </div>
 
       {/* Mode */}
       <div>
-        <Label className="text-sm font-semibold mb-2 block">Mode</Label>
-        <div className="space-y-2">
+        <Label className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 block text-slate-700 uppercase tracking-wider">Mode</Label>
+        <div className="space-y-2 sm:space-y-2.5">
           {modeOptions.map(option => (
-            <div key={option.value} className="flex items-center space-x-2">
+            <div key={option.value} className="flex items-center space-x-2 hover:bg-slate-50 p-1.5 rounded transition-colors">
               <Checkbox
                 id={`mode-${option.value}`}
                 checked={(filters.mode || []).includes(option.value as any)}
                 onCheckedChange={() => toggleArrayFilter('mode', option.value)}
+                className="data-[state=checked]:bg-drop-600 data-[state=checked]:border-drop-600"
               />
-              <Label htmlFor={`mode-${option.value}`} className="text-sm">
+              <Label htmlFor={`mode-${option.value}`} className="text-xs sm:text-sm cursor-pointer flex-1">
                 {option.label}
               </Label>
             </div>
@@ -99,16 +101,17 @@ export default function FilterSidebar({
 
       {/* Cause Category */}
       <div>
-        <Label className="text-sm font-semibold mb-2 block">Cause</Label>
-        <div className="space-y-2 max-h-48 overflow-y-auto">
+        <Label className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 block text-slate-700 uppercase tracking-wider">Cause Category</Label>
+        <div className="space-y-2 sm:space-y-2.5 max-h-48 sm:max-h-56 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-drop-300 scrollbar-track-slate-100">
           {causeCategories.map(category => (
-            <div key={category.value} className="flex items-center space-x-2">
+            <div key={category.value} className="flex items-center space-x-2 hover:bg-slate-50 p-1.5 rounded transition-colors">
               <Checkbox
                 id={`cause-${category.value}`}
                 checked={(filters.causeCategory || []).includes(category.value as any)}
                 onCheckedChange={() => toggleArrayFilter('causeCategory', category.value)}
+                className="data-[state=checked]:bg-drop-600 data-[state=checked]:border-drop-600"
               />
-              <Label htmlFor={`cause-${category.value}`} className="text-sm">
+              <Label htmlFor={`cause-${category.value}`} className="text-xs sm:text-sm cursor-pointer flex-1">
                 {category.label}
               </Label>
             </div>
@@ -118,16 +121,17 @@ export default function FilterSidebar({
 
       {/* Status */}
       <div>
-        <Label className="text-sm font-semibold mb-2 block">Status</Label>
-        <div className="space-y-2">
+        <Label className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 block text-slate-700 uppercase tracking-wider">Status</Label>
+        <div className="space-y-2 sm:space-y-2.5">
           {statusOptions.map(option => (
-            <div key={option.value} className="flex items-center space-x-2">
+            <div key={option.value} className="flex items-center space-x-2 hover:bg-slate-50 p-1.5 rounded transition-colors">
               <Checkbox
                 id={`status-${option.value}`}
                 checked={(filters.status || []).includes(option.value as any)}
                 onCheckedChange={() => toggleArrayFilter('status', option.value)}
+                className="data-[state=checked]:bg-drop-600 data-[state=checked]:border-drop-600"
               />
-              <Label htmlFor={`status-${option.value}`} className="text-sm">
+              <Label htmlFor={`status-${option.value}`} className="text-xs sm:text-sm cursor-pointer flex-1">
                 {option.label}
               </Label>
             </div>
@@ -137,29 +141,31 @@ export default function FilterSidebar({
 
       {/* Location */}
       <div>
-        <Label className="text-sm font-semibold mb-2 block">Location</Label>
-        <div className="space-y-2">
+        <Label className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 block text-slate-700 uppercase tracking-wider">Location</Label>
+        <div className="space-y-2 sm:space-y-3">
           <Input
             placeholder="City"
             value={filters.city || ''}
             onChange={e => updateFilter('city', e.target.value)}
+            className="text-xs sm:text-sm border-2 focus:border-drop-500"
           />
           <Input
             placeholder="State"
             value={filters.state || ''}
             onChange={e => updateFilter('state', e.target.value)}
+            className="text-xs sm:text-sm border-2 focus:border-drop-500"
           />
         </div>
       </div>
 
       {/* Skills */}
       <div>
-        <Label htmlFor="skills" className="text-sm font-semibold mb-2 block">
+        <Label htmlFor="skills" className="text-xs sm:text-sm font-bold mb-2 sm:mb-3 block text-slate-700 uppercase tracking-wider">
           Required Skills
         </Label>
         <Input
           id="skills"
-          placeholder="e.g., Communication"
+          placeholder="e.g., Communication, Teaching"
           value={(filters.skills || []).join(', ')}
           onChange={e =>
             updateFilter(
@@ -167,7 +173,9 @@ export default function FilterSidebar({
               e.target.value.split(',').map(s => s.trim()).filter(Boolean)
             )
           }
+          className="text-xs sm:text-sm border-2 focus:border-drop-500"
         />
+        <p className="text-[10px] sm:text-xs text-slate-500 mt-1.5">Separate skills with commas</p>
       </div>
     </div>
   );
