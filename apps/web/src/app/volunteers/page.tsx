@@ -4,8 +4,15 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Search, Users, MapPin, Heart, Clock, Briefcase, Mail, ChevronRight } from 'lucide-react'
+import { Search, Users, MapPin, Heart, Clock, Briefcase, Mail, ChevronRight, Phone, Calendar, Award, Target, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import Link from 'next/link'
 
 interface Volunteer {
@@ -33,6 +40,10 @@ export default function VolunteersPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedInterest, setSelectedInterest] = useState<string | null>(null)
+  const [selectedVolunteer, setSelectedVolunteer] = useState<Volunteer | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [emailCopied, setEmailCopied] = useState(false)
+  const [phoneCopied, setPhoneCopied] = useState(false)
 
   useEffect(() => {
     fetchVolunteers()
@@ -63,7 +74,7 @@ export default function VolunteersPage() {
     let filtered = volunteers
 
     if (searchQuery) {
-      filtered = filtered.filter(v => 
+      filtered = filtered.filter(v =>
         v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         v.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
         v.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,6 +88,28 @@ export default function VolunteersPage() {
     }
 
     setFilteredVolunteers(filtered)
+  }
+
+  const openVolunteerModal = (volunteer: Volunteer) => {
+    setSelectedVolunteer(volunteer)
+    setIsModalOpen(true)
+    setEmailCopied(false)
+    setPhoneCopied(false)
+  }
+
+  const copyToClipboard = async (text: string, type: 'email' | 'phone') => {
+    try {
+      await navigator.clipboard.writeText(text)
+      if (type === 'email') {
+        setEmailCopied(true)
+        setTimeout(() => setEmailCopied(false), 2000)
+      } else {
+        setPhoneCopied(true)
+        setTimeout(() => setPhoneCopied(false), 2000)
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
   }
 
   const allInterests = Array.from(new Set(volunteers.flatMap(v => v.interests)))
@@ -246,7 +279,11 @@ export default function VolunteersPage() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVolunteers.map((volunteer) => (
-                <Card key={volunteer.id} className="border-2 border-slate-200 hover:border-drop-400 hover:shadow-xl transition-all duration-300 group">
+                <Card
+                  key={volunteer.id}
+                  className="border-2 border-slate-200 hover:border-drop-400 hover:shadow-xl transition-all duration-300 group cursor-pointer"
+                  onClick={() => openVolunteerModal(volunteer)}
+                >
                   <CardContent className="p-6 space-y-4">
                     {/* Avatar & Name */}
                     <div className="flex items-start gap-4">
@@ -316,13 +353,14 @@ export default function VolunteersPage() {
                     <Button
                       variant="outline"
                       className="w-full border-2 border-drop-300 hover:bg-drop-50 hover:border-drop-500 text-drop-700 font-semibold group-hover:shadow-md transition-all"
-                      asChild
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openVolunteerModal(volunteer)
+                      }}
                     >
-                      <a href={`mailto:${volunteer.email}`}>
-                        <Mail className="w-4 h-4 mr-2" />
-                        Contact Volunteer
-                        <ChevronRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform" />
-                      </a>
+                      <Mail className="w-4 h-4 mr-2" />
+                      View Profile & Contact
+                      <ChevronRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </CardContent>
                 </Card>
@@ -331,6 +369,197 @@ export default function VolunteersPage() {
           </>
         )}
       </section>
+
+      {/* Volunteer Profile Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {selectedVolunteer && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="flex-shrink-0 w-20 h-20 rounded-full bg-gradient-to-br from-drop-400 to-drop-600 flex items-center justify-center text-white font-black text-3xl">
+                    {selectedVolunteer.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <DialogTitle className="text-2xl font-black text-slate-900 mb-2">
+                      {selectedVolunteer.name}
+                    </DialogTitle>
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <MapPin className="w-4 h-4" />
+                      <span>{selectedVolunteer.city}, {selectedVolunteer.state}</span>
+                      <span className="text-slate-400">•</span>
+                      <span className="text-sm">{selectedVolunteer.pincode}</span>
+                    </div>
+                  </div>
+                </div>
+                <DialogDescription>
+                  Full profile and contact information
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 pt-6">
+                {/* Bio */}
+                {selectedVolunteer.bio && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      About
+                    </h3>
+                    <p className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-lg">
+                      {selectedVolunteer.bio}
+                    </p>
+                  </div>
+                )}
+
+                {/* Contact Information */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Contact Information
+                  </h3>
+                  <div className="bg-slate-50 p-4 rounded-lg space-y-3">
+                    {/* Email */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-white rounded-md border border-slate-200">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <Mail className="w-5 h-5 text-drop-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-slate-500 font-medium">Email</p>
+                          <p className="text-sm text-slate-900 font-medium truncate">{selectedVolunteer.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => copyToClipboard(selectedVolunteer.email, 'email')}
+                        className="flex-shrink-0"
+                      >
+                        {emailCopied ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Phone */}
+                    <div className="flex items-center justify-between gap-4 p-3 bg-white rounded-md border border-slate-200">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <Phone className="w-5 h-5 text-drop-600 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-slate-500 font-medium">Phone</p>
+                          <p className="text-sm text-slate-900 font-medium">{selectedVolunteer.phone}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => copyToClipboard(selectedVolunteer.phone, 'phone')}
+                        className="flex-shrink-0"
+                      >
+                        {phoneCopied ? (
+                          <Check className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skills */}
+                {selectedVolunteer.skills && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <Briefcase className="w-4 h-4" />
+                      Skills & Expertise
+                    </h3>
+                    <p className="text-slate-700 bg-slate-50 p-4 rounded-lg">
+                      {selectedVolunteer.skills}
+                    </p>
+                  </div>
+                )}
+
+                {/* Interests */}
+                {selectedVolunteer.interests.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <Heart className="w-4 h-4" />
+                      Interests & Causes
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedVolunteer.interests.map((interest, idx) => (
+                        <Badge key={idx} className="bg-drop-100 text-drop-700 hover:bg-drop-200 px-3 py-1">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Availability */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Availability
+                  </h3>
+                  <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                    <p className="text-emerald-700 font-semibold">{selectedVolunteer.availability}</p>
+                  </div>
+                </div>
+
+                {/* Experience */}
+                {selectedVolunteer.experience && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <Award className="w-4 h-4" />
+                      Experience
+                    </h3>
+                    <p className="text-slate-700 bg-slate-50 p-4 rounded-lg leading-relaxed">
+                      {selectedVolunteer.experience}
+                    </p>
+                  </div>
+                )}
+
+                {/* Motivation */}
+                {selectedVolunteer.motivation && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      Motivation
+                    </h3>
+                    <p className="text-slate-700 bg-slate-50 p-4 rounded-lg leading-relaxed">
+                      {selectedVolunteer.motivation}
+                    </p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    asChild
+                    className="flex-1 bg-drop-600 hover:bg-drop-700"
+                  >
+                    <a href={`mailto:${selectedVolunteer.email}`}>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Email
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="flex-1 border-2 border-drop-300 hover:bg-drop-50"
+                  >
+                    <a href={`tel:${selectedVolunteer.phone}`}>
+                      <Phone className="w-4 h-4 mr-2" />
+                      Call Now
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </main>
   )
