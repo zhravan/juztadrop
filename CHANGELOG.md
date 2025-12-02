@@ -1,3 +1,12 @@
+# [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.1...v1.0.0) (2025-12-02)
+
+
+### Features
+
+* changelogs added ([e461588](https://github.com/zhravan/justadrop.xyz/commit/e461588555aa7ac9d1cd5ac63c0b9a86e55104d5))
+
+
+
 # Changelog
 
 ## 1.0.0 (2025-12-02)
