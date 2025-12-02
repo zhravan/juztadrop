@@ -105,4 +105,32 @@ jobs:
           git push origin ${NEW_VERSION}
           git push
 
-          echo "✅ Created and pushed tag: ${NEW_VERSION}"
+      - name: Extract release notes
+        if: steps.version.outputs.should_release == 'true'
+        id: release_notes
+        run: |
+          # Extract the latest version section from CHANGELOG.md
+          VERSION="${{ steps.version.outputs.new_version }}"
+          VERSION_NO_V="${VERSION#v}"
+          
+          # Get content between this version and the next version header (or end of file)
+          NOTES=$(awk "/^#+ .*${VERSION_NO_V}|^#+ \[${VERSION_NO_V}\]/,/^#+ [0-9]+\.[0-9]+\.[0-9]+|^#+ \[[0-9]+\.[0-9]+\.[0-9]+\]/{if(/^#+ [0-9]+\.[0-9]+\.[0-9]+|^#+ \[[0-9]+\.[0-9]+\.[0-9]+\]/ && !/^#+ .*${VERSION_NO_V}|^#+ \[${VERSION_NO_V}\]/)exit; print}" CHANGELOG.md | tail -n +2)
+          
+          if [ -z "$NOTES" ]; then
+            NOTES="Release ${VERSION}"
+          fi
+          
+          # Write to file for multi-line support
+          echo "$NOTES" > release_notes.md
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+          name: Release ${{ steps.version.outputs.new_version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
