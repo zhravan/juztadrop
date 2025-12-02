@@ -1,14 +1,5 @@
 /**
  * Shared validation constants and functions for opportunity creation/editing
- * 
- * ⚠️ SINGLE SOURCE OF TRUTH ⚠️
- * This file is the ONLY place where validation rules are defined.
- * Both backend (apps/api) and frontend (apps/web) MUST use these functions.
- * 
- * DO NOT create duplicate validation logic elsewhere.
- * DO NOT hardcode validation values in route schemas or UI components.
- * 
- * To change validation rules, update the constants below and the functions will automatically use them.
  */
 
 export const OPPORTUNITY_VALIDATION = {
@@ -21,7 +12,7 @@ export const OPPORTUNITY_VALIDATION = {
     maxLength: 500,
   },
   description: {
-    minLength: 50, // ⚠️ CRITICAL: Backend requires 50, UI must match this exactly
+    minLength: 50,
     maxLength: 5000,
   },
   contactName: {
@@ -99,10 +90,6 @@ export const VALIDATION_MESSAGES = {
   },
 } as const;
 
-/**
- * Shared validation functions that work in both Node.js and browser environments
- */
-
 export type OpportunityFormData = {
   title: string;
   shortSummary: string;
@@ -131,9 +118,6 @@ export type ValidationResult = {
   error?: string;
 };
 
-/**
- * Validate title field
- */
 export function validateTitle(value: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: false, error: VALIDATION_MESSAGES.title.required };
@@ -148,9 +132,6 @@ export function validateTitle(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate short summary field
- */
 export function validateShortSummary(value: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: false, error: VALIDATION_MESSAGES.shortSummary.required };
@@ -165,9 +146,6 @@ export function validateShortSummary(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate description field
- */
 export function validateDescription(value: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: false, error: VALIDATION_MESSAGES.description.required };
@@ -182,9 +160,6 @@ export function validateDescription(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate contact name
- */
 export function validateContactName(value: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: false, error: VALIDATION_MESSAGES.contactName.required };
@@ -196,9 +171,6 @@ export function validateContactName(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate contact email
- */
 export function validateContactEmail(value: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: false, error: VALIDATION_MESSAGES.contactEmail.required };
@@ -211,9 +183,6 @@ export function validateContactEmail(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate contact phone
- */
 export function validateContactPhone(value: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: false, error: VALIDATION_MESSAGES.contactPhone.required };
@@ -226,9 +195,6 @@ export function validateContactPhone(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate max volunteers
- */
 export function validateMaxVolunteers(value: any): ValidationResult {
   if (value === undefined || value === null) {
     return { valid: false, error: VALIDATION_MESSAGES.maxVolunteers.required };
@@ -240,9 +206,6 @@ export function validateMaxVolunteers(value: any): ValidationResult {
   return { valid: true };
 }
 
-/**
- * Validate URL
- */
 export function validateUrl(value?: any): ValidationResult {
   if (!value || (typeof value === 'string' && value.trim().length === 0)) {
     return { valid: true }; // Optional field
@@ -256,9 +219,6 @@ export function validateUrl(value?: any): ValidationResult {
   }
 }
 
-/**
- * Validate address based on mode
- */
 export function validateAddress(value: any, mode: 'onsite' | 'remote' | 'hybrid'): ValidationResult {
   if (mode === 'remote') {
     return { valid: true };
@@ -274,9 +234,6 @@ export function validateAddress(value: any, mode: 'onsite' | 'remote' | 'hybrid'
   return { valid: true };
 }
 
-/**
- * Validate city based on mode
- */
 export function validateCity(value: any, mode: 'onsite' | 'remote' | 'hybrid'): ValidationResult {
   if (mode === 'remote') {
     return { valid: true };
@@ -292,9 +249,6 @@ export function validateCity(value: any, mode: 'onsite' | 'remote' | 'hybrid'): 
   return { valid: true };
 }
 
-/**
- * Validate state based on mode
- */
 export function validateState(value: any, mode: 'onsite' | 'remote' | 'hybrid'): ValidationResult {
   if (mode === 'remote') {
     return { valid: true };
@@ -310,9 +264,6 @@ export function validateState(value: any, mode: 'onsite' | 'remote' | 'hybrid'):
   return { valid: true };
 }
 
-/**
- * Validate country based on mode
- */
 export function validateCountry(value: any, mode: 'onsite' | 'remote' | 'hybrid'): ValidationResult {
   if (mode === 'remote') {
     return { valid: true };
@@ -328,34 +279,26 @@ export function validateCountry(value: any, mode: 'onsite' | 'remote' | 'hybrid'
   return { valid: true };
 }
 
-/**
- * Validate start date based on dateType
- */
 export function validateStartDate(
   value: any,
   dateType: 'single_day' | 'multi_day' | 'ongoing'
 ): ValidationResult {
-  if (dateType === 'ongoing') {
-    // Optional for ongoing
-    if (!value) {
-      return { valid: true };
-    }
-  } else {
-    // Required for single_day and multi_day
-    if (!value || (typeof value === 'string' && value.trim().length === 0)) {
-      return { 
-        valid: false, 
-        error: dateType === 'single_day' 
-          ? VALIDATION_MESSAGES.dates.startDateRequiredSingle 
-          : VALIDATION_MESSAGES.dates.startDateRequiredMulti 
-      };
-    }
+  if (dateType === 'ongoing' && !value) {
+    return { valid: true };
+  }
+  
+  if (dateType !== 'ongoing' && (!value || (typeof value === 'string' && value.trim().length === 0))) {
+    return { 
+      valid: false, 
+      error: dateType === 'single_day' 
+        ? VALIDATION_MESSAGES.dates.startDateRequiredSingle 
+        : VALIDATION_MESSAGES.dates.startDateRequiredMulti 
+    };
   }
 
   if (value) {
     const date = new Date(value);
-    const now = new Date();
-    if (date < now) {
+    if (date < new Date()) {
       return { valid: false, error: VALIDATION_MESSAGES.dates.startDatePast };
     }
   }
@@ -363,53 +306,34 @@ export function validateStartDate(
   return { valid: true };
 }
 
-/**
- * Validate end date based on dateType and startDate
- */
 export function validateEndDate(
   value: any,
   dateType: 'single_day' | 'multi_day' | 'ongoing',
   startDate?: string
 ): ValidationResult {
   if (dateType === 'single_day') {
-    if (value) {
-      return { valid: false, error: VALIDATION_MESSAGES.dates.endDateNotAllowedSingle };
-    }
-    return { valid: true };
+    return value ? { valid: false, error: VALIDATION_MESSAGES.dates.endDateNotAllowedSingle } : { valid: true };
   }
 
-  if (dateType === 'multi_day') {
-    if (!value || (typeof value === 'string' && value.trim().length === 0)) {
-      return { valid: false, error: VALIDATION_MESSAGES.dates.endDateRequiredMulti };
-    }
+  if (dateType === 'multi_day' && (!value || (typeof value === 'string' && value.trim().length === 0))) {
+    return { valid: false, error: VALIDATION_MESSAGES.dates.endDateRequiredMulti };
   }
 
   if (value) {
     const endDate = new Date(value);
-    const now = new Date();
     
-    // If no startDate provided, check if endDate is in the past (for ongoing)
-    if (!startDate && dateType === 'ongoing') {
-      if (endDate < now) {
-        return { valid: false, error: VALIDATION_MESSAGES.dates.endDatePast };
-      }
+    if (!startDate && dateType === 'ongoing' && endDate < new Date()) {
+      return { valid: false, error: VALIDATION_MESSAGES.dates.endDatePast };
     }
 
-    // If startDate is provided, check if endDate is after startDate
-    if (startDate) {
-      const start = new Date(startDate);
-      if (endDate <= start) {
-        return { valid: false, error: VALIDATION_MESSAGES.dates.endDateAfterStart };
-      }
+    if (startDate && endDate <= new Date(startDate)) {
+      return { valid: false, error: VALIDATION_MESSAGES.dates.endDateAfterStart };
     }
   }
 
   return { valid: true };
 }
 
-/**
- * Validate a single field by name
- */
 export function validateOpportunityField(
   field: string,
   value: any,
@@ -449,16 +373,12 @@ export function validateOpportunityField(
   }
 }
 
-/**
- * Validate entire opportunity form
- */
 export function validateOpportunityForm(formData: OpportunityFormData): {
   valid: boolean;
   errors: Record<string, string>;
 } {
   const errors: Record<string, string> = {};
 
-  // Basic info
   const titleError = validateTitle(formData.title).error;
   if (titleError) errors.title = titleError;
 
@@ -468,7 +388,6 @@ export function validateOpportunityForm(formData: OpportunityFormData): {
   const descriptionError = validateDescription(formData.description).error;
   if (descriptionError) errors.description = descriptionError;
 
-  // Location (if not remote)
   if (formData.mode !== 'remote') {
     const addressError = validateAddress(formData.address, formData.mode).error;
     if (addressError) errors.address = addressError;
@@ -483,14 +402,12 @@ export function validateOpportunityForm(formData: OpportunityFormData): {
     if (countryError) errors.country = countryError;
   }
 
-  // Dates
   const startDateError = validateStartDate(formData.startDate, formData.dateType).error;
   if (startDateError) errors.startDate = startDateError;
 
   const endDateError = validateEndDate(formData.endDate, formData.dateType, formData.startDate).error;
   if (endDateError) errors.endDate = endDateError;
 
-  // Requirements
   const maxVolunteersError = validateMaxVolunteers(formData.maxVolunteers).error;
   if (maxVolunteersError) errors.maxVolunteers = maxVolunteersError;
 
@@ -503,7 +420,6 @@ export function validateOpportunityForm(formData: OpportunityFormData): {
   const contactPhoneError = validateContactPhone(formData.contactPhone).error;
   if (contactPhoneError) errors.contactPhone = contactPhoneError;
 
-  // Optional fields
   if (formData.osrmLink) {
     const urlError = validateUrl(formData.osrmLink).error;
     if (urlError) errors.osrmLink = urlError;
