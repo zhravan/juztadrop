@@ -1,19 +1,17 @@
-import { db, users } from '@justadrop/db';
-import { eq } from 'drizzle-orm';
-import { createId } from '@paralleldrive/cuid2';
 import { OtpService } from './otp.service';
 import { SessionService } from './session.service';
 import { EmailService } from './email.service';
+import { UserRepository } from '../repositories/user.repository';
 import { logger } from '../utils/logger';
 
 const otpService = new OtpService();
 const sessionService = new SessionService();
 const emailService = new EmailService();
+const userRepository = new UserRepository();
 
 export class AuthService {
   async sendOtp(email: string): Promise<void> {
     const normalizedEmail = email.toLowerCase().trim();
-
     await otpService.generateAndSendOtp(normalizedEmail);
   }
 
@@ -25,29 +23,18 @@ export class AuthService {
       throw new Error('Invalid or expired OTP code');
     }
 
-    let user = await db.query.users.findFirst({
-      where: eq(users.email, normalizedEmail),
-    });
+    let user = await userRepository.findByEmail(normalizedEmail);
 
     if (!user) {
-      const userId = createId();
-      await db.insert(users).values({
-        id: userId,
-        email: normalizedEmail,
-        emailVerified: true,
-      });
-
-      user = await db.query.users.findFirst({
-        where: eq(users.id, userId),
-      });
-
+      user = await userRepository.create(normalizedEmail, true);
       await emailService.sendWelcomeEmail(normalizedEmail);
       logger.info({ email: normalizedEmail }, 'New user created');
     } else if (!user.emailVerified) {
-      await db
-        .update(users)
-        .set({ emailVerified: true })
-        .where(eq(users.id, user.id));
+      await userRepository.updateEmailVerified(user.id, true);
+      user = await userRepository.findById(user.id);
+      if (!user) {
+        throw new Error('Failed to update user');
+      }
     }
 
     if (user.isBanned || user.deletedAt) {

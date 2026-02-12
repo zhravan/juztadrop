@@ -1,10 +1,9 @@
-import { db, otpTokens } from '@justadrop/db';
-import { eq, and, gt } from 'drizzle-orm';
-import { createId } from '@paralleldrive/cuid2';
 import { EmailService } from './email.service';
+import { OtpRepository } from '../repositories/otp.repository';
 import { logger } from '../utils/logger';
 
 const emailService = new EmailService();
+const otpRepository = new OtpRepository();
 
 export class OtpService {
   private generateOtpCode(): string {
@@ -15,14 +14,7 @@ export class OtpService {
     const code = this.generateOtpCode();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    await db.insert(otpTokens).values({
-      id: createId(),
-      email,
-      code,
-      expiresAt,
-      used: false,
-    });
-
+    await otpRepository.create(email, code, expiresAt);
     await emailService.sendOtpEmail(email, code);
 
     logger.info({ email }, 'OTP generated and sent');
@@ -30,24 +22,13 @@ export class OtpService {
   }
 
   async verifyOtp(email: string, code: string): Promise<boolean> {
-    const token = await db.query.otpTokens.findFirst({
-      where: and(
-        eq(otpTokens.email, email),
-        eq(otpTokens.code, code),
-        eq(otpTokens.used, false),
-        gt(otpTokens.expiresAt, new Date())
-      ),
-    });
+    const token = await otpRepository.findValidToken(email, code);
 
     if (!token) {
       return false;
     }
 
-    await db
-      .update(otpTokens)
-      .set({ used: true })
-      .where(eq(otpTokens.id, token.id));
-
+    await otpRepository.markAsUsed(token.id);
     logger.info({ email }, 'OTP verified successfully');
     return true;
   }

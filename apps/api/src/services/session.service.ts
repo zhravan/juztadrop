@@ -1,42 +1,31 @@
-import { db, sessions, users } from '@justadrop/db';
-import { eq, and, gt } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
+import { SessionRepository } from '../repositories/session.repository';
+import { UserRepository } from '../repositories/user.repository';
 import { logger } from '../utils/logger';
 
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+const sessionRepository = new SessionRepository();
+const userRepository = new UserRepository();
 
 export class SessionService {
   async createSession(userId: string): Promise<string> {
     const token = createId();
     const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 
-    await db.insert(sessions).values({
-      id: createId(),
-      userId,
-      token,
-      expiresAt,
-      lastAccessedAt: new Date(),
-    });
-
+    await sessionRepository.create(userId, token, expiresAt);
     logger.info({ userId }, 'Session created');
     return token;
   }
 
   async validateSession(token: string): Promise<{ userId: string; user: any } | null> {
-    const session = await db.query.sessions.findFirst({
-      where: and(
-        eq(sessions.token, token),
-        gt(sessions.expiresAt, new Date())
-      ),
-    });
+    const session = await sessionRepository.findByToken(token);
 
     if (!session) {
       return null;
     }
 
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, session.userId),
-    });
+    const user = await userRepository.findById(session.userId);
 
     if (!user) {
       await this.deleteSession(token);
@@ -48,10 +37,7 @@ export class SessionService {
       return null;
     }
 
-    await db
-      .update(sessions)
-      .set({ lastAccessedAt: new Date() })
-      .where(eq(sessions.id, session.id));
+    await sessionRepository.updateLastAccessed(session.id);
 
     return {
       userId: session.userId,
@@ -60,12 +46,12 @@ export class SessionService {
   }
 
   async deleteSession(token: string): Promise<void> {
-    await db.delete(sessions).where(eq(sessions.token, token));
+    await sessionRepository.deleteByToken(token);
     logger.info({ token }, 'Session deleted');
   }
 
   async deleteUserSessions(userId: string): Promise<void> {
-    await db.delete(sessions).where(eq(sessions.userId, userId));
+    await sessionRepository.deleteByUserId(userId);
     logger.info({ userId }, 'All user sessions deleted');
   }
 }
