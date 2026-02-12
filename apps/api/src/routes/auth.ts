@@ -33,6 +33,7 @@ export const authRouter = new Elysia({ prefix: '/auth', tags: ['auth'] })
       
       return {
         user: result.user,
+        isNewUser: result.isNewUser,
       };
     },
     {

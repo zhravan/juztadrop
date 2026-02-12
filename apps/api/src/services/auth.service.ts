@@ -17,7 +17,7 @@ export class AuthService {
     await this.otpService.generateAndSendOtp(normalizedEmail);
   }
 
-  async verifyOtpAndLogin(email: string, code: string): Promise<{ token: string; user: any }> {
+  async verifyOtpAndLogin(email: string, code: string): Promise<{ token: string; user: any; isNewUser: boolean }> {
     const normalizedEmail = email.toLowerCase().trim();
 
     const isValid = await this.otpService.verifyOtp(normalizedEmail, code);
@@ -26,11 +26,13 @@ export class AuthService {
     }
 
     let user = await this.userRepository.findByEmail(normalizedEmail);
+    let isNewUser = false;
 
     if (!user) {
       user = await this.userRepository.create(normalizedEmail, true);
       await this.emailService.sendWelcomeEmail(normalizedEmail);
       logger.info({ email: normalizedEmail }, 'New user created');
+      isNewUser = true;
     } else if (!user.emailVerified) {
       await this.userRepository.updateEmailVerified(user.id, true);
       user = await this.userRepository.findById(user.id);
@@ -53,6 +55,7 @@ export class AuthService {
         name: user.name,
         emailVerified: user.emailVerified,
       },
+      isNewUser,
     };
   }
 
