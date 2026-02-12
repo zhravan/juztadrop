@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "types": ["node", "bun-types"],
     "verbatimModuleSyntax": false,
     "esModuleInterop": true
