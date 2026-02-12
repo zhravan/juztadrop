@@ -55,6 +55,13 @@ export const sessions = pgTable('sessions', {
 
 export const organizationStatusEnum = pgEnum('organization_status', ['pending', 'verified', 'rejected', 'suspended']);
 
+export const documentTypeEnum = pgEnum('document_type', [
+  'registration_certificate',
+  '80G_certificate',
+  '12A_certificate',
+  'PAN'
+]);
+
 export const causeEnum = pgEnum('cause', [
   'animal_welfare',
   'environmental',
@@ -105,6 +112,19 @@ export const organizations = pgTable('organizations', {
   verificationStatusIdx: index('organizations_verification_status_idx').on(table.verificationStatus),
   contactPersonEmailIdx: index('organizations_contact_email_idx').on(table.contactPersonEmail),
   deletedAtIdx: index('organizations_deleted_at_idx').on(table.deletedAt),
+}));
+
+export const organizationDocuments = pgTable('organization_documents', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  ngoId: text('ngo_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  documentType: documentTypeEnum('document_type').notNull(),
+  documentAssetUrl: text('document_asset_url').notNull(),
+  format: text('format').notNull(), // pdf, png, jpg, jpeg, etc.
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  ngoIdIdx: index('org_documents_ngo_id_idx').on(table.ngoId),
+  documentTypeIdx: index('org_documents_type_idx').on(table.documentType),
 }));
 
 export const organizationMemberRoleEnum = pgEnum('organization_member_role', ['owner', 'admin', 'member']);
