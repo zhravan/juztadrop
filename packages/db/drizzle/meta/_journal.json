@@ -64,6 +64,20 @@
       "when": 1770934673023,
       "tag": "0008_tan_lenny_balinger",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1770934724698,
+      "tag": "0009_worthless_colonel_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1770934788727,
+      "tag": "0010_overjoyed_siren",
+      "breakpoints": true
     }
   ]
 }

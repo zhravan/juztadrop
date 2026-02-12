@@ -260,3 +260,40 @@ export const moderators = pgTable('moderators', {
   userIdIdx: index('moderators_user_id_idx').on(table.userId),
   isActiveIdx: index('moderators_is_active_idx').on(table.isActive),
 }));
+
+export const moderationTypeEnum = pgEnum('moderation_type', ['user', 'event', 'ngo']);
+
+export const moderationStatusEnum = pgEnum('moderation_status', ['open', 'resolved', 'dismissed']);
+
+export const moderationPriorityEnum = pgEnum('moderation_priority', ['low', 'medium', 'high', 'urgent']);
+
+export type TargetMetadata = {
+  opportunityId?: string;
+  userId?: string;
+  ngoId?: string;
+};
+
+export const moderationMonitoring = pgTable('moderation_monitoring', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  moderationType: moderationTypeEnum('moderation_type').notNull(),
+  reasons: text('reasons').notNull(),
+  targetMetadata: jsonb('target_metadata').$type<TargetMetadata>(),
+  status: moderationStatusEnum('status').notNull().default('open'),
+  priority: moderationPriorityEnum('priority').notNull().default('medium'),
+  reportedBy: text('reported_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  assignedTo: text('assigned_to').references(() => users.id, { onDelete: 'set null' }),
+  reviewedBy: text('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+  reviewedAt: timestamp('reviewed_at'),
+  resolutionNotes: text('resolution_notes'),
+  closedAt: timestamp('closed_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  moderationTypeIdx: index('moderation_monitoring_type_idx').on(table.moderationType),
+  statusIdx: index('moderation_monitoring_status_idx').on(table.status),
+  priorityIdx: index('moderation_monitoring_priority_idx').on(table.priority),
+  reportedByIdx: index('moderation_monitoring_reported_by_idx').on(table.reportedBy),
+  assignedToIdx: index('moderation_monitoring_assigned_to_idx').on(table.assignedTo),
+  reviewedByIdx: index('moderation_monitoring_reviewed_by_idx').on(table.reviewedBy),
+  createdAtIdx: index('moderation_monitoring_created_at_idx').on(table.createdAt),
+}));
