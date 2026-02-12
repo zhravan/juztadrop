@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, pgEnum, jsonb, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, pgEnum, jsonb, index, integer } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
 
 export const genderEnum = pgEnum('gender', ['male', 'female', 'other', 'prefer_not_to_say']);
@@ -111,7 +111,12 @@ export const organizations = pgTable('organizations', {
   createdByIdx: index('organizations_created_by_idx').on(table.createdBy),
   verificationStatusIdx: index('organizations_verification_status_idx').on(table.verificationStatus),
   contactPersonEmailIdx: index('organizations_contact_email_idx').on(table.contactPersonEmail),
+  cityIdx: index('organizations_city_idx').on(table.city),
+  stateIdx: index('organizations_state_idx').on(table.state),
+  countryIdx: index('organizations_country_idx').on(table.country),
   deletedAtIdx: index('organizations_deleted_at_idx').on(table.deletedAt),
+  // GIN index for causes array to enable efficient array queries
+  causesIdx: index('organizations_causes_idx').on(table.causes),
 }));
 
 export const organizationDocuments = pgTable('organization_documents', {
@@ -140,4 +145,72 @@ export const organizationMembers = pgTable('organization_members', {
   orgUserIdx: index('org_members_org_user_idx').on(table.organizationId, table.userId),
   userIdIdx: index('org_members_user_id_idx').on(table.userId),
   orgIdIdx: index('org_members_org_id_idx').on(table.organizationId),
+}));
+
+export const opportunityStatusEnum = pgEnum('opportunity_status', ['draft', 'active', 'completed', 'cancelled']);
+
+export const opportunityModeEnum = pgEnum('opportunity_mode', ['onsite', 'remote', 'hybrid']);
+
+export const opportunities = pgTable('opportunities', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  ngoId: text('ngo_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  userCreatedBy: text('user_created_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  userUpdatedBy: text('user_updated_by').references(() => users.id, { onDelete: 'restrict' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  causeCategoryNames: text('cause_category_names').array().notNull().default([]),
+  requiredSkills: text('required_skills').array().default([]),
+  maxVolunteers: integer('max_volunteers'),
+  minVolunteers: integer('min_volunteers'),
+  languagePreference: text('language_preference'),
+  genderPreference: text('gender_preference'),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  startTime: text('start_time'),
+  endTime: text('end_time'),
+  status: opportunityStatusEnum('status').notNull().default('draft'),
+  opportunityMode: opportunityModeEnum('opportunity_mode').notNull(),
+  osrmLink: text('osrm_link'),
+  address: text('address'),
+  city: text('city'),
+  state: text('state'),
+  country: text('country').default('India'),
+  contactName: text('contact_name').notNull(),
+  contactPhoneNumber: text('contact_phone_number'),
+  contactEmail: text('contact_email').notNull(),
+  stipendInfo: jsonb('stipend_info').$type<{ amount?: number; duration?: string }>(),
+  isCertificateOffered: boolean('is_certificate_offered').notNull().default(false),
+  bannerImage: text('banner_image'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  ngoIdIdx: index('opportunities_ngo_id_idx').on(table.ngoId),
+  userCreatedByIdx: index('opportunities_user_created_by_idx').on(table.userCreatedBy),
+  statusIdx: index('opportunities_status_idx').on(table.status),
+  opportunityModeIdx: index('opportunities_mode_idx').on(table.opportunityMode),
+  cityIdx: index('opportunities_city_idx').on(table.city),
+  stateIdx: index('opportunities_state_idx').on(table.state),
+  countryIdx: index('opportunities_country_idx').on(table.country),
+  startDateIdx: index('opportunities_start_date_idx').on(table.startDate),
+  endDateIdx: index('opportunities_end_date_idx').on(table.endDate),
+  // GIN indexes for array fields to enable efficient array queries
+  causeCategoryNamesIdx: index('opportunities_cause_categories_idx').on(table.causeCategoryNames),
+  requiredSkillsIdx: index('opportunities_required_skills_idx').on(table.requiredSkills),
+}));
+
+export const applicationStatusEnum = pgEnum('application_status', ['pending', 'accepted', 'rejected', 'withdrawn']);
+
+export const opportunityApplications = pgTable('opportunity_applications', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  opportunityId: text('opportunity_id').notNull().references(() => opportunities.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: applicationStatusEnum('status').notNull().default('pending'),
+  message: text('message'), // Optional message from volunteer
+  appliedAt: timestamp('applied_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => ({
+  opportunityUserIdx: index('applications_opp_user_idx').on(table.opportunityId, table.userId),
+  opportunityIdIdx: index('applications_opp_id_idx').on(table.opportunityId),
+  userIdIdx: index('applications_user_id_idx').on(table.userId),
+  statusIdx: index('applications_status_idx').on(table.status),
 }));
