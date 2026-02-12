@@ -4,30 +4,83 @@ import { swagger } from '@elysiajs/swagger';
 import { healthRouter } from './routes';
 import { errorHandler, responseEnvelope } from './middleware';
 import { runMigrations } from '@justadrop/db';
+import { logger } from './utils/logger';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldRunMigrations = process.env.RUN_MIGRATIONS !== 'false';
+
+// Track server state for graceful shutdown
+let server: Elysia | null = null;
+let isShuttingDown = false;
+
+// Graceful shutdown handler
+async function gracefulShutdown(signal: string) {
+  if (isShuttingDown) {
+    logger.warn({ signal }, 'Shutdown already in progress, forcing exit');
+    process.exit(1);
+  }
+
+  isShuttingDown = true;
+  logger.info({ signal }, 'Starting graceful shutdown');
+
+  try {
+    // Stop accepting new connections
+    if (server?.server) {
+      logger.info('Closing server...');
+      await new Promise<void>((resolve) => {
+        server!.server?.close(() => {
+          logger.info('Server closed');
+          resolve();
+        });
+      });
+    }
+
+    // Give ongoing requests time to complete (15 seconds max)
+    logger.info('Waiting for ongoing requests to complete...');
+    await new Promise((resolve) => setTimeout(resolve, 15000));
+
+    logger.info('Graceful shutdown completed');
+    process.exit(0);
+  } catch (error) {
+    logger.error({ error }, 'Error during graceful shutdown');
+    process.exit(1);
+  }
+}
+
+// Register signal handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  logger.error({ error }, 'Uncaught exception');
+  gracefulShutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({ reason, promise }, 'Unhandled rejection');
+});
 
 // Run migrations before starting the server
 async function startServer() {
   // Run migrations only if enabled (default: true, set RUN_MIGRATIONS=false to disable)
   if (shouldRunMigrations) {
     try {
-      console.log('Running database migrations...');
+      logger.info('Running database migrations...');
       await runMigrations();
-      console.log('Migrations completed successfully');
+      logger.info('Migrations completed successfully');
     } catch (error) {
-      console.error('Failed to run migrations:', error);
+      logger.error({ error }, 'Failed to run migrations');
       // In production, exit if migrations fail
       if (isProduction) {
-        console.error('Exiting due to migration failure in production');
+        logger.error('Exiting due to migration failure in production');
         process.exit(1);
       } else {
-        console.warn('Continuing in development mode despite migration failure');
+        logger.warn({ error }, 'Continuing in development mode despite migration failure');
       }
     }
   } else {
-    console.log('Migrations skipped (RUN_MIGRATIONS=false)');
+    logger.info('Migrations skipped (RUN_MIGRATIONS=false)');
   }
 
   const app = new Elysia()
@@ -57,10 +110,26 @@ async function startServer() {
     .use(healthRouter)
     .listen(3001);
 
-  console.log(`API running at http://${app.server?.hostname}:${app.server?.port}`);
+  server = app;
+
+  logger.info(
+    {
+      hostname: app.server?.hostname,
+      port: app.server?.port,
+      environment: isProduction ? 'production' : 'development',
+    },
+    'API server started'
+  );
+
   if (!isProduction) {
-    console.log(`OpenAPI docs at http://${app.server?.hostname}:${app.server?.port}/swagger`);
+    logger.info(
+      { url: `http://${app.server?.hostname}:${app.server?.port}/swagger` },
+      'OpenAPI documentation available'
+    );
   }
 }
 
-startServer();
+startServer().catch((error) => {
+  logger.error({ error }, 'Failed to start server');
+  process.exit(1);
+});
