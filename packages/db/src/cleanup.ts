@@ -67,8 +67,8 @@ export async function runCleanupTasks() {
   }
 }
 
-// Run cleanup if executed directly
-if (import.meta.main || require.main === module) {
+// Run cleanup if executed directly (CommonJS compatible)
+if (require.main === module) {
   runCleanupTasks()
     .then(() => {
       console.log('Cleanup completed successfully');

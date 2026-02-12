@@ -44,6 +44,7 @@ COPY --from=prerelease /app/apps/api/dist ./apps/api/dist
 COPY --from=prerelease /app/packages/db/dist ./packages/db/dist
 COPY --from=prerelease /app/packages/types/dist ./packages/types/dist
 COPY --from=prerelease /app/packages/common/dist ./packages/common/dist
+COPY --from=prerelease /app/packages/db/drizzle ./packages/db/drizzle
 COPY --from=prerelease /app/apps/api/package.json ./apps/api/package.json
 COPY --from=prerelease /app/packages/db/package.json ./packages/db/package.json
 COPY --from=prerelease /app/packages/types/package.json ./packages/types/package.json
