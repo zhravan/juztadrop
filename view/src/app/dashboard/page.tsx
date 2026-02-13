@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ViewHeader } from '@/components/landing';
+import { ViewHeader, ViewFooter } from '@/components/landing';
 import { useAuth } from '@/lib/auth/use-auth';
 import {
   Calendar,
@@ -12,6 +12,7 @@ import {
   Heart,
   ArrowRight,
   MapPin,
+  Building2,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -43,11 +44,29 @@ export default function DashboardPage() {
           {/* Welcome */}
           <div className="mb-10">
             <h1 className="text-2xl font-bold tracking-tight text-jad-foreground sm:text-3xl">
-              Your volunteering dashboard
+              Your dashboard
             </h1>
             <p className="mt-1 text-foreground/70">
-              Welcome back, {user.email}
+              Welcome back, {user.email} — volunteer, create an NGO, or do both.
             </p>
+          </div>
+
+          {/* Quick actions */}
+          <div className="mb-10 flex flex-wrap gap-4">
+            <Link
+              href="/opportunities"
+              className="inline-flex items-center gap-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-jad-primary/25 transition-all hover:bg-jad-dark"
+            >
+              <Heart className="h-4 w-4" />
+              Find volunteering
+            </Link>
+            <Link
+              href="/organisations/create"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-jad-primary bg-white px-5 py-2.5 text-sm font-semibold text-jad-primary transition-all hover:bg-jad-mint/50"
+            >
+              <Building2 className="h-4 w-4" />
+              Create an NGO
+            </Link>
           </div>
 
           <div className="grid gap-8 lg:grid-cols-3">
@@ -122,6 +141,7 @@ export default function DashboardPage() {
           </section>
         </div>
       </main>
+      <ViewFooter />
     </div>
   );
 }

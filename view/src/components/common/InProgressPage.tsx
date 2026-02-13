@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ViewHeader } from '@/components/landing';
+import { ViewHeader, ViewFooter } from '@/components/landing';
 import { Construction, ArrowLeft } from 'lucide-react';
 
 interface InProgressPageProps {
@@ -34,6 +34,7 @@ export function InProgressPage({ title, description }: InProgressPageProps) {
           </Link>
         </div>
       </main>
+      <ViewFooter />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { ViewHeader } from '@/components/landing';
+import { ViewHeader, ViewFooter } from '@/components/landing';
 import { TeamHero, TeamGrid, TeamCTA } from '@/components/team';
 
 export const metadata = {
@@ -15,6 +15,7 @@ export default function TeamPage() {
         <TeamGrid />
         <TeamCTA />
       </main>
+      <ViewFooter />
     </div>
   );
 }

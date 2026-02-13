@@ -1,5 +1,6 @@
 import {
   ViewHeader,
+  ViewFooter,
   LandingHero,
   GetInvolvedSection,
   HowItWorksSection,
@@ -14,6 +15,7 @@ export default function HomePage() {
         <GetInvolvedSection />
         <HowItWorksSection />
       </main>
+      <ViewFooter />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
-import { ViewHeader } from '@/components/landing';
+import { ViewHeader, ViewFooter } from '@/components/landing';
 import { authClient } from '@/lib/auth/auth-client';
 import { useSession } from '@/lib/auth/use-auth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -94,9 +94,13 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await authClient.verifyOtp(email, code);
+      const { isNewUser } = await authClient.verifyOtp(email, code);
       await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
-      router.replace(redirectTo);
+      if (isNewUser) {
+        router.replace('/onboarding');
+      } else {
+        router.replace(redirectTo);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid or expired code');
     } finally {
@@ -262,6 +266,7 @@ export default function LoginPage() {
           </p>
         </div>
       </main>
+      <ViewFooter />
     </div>
   );
 }
