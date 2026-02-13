@@ -1,7 +1,10 @@
 {
   "name": "@justadrop/api",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
+  "engines": {
+    "node": "v24.7.0"
+  },
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",

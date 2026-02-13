@@ -1,6 +1,10 @@
 {
   "name": "@justadrop/types",
   "version": "1.0.0",
+  "private": false,
+  "engines": {
+    "node": "v24.7.0"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
