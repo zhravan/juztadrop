@@ -84,14 +84,9 @@ export default function LoginPage() {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verifyWithCode = async (code: string) => {
+    if (code.length !== OTP_LENGTH || loading) return;
     setError(null);
-    const code = otp.replace(/\D/g, '');
-    if (code.length !== OTP_LENGTH) {
-      setError(`Enter all ${OTP_LENGTH} digits`);
-      return;
-    }
     setLoading(true);
     try {
       await authClient.verifyOtp(email, code);
@@ -104,9 +99,17 @@ export default function LoginPage() {
     }
   };
 
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    verifyWithCode(otp.replace(/\D/g, ''));
+  };
+
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, '').slice(0, OTP_LENGTH);
     setOtp(raw);
+    if (raw.length === OTP_LENGTH) {
+      verifyWithCode(raw);
+    }
   };
 
   const handleBack = () => {
