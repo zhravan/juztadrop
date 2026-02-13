@@ -1,0 +1,127 @@
+'use client';
+
+import { useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ViewHeader } from '@/components/landing';
+import { useAuth } from '@/lib/auth/use-auth';
+import {
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Heart,
+  ArrowRight,
+  MapPin,
+} from 'lucide-react';
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, isReady } = useAuth();
+
+  useEffect(() => {
+    if (isReady && !isAuthenticated) {
+      router.replace('/login?redirect=/dashboard');
+    }
+  }, [isReady, isAuthenticated, router]);
+
+  if (!isReady || isLoading || !user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <ViewHeader />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse text-jad-foreground/60">Loading...</div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <ViewHeader />
+      <main className="flex-1 pt-20 pb-16 sm:pt-24">
+        <div className="container">
+          {/* Welcome */}
+          <div className="mb-10">
+            <h1 className="text-2xl font-bold tracking-tight text-jad-foreground sm:text-3xl">
+              Your volunteering dashboard
+            </h1>
+            <p className="mt-1 text-foreground/70">
+              Welcome back, {user.email}
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* My applications */}
+            <section className="rounded-2xl border border-jad-primary/10 bg-white p-6 shadow-lg shadow-jad-foreground/5 lg:col-span-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-jad-mint text-jad-primary">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
+                <h2 className="text-lg font-bold text-jad-foreground">
+                  My applications
+                </h2>
+              </div>
+              <div className="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-jad-primary/15 bg-jad-mint/20 py-12 text-center">
+                <Heart className="h-12 w-12 text-jad-primary/40" />
+                <p className="mt-4 font-medium text-jad-foreground">
+                  No applications yet
+                </p>
+                <p className="mt-1 text-sm text-foreground/60">
+                  Browse opportunities and apply to start volunteering
+                </p>
+                <Link
+                  href="/opportunities"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-jad-primary/25 transition-all hover:bg-jad-dark"
+                >
+                  Browse opportunities
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </section>
+
+            {/* Upcoming */}
+            <section className="rounded-2xl border border-jad-primary/10 bg-white p-6 shadow-lg shadow-jad-foreground/5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-jad-mint text-jad-primary">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <h2 className="text-lg font-bold text-jad-foreground">
+                  Upcoming
+                </h2>
+              </div>
+              <div className="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-jad-primary/15 bg-jad-mint/20 py-10 text-center">
+                <Clock className="h-10 w-10 text-jad-primary/40" />
+                <p className="mt-4 text-sm font-medium text-jad-foreground">
+                  No upcoming sessions
+                </p>
+                <p className="mt-1 text-xs text-foreground/60">
+                  Approved applications will appear here
+                </p>
+              </div>
+            </section>
+          </div>
+
+          {/* Past volunteering */}
+          <section className="mt-8 rounded-2xl border border-jad-primary/10 bg-white p-6 shadow-lg shadow-jad-foreground/5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-jad-mint text-jad-primary">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-bold text-jad-foreground">
+                Past volunteering
+              </h2>
+            </div>
+            <div className="mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-jad-primary/15 bg-jad-mint/20 py-10 text-center">
+              <p className="text-sm font-medium text-jad-foreground">
+                No past sessions yet
+              </p>
+              <p className="mt-1 text-xs text-foreground/60">
+                Completed volunteering will appear here
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
+}

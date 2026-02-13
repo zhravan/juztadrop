@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User, LayoutDashboard } from 'lucide-react';
 import { useClickOutside } from '@/hooks';
 import { useAuth } from '@/lib/auth/use-auth';
 
@@ -47,6 +47,15 @@ export function ViewHeader() {
               {link.label}
             </Link>
           ))}
+          {isAuthenticated && user && (
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 rounded-full bg-jad-primary/10 px-4 py-2.5 text-sm font-semibold text-jad-primary transition-all duration-200 hover:bg-jad-primary/20 hover:text-jad-dark"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
+          )}
           {isAuthenticated && user ? (
             <div ref={userMenuRef} className="relative ml-2">
               <button
@@ -114,6 +123,17 @@ export function ViewHeader() {
                   {link.label}
                 </Link>
               ))}
+              {isAuthenticated && user && (
+                <Link
+                  href="/dashboard"
+                  onClick={closeMenu}
+                  className="flex items-center gap-2 px-5 py-3 text-sm font-semibold text-jad-primary hover:bg-jad-mint/60"
+                  role="menuitem"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Link>
+              )}
               <div className="border-t border-foreground/5 px-5 py-3">
                 {isAuthenticated && user ? (
                   <>

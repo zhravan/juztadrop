@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import { ViewHeader } from '@/components/landing';
 import { authClient } from '@/lib/auth/auth-client';
@@ -15,6 +15,11 @@ const RESEND_COOLDOWN_SEC = 60;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = useMemo(() => {
+    const r = searchParams.get('redirect');
+    return r && r.startsWith('/') && !r.startsWith('//') ? r : '/';
+  }, [searchParams]);
   const queryClient = useQueryClient();
   const { data: user, isFetched } = useSession();
   const [step, setStep] = useState<'email' | 'otp'>('email');
@@ -26,7 +31,7 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   if (isFetched && user) {
-    router.replace('/');
+    router.replace(redirectTo);
     return null;
   }
 
@@ -91,7 +96,7 @@ export default function LoginPage() {
     try {
       await authClient.verifyOtp(email, code);
       await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
-      router.replace('/');
+      router.replace(redirectTo);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid or expired code');
     } finally {
