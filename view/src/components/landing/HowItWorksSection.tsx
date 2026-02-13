@@ -15,7 +15,7 @@ export function HowItWorksSection() {
       <div className="container">
         <div className="flex flex-col items-center gap-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-jad-mint md:text-3xl">
+            <h2 className="text-3xl font-bold tracking-tight text-jad-mint md:text-4xl">
               How it works
             </h2>
             <p className="mt-1 text-sm text-jad-mint/80">
