@@ -1,3 +1,12 @@
+# [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.10...v1.0.0) (2026-02-13)
+
+
+### Features
+
+* better-auth intg ([#19](https://github.com/zhravan/justadrop.xyz/issues/19)) ([9e00ac5](https://github.com/zhravan/justadrop.xyz/commit/9e00ac5b839becda34a7a53e30c25af1d35048d6))
+
+
+
 # [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.9...v1.0.0) (2026-02-12)
 
 
