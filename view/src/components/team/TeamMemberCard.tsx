@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Linkedin, Mail } from 'lucide-react';
 import { cn } from '@/lib/common';
 import type { TeamMember } from '@/lib/constants';
@@ -54,17 +55,27 @@ export function TeamMemberCard({
       />
 
       <div className="relative flex flex-col">
-        {/* Avatar - initials with gradient */}
+        {/* Avatar - image or initials */}
         <div
           className={cn(
-            'flex shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br font-bold text-white',
-            gradientClass,
+            'flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br font-bold text-white',
+            !member.image && gradientClass,
             size === 'lg' && 'mb-6 h-24 w-24 text-2xl',
             size === 'md' && 'mb-5 h-16 w-16 text-xl',
             size === 'sm' && 'mb-4 h-14 w-14 text-lg'
           )}
         >
-          {member.initials}
+          {member.image ? (
+            <Image
+              src={member.image}
+              alt={member.name}
+              width={size === 'lg' ? 96 : size === 'md' ? 64 : 56}
+              height={size === 'lg' ? 96 : size === 'md' ? 64 : 56}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            member.initials
+          )}
         </div>
 
         <div className="flex-1">
