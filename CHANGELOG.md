@@ -1,3 +1,7 @@
+# [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.11...v1.0.0) (2026-02-13)
+
+
+
 # [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.10...v1.0.0) (2026-02-13)
 
 
