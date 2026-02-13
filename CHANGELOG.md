@@ -1,3 +1,12 @@
+# [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.14...v1.0.0) (2026-02-13)
+
+
+### Features
+
+* automate & streamline dev setup ([9450e2b](https://github.com/zhravan/justadrop.xyz/commit/9450e2b2aa076a2f5e0e5fbc4aed3f1321909af9))
+
+
+
 # [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.13...v1.0.0) (2026-02-13)
 
 
