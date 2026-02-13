@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { MapPin, Calendar, Clock, ChevronDown, ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
+
+const CARD_WIDTH = 320;
+const CARD_GAP = 24;
 
 const LOCATIONS = ['Kolkata', 'Mumbai', 'Delhi', 'Bangalore', 'Chennai'];
 
@@ -51,8 +54,42 @@ const OPPORTUNITIES = [
 export function GetInvolvedSection() {
   const [location, setLocation] = useState('Kolkata');
   const [locationOpen, setLocationOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
+
+  const totalCards = OPPORTUNITIES.length;
+  const cardsPerPage = 2;
+  const totalPages = Math.ceil(totalCards / cardsPerPage);
+
+  const getScrollPerPage = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return CARD_WIDTH * 2 + CARD_GAP;
+    const { scrollWidth } = el;
+    const cardWidth = (scrollWidth - (totalCards - 1) * CARD_GAP) / totalCards;
+    return (cardWidth + CARD_GAP) * cardsPerPage;
+  }, [totalCards]);
+
+  const updateActiveIndex = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    const scrollPerPage = getScrollPerPage();
+    const page = Math.round(scrollLeft / scrollPerPage);
+    setActiveIndex(Math.min(Math.max(0, page), totalPages - 1));
+  }, [totalPages, getScrollPerPage]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateActiveIndex();
+    el.addEventListener('scroll', updateActiveIndex);
+    window.addEventListener('resize', updateActiveIndex);
+    return () => {
+      el.removeEventListener('scroll', updateActiveIndex);
+      window.removeEventListener('resize', updateActiveIndex);
+    };
+  }, [updateActiveIndex]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -66,13 +103,20 @@ export function GetInvolvedSection() {
     }
   }, [locationOpen]);
 
+  const scrollToPage = (pageIndex: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollPerPage = getScrollPerPage();
+    const targetScroll = pageIndex * scrollPerPage;
+    el.scrollTo({ left: targetScroll, behavior: 'smooth' });
+  };
+
   const scroll = (direction: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const cardWidth = 340;
-    scrollRef.current.scrollBy({
-      left: direction === 'left' ? -cardWidth : cardWidth,
-      behavior: 'smooth',
-    });
+    const nextPage =
+      direction === 'left'
+        ? Math.max(0, activeIndex - 1)
+        : Math.min(totalPages - 1, activeIndex + 1);
+    scrollToPage(nextPage);
   };
 
   return (
@@ -125,7 +169,7 @@ export function GetInvolvedSection() {
             {OPPORTUNITIES.map((opp) => (
               <article
                 key={opp.id}
-                className="group relative min-w-[300px] shrink-0 overflow-hidden rounded-2xl border-0 bg-white p-6 shadow-lg shadow-jad-foreground/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-jad-primary/15 md:min-w-[320px] md:snap-center"
+                className="group relative min-w-[280px] shrink-0 overflow-hidden rounded-2xl border-0 bg-white p-6 shadow-lg shadow-jad-foreground/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-jad-primary/15 md:min-w-[320px] md:snap-center"
               >
                 <div className="absolute right-4 top-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-jad-primary/10 text-jad-primary">
@@ -170,13 +214,16 @@ export function GetInvolvedSection() {
             <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
           </button>
           <div className="flex gap-2">
-            {OPPORTUNITIES.map((_, i) => (
-              <div
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
                 key={i}
+                type="button"
+                onClick={() => scrollToPage(i)}
                 className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
-                  i === 0 ? 'bg-jad-primary scale-125' : 'bg-jad-primary/25'
+                  i === activeIndex ? 'bg-jad-primary scale-125' : 'bg-jad-primary/25 hover:bg-jad-primary/50'
                 }`}
-                aria-hidden
+                aria-label={`Go to page ${i + 1}`}
+                aria-current={i === activeIndex}
               />
             ))}
           </div>
