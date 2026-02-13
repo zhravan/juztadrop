@@ -4,8 +4,9 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { InProgressPage } from '@/components/common/InProgressPage';
 import { useAuth } from '@/lib/auth/use-auth';
+import type { AuthUser } from '@/lib/auth/auth-client';
 
-function hasVolunteerProfile(user: { volunteering?: { isInterest?: boolean; causes?: string[] } } | null): boolean {
+function hasVolunteerProfile(user: AuthUser | null): boolean {
   if (!user?.volunteering) return false;
   return user.volunteering.isInterest === true;
 }

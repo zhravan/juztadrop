@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Heart, Loader2 } from 'lucide-react';
@@ -17,10 +17,21 @@ export default function VolunteerOnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    name: user?.name ?? '',
+    name: '',
     causes: [] as string[],
     skills: [] as string[],
   });
+
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        name: user.name ?? '',
+        causes: user.volunteering?.causes ?? [],
+        skills: (user.volunteering?.skills ?? []).map((s) => s.name),
+      }));
+    }
+  }, [user]);
 
   const toggleCause = (value: string) =>
     setForm((f) => ({
@@ -54,9 +65,6 @@ export default function VolunteerOnboardingPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to save');
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(VOLUNTEER_PROFILE_KEY, 'true');
-      }
       await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
       router.push('/opportunities');
     } catch (err) {

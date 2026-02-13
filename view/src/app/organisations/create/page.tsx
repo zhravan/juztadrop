@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Building2, Loader2, Upload, FileText } from 'lucide-react';
 import { ViewHeader, ViewFooter } from '@/components/landing';
 import { useAuth } from '@/lib/auth/use-auth';
-import { LOCATIONS } from '@/lib/constants';
+import { LOCATIONS, VOLUNTEER_CAUSES } from '@/lib/constants';
 import { cn } from '@/lib/common';
 
 const ORG_TYPES = ['NGO', 'NPO', 'Trust', 'Foundation', 'Society'] as const;
@@ -15,20 +15,29 @@ export default function CreateOrganisationPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, isReady } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    name: '',
+    orgName: '',
     type: '',
     registrationNumber: '',
     address: '',
     city: '',
-    contactPerson: '',
-    contactEmail: '',
-    contactPhone: '',
+    state: '',
+    contactPersonName: '',
+    contactPersonEmail: '',
+    contactPersonNumber: '',
     description: '',
     website: '',
+    causes: [] as string[],
     registrationDoc: null as File | null,
     proofDoc: null as File | null,
   });
+
+  const toggleCause = (value: string) =>
+    setForm((f) => ({
+      ...f,
+      causes: f.causes.includes(value) ? f.causes.filter((x) => x !== value) : [...f.causes, value],
+    }));
 
   const handleFileChange = (field: 'registrationDoc' | 'proofDoc') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,10 +46,36 @@ export default function CreateOrganisationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setSubmitting(true);
-    // TODO: API call to create organisation with form data
-    setSubmitting(false);
-    router.push('/dashboard');
+    try {
+      const res = await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          orgName: form.orgName,
+          description: form.description || undefined,
+          causes: form.causes,
+          website: form.website || undefined,
+          registrationNumber: form.registrationNumber || undefined,
+          contactPersonName: form.contactPersonName,
+          contactPersonEmail: form.contactPersonEmail,
+          contactPersonNumber: form.contactPersonNumber || undefined,
+          address: form.address || undefined,
+          city: form.city || undefined,
+          state: form.state || undefined,
+          country: 'India',
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Failed to create organization');
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create organization');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!isReady || isLoading || !user) {
@@ -87,16 +122,22 @@ export default function CreateOrganisationPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+                {error}
+              </div>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label htmlFor="name" className="block text-sm font-medium text-jad-foreground mb-1.5">
+                <label htmlFor="orgName" className="block text-sm font-medium text-jad-foreground mb-1.5">
                   Organisation name
                 </label>
                 <input
-                  id="name"
+                  id="orgName"
                   type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  value={form.orgName}
+                  onChange={(e) => setForm({ ...form, orgName: e.target.value })}
                   placeholder="e.g. Ocean Guardians"
                   className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground placeholder:text-foreground/40 focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
                   required
@@ -130,8 +171,30 @@ export default function CreateOrganisationPage() {
                   onChange={(e) => setForm({ ...form, registrationNumber: e.target.value })}
                   placeholder="e.g. 80G/12345"
                   className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground placeholder:text-foreground/40 focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
-                  required
                 />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-jad-foreground mb-2">
+                Focus causes
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {VOLUNTEER_CAUSES.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => toggleCause(value)}
+                    className={cn(
+                      'rounded-full px-4 py-2 text-sm font-medium transition-all',
+                      form.causes.includes(value)
+                        ? 'bg-jad-primary text-white'
+                        : 'border border-foreground/20 bg-white text-foreground/80 hover:border-jad-primary/40'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -150,64 +213,77 @@ export default function CreateOrganisationPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-jad-foreground mb-1.5">
-                City
-              </label>
-              <select
-                id="city"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
-                required
-              >
-                <option value="">Select city</option>
-                {LOCATIONS.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium text-jad-foreground mb-1.5">
+                  City
+                </label>
+                <select
+                  id="city"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
+                >
+                  <option value="">Select city</option>
+                  {LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="state" className="block text-sm font-medium text-jad-foreground mb-1.5">
+                  State (optional)
+                </label>
+                <input
+                  id="state"
+                  type="text"
+                  value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })}
+                  placeholder="e.g. West Bengal"
+                  className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground placeholder:text-foreground/40 focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
+                />
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="contactPerson" className="block text-sm font-medium text-jad-foreground mb-1.5">
+                <label htmlFor="contactPersonName" className="block text-sm font-medium text-jad-foreground mb-1.5">
                   Contact person
                 </label>
                 <input
-                  id="contactPerson"
+                  id="contactPersonName"
                   type="text"
-                  value={form.contactPerson}
-                  onChange={(e) => setForm({ ...form, contactPerson: e.target.value })}
+                  value={form.contactPersonName}
+                  onChange={(e) => setForm({ ...form, contactPersonName: e.target.value })}
                   placeholder="e.g. John Doe"
                   className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground placeholder:text-foreground/40 focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="contactPhone" className="block text-sm font-medium text-jad-foreground mb-1.5">
+                <label htmlFor="contactPersonNumber" className="block text-sm font-medium text-jad-foreground mb-1.5">
                   Phone
                 </label>
                 <input
-                  id="contactPhone"
+                  id="contactPersonNumber"
                   type="tel"
-                  value={form.contactPhone}
-                  onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
+                  value={form.contactPersonNumber}
+                  onChange={(e) => setForm({ ...form, contactPersonNumber: e.target.value })}
                   placeholder="+91 98765 43210"
                   className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground placeholder:text-foreground/40 focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
-                  required
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="contactEmail" className="block text-sm font-medium text-jad-foreground mb-1.5">
+              <label htmlFor="contactPersonEmail" className="block text-sm font-medium text-jad-foreground mb-1.5">
                 Organisation email
               </label>
               <input
-                id="contactEmail"
+                id="contactPersonEmail"
                 type="email"
-                value={form.contactEmail}
-                onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
+                value={form.contactPersonEmail}
+                onChange={(e) => setForm({ ...form, contactPersonEmail: e.target.value })}
                 placeholder="contact@org.org"
                 className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm text-jad-foreground placeholder:text-foreground/40 focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
                 required
@@ -245,8 +321,11 @@ export default function CreateOrganisationPage() {
             <div className="space-y-4 rounded-xl border-2 border-dashed border-jad-primary/20 bg-jad-mint/20 p-6">
               <h3 className="text-sm font-semibold text-jad-foreground flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Documents required
+                Documents (coming soon)
               </h3>
+              <p className="text-xs text-foreground/60">
+                Document upload will be available soon. Your organisation will be verified after submission.
+              </p>
               <div>
                 <label className="block text-sm font-medium text-jad-foreground mb-2">
                   Registration certificate (PDF, max 5MB)
@@ -298,7 +377,7 @@ export default function CreateOrganisationPage() {
               </Link>
               <button
                 type="submit"
-                disabled={submitting || !form.name || !form.type || !form.registrationNumber || !form.registrationDoc}
+                disabled={submitting || !form.orgName || !form.contactPersonName || !form.contactPersonEmail}
                 className="rounded-xl bg-jad-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-jad-primary/25 transition-all hover:bg-jad-dark disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (

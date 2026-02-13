@@ -1,10 +1,17 @@
 const API_BASE = '/api/auth';
 
+export interface VolunteeringData {
+  isInterest: boolean;
+  skills: Array<{ name: string; expertise: string }>;
+  causes: string[];
+}
+
 export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
   emailVerified: boolean;
+  volunteering?: VolunteeringData;
 }
 
 export interface SendOtpResponse {
