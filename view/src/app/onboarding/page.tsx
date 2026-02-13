@@ -64,7 +64,7 @@ export default function OnboardingPage() {
             {/* Volunteer path */}
             <button
               type="button"
-              onClick={() => markCompleteAndGo('/opportunities')}
+              onClick={() => markCompleteAndGo('/onboarding/volunteer')}
               className="group relative overflow-hidden rounded-2xl border-2 border-jad-primary/20 bg-white p-8 text-left shadow-lg shadow-jad-foreground/5 transition-all duration-300 hover:border-jad-primary/40 hover:shadow-xl hover:shadow-jad-primary/15 hover:-translate-y-1"
             >
               <div className="absolute right-4 top-4 rounded-full bg-jad-mint/50 p-2 transition-colors group-hover:bg-jad-mint">
@@ -80,7 +80,7 @@ export default function OnboardingPage() {
                 Browse opportunities, apply to causes you care about, and make an impact.
               </p>
               <span className="mt-4 inline-block text-sm font-semibold text-jad-primary group-hover:underline">
-                Browse opportunities →
+                Set up profile →
               </span>
             </button>
 

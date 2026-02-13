@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
-import { healthRouter, authRouter } from './routes';
+import { healthRouter, authRouter, usersRouter, organizationsRouter } from './routes';
 import { errorHandler, responseEnvelope } from './middleware';
 import { runMigrations } from './db/index.js';
 import { logger } from './utils/logger';
@@ -114,6 +114,8 @@ async function startServer() {
   app.get('/', () => ({ message: 'Just a Drop API' }))
     .use(healthRouter)
     .use(authRouter)
+    .use(usersRouter)
+    .use(organizationsRouter)
     .listen(3001);
 
   server = app;

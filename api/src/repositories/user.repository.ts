@@ -90,4 +90,26 @@ export class UserRepository {
       .set({ emailVerified })
       .where(eq(users.id, id));
   }
+
+  async updateUser(
+    id: string,
+    data: {
+      name?: string;
+      phone?: string;
+      gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
+      volunteering?: { isInterest: boolean; skills: Array<{ name: string; expertise: string }>; causes: string[] };
+    }
+  ): Promise<User | null> {
+    await db
+      .update(users)
+      .set({
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.gender !== undefined && { gender: data.gender }),
+        ...(data.volunteering !== undefined && { volunteering: data.volunteering }),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+    return this.findById(id);
+  }
 }

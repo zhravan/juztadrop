@@ -1,6 +1,7 @@
 import { OtpRepository } from './repositories/otp.repository';
 import { SessionRepository } from './repositories/session.repository';
 import { UserRepository } from './repositories/user.repository';
+import { OrganizationRepository } from './repositories/organization.repository';
 import { EmailService } from './services/email.service';
 import { OtpService } from './services/otp.service';
 import { SessionService } from './services/session.service';
@@ -12,6 +13,7 @@ class Container {
     otp: OtpRepository;
     session: SessionRepository;
     user: UserRepository;
+    organization: OrganizationRepository;
   } | null = null;
 
   private _services: {
@@ -31,6 +33,7 @@ class Container {
         otp: new OtpRepository(),
         session: new SessionRepository(),
         user: new UserRepository(),
+        organization: new OrganizationRepository(),
       };
     }
     return this._repositories;
