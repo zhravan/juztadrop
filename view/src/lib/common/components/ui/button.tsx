@@ -13,6 +13,11 @@ const buttonVariants = cva(
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        jad: 'bg-jad-green text-white hover:bg-jad-green/90 shadow-lg shadow-jad-teal/20',
+        'jad-glow':
+          'bg-jad-green text-white hover:bg-jad-green/90 shadow-lg shadow-jad-teal/20 ring-2 ring-jad-teal-light/60 ring-offset-2 ring-offset-jad-teal-dark',
+        'jad-mint':
+          'bg-jad-mint text-jad-foreground border-2 border-jad-accent hover:bg-jad-mint/90 hover:border-jad-primary',
       },
       size: {
         default: 'h-10 px-4 py-2',
