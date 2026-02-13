@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { authClient, type AuthUser } from './auth-client';
 
 export function useSession() {
@@ -20,6 +21,7 @@ export function useAuth() {
     mutationFn: () => authClient.logout(),
     onSuccess: () => {
       queryClient.setQueryData(['auth', 'session'], null);
+      toast.success('Logged out');
     },
   });
 

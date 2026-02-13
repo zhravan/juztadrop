@@ -8,6 +8,7 @@ import { ViewHeader, ViewFooter } from '@/components/landing';
 import { useAuth } from '@/lib/auth/use-auth';
 import { LOCATIONS, VOLUNTEER_CAUSES } from '@/lib/constants';
 import { cn } from '@/lib/common';
+import { toast } from 'sonner';
 
 const ORG_TYPES = ['NGO', 'NPO', 'Trust', 'Foundation', 'Society'] as const;
 
@@ -15,7 +16,6 @@ export default function CreateOrganisationPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, isReady } = useAuth();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     orgName: '',
     type: '',
@@ -46,7 +46,6 @@ export default function CreateOrganisationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSubmitting(true);
     try {
       const res = await fetch('/api/organizations', {
@@ -70,9 +69,10 @@ export default function CreateOrganisationPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to create organization');
+      toast.success('Organization created successfully');
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create organization');
+      toast.error(err instanceof Error ? err.message : 'Failed to create organization');
     } finally {
       setSubmitting(false);
     }
@@ -122,12 +122,6 @@ export default function CreateOrganisationPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-                {error}
-              </div>
-            )}
-
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="orgName" className="block text-sm font-medium text-jad-foreground mb-1.5">

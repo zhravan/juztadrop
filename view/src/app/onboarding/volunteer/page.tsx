@@ -9,13 +9,13 @@ import { useAuth } from '@/lib/auth/use-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { VOLUNTEER_CAUSES, VOLUNTEER_SKILLS } from '@/lib/constants';
 import { cn } from '@/lib/common';
+import { toast } from 'sonner';
 
 export default function VolunteerOnboardingPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, isAuthenticated, isLoading, isReady } = useAuth();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     causes: [] as string[],
@@ -47,7 +47,6 @@ export default function VolunteerOnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSubmitting(true);
     try {
       const res = await fetch('/api/users/me', {
@@ -65,10 +64,11 @@ export default function VolunteerOnboardingPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to save');
+      toast.success('Volunteer profile saved');
       await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
       router.push('/opportunities');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save profile');
+      toast.error(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setSubmitting(false);
     }
@@ -118,12 +118,6 @@ export default function VolunteerOnboardingPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-                {error}
-              </div>
-            )}
-
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-jad-foreground mb-1.5">
                 Full name

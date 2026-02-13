@@ -9,6 +9,7 @@ import { authClient } from '@/lib/auth/auth-client';
 import { useSession } from '@/lib/auth/use-auth';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/common';
+import { toast } from 'sonner';
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN_SEC = 60;
@@ -26,7 +27,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
 
   // Redirect if already logged in
@@ -37,15 +37,15 @@ export default function LoginPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) {
-      setError('Please enter your email');
+      toast.error('Please enter your email');
       return;
     }
     setLoading(true);
     try {
       await authClient.sendOtp(trimmed);
+      toast.success('Verification code sent to your email');
       setEmail(trimmed);
       setStep('otp');
       setOtp('');
@@ -60,7 +60,7 @@ export default function LoginPage() {
         });
       }, 1000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send code');
+      toast.error(err instanceof Error ? err.message : 'Failed to send code');
     } finally {
       setLoading(false);
     }
@@ -68,10 +68,10 @@ export default function LoginPage() {
 
   const handleResend = async () => {
     if (resendCooldown > 0) return;
-    setError(null);
     setLoading(true);
     try {
       await authClient.sendOtp(email);
+      toast.success('Code resent');
       setResendCooldown(RESEND_COOLDOWN_SEC);
       const interval = setInterval(() => {
         setResendCooldown((prev) => {
@@ -83,7 +83,7 @@ export default function LoginPage() {
         });
       }, 1000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to resend');
+      toast.error(err instanceof Error ? err.message : 'Failed to resend');
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,6 @@ export default function LoginPage() {
 
   const verifyWithCode = async (code: string) => {
     if (code.length !== OTP_LENGTH || loading) return;
-    setError(null);
     setLoading(true);
     try {
       const { isNewUser } = await authClient.verifyOtp(email, code);
@@ -102,7 +101,7 @@ export default function LoginPage() {
         router.replace(redirectTo);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid or expired code');
+      toast.error(err instanceof Error ? err.message : 'Invalid or expired code');
     } finally {
       setLoading(false);
     }
@@ -124,7 +123,6 @@ export default function LoginPage() {
   const handleBack = () => {
     setStep('email');
     setOtp('');
-    setError(null);
   };
 
   return (
@@ -151,15 +149,6 @@ export default function LoginPage() {
                 ? 'Enter your email to receive a one-time code'
                 : `We sent a 6-digit code to ${email}`}
             </p>
-
-            {error && (
-              <div
-                role="alert"
-                className="mt-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800"
-              >
-                {error}
-              </div>
-            )}
 
             {step === 'email' ? (
               <form onSubmit={handleSendOtp} className="mt-6 space-y-4">

@@ -14,14 +14,13 @@ import {
   GENDER_OPTIONS,
 } from '@/lib/constants';
 import { cn } from '@/lib/common';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, isAuthenticated, isLoading, isReady } = useAuth();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -73,8 +72,6 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
     setSubmitting(true);
     try {
       const res = await fetch('/api/users/me', {
@@ -94,10 +91,10 @@ export default function ProfilePage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to update profile');
-      setSuccess(true);
+      toast.success('Profile updated successfully');
       await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      toast.error(err instanceof Error ? err.message : 'Failed to update profile');
     } finally {
       setSubmitting(false);
     }
@@ -147,17 +144,6 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
-                Profile updated successfully.
-              </div>
-            )}
-
             {/* Email (read-only) */}
             <div>
               <label className="block text-sm font-medium text-jad-foreground mb-1.5">
