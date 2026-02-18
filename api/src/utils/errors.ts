@@ -11,7 +11,10 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string, public errors?: any) {
+  constructor(
+    message: string,
+    public errors?: any
+  ) {
     super(message, 400, 'VALIDATION_ERROR');
     this.name = 'ValidationError';
   }
@@ -35,5 +38,15 @@ export class ForbiddenError extends AppError {
   constructor(message: string = 'Forbidden') {
     super(message, 403, 'FORBIDDEN');
     this.name = 'ForbiddenError';
+  }
+}
+
+export class TransactionError extends AppError {
+  constructor(
+    message: string,
+    public readonly cause?: unknown
+  ) {
+    super(message);
+    this.name = 'TransactionError';
   }
 }

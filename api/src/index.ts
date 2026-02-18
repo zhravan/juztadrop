@@ -5,7 +5,7 @@ import { healthRouter, authRouter, usersRouter, organizationsRouter } from './ro
 import { errorHandler, responseEnvelope } from './middleware';
 import { runMigrations } from './db/index.js';
 import { logger } from './utils/logger';
-import { adminRouter } from './routes/admin';
+import { moderatorRouter } from './routes/moderator';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldRunMigrations = process.env.RUN_MIGRATIONS !== 'false';
@@ -130,7 +130,7 @@ async function startServer() {
     .use(healthRouter)
     .use(authRouter)
     .use(usersRouter)
-    .use(adminRouter)
+    .use(moderatorRouter)
     .use(organizationsRouter)
     .listen(3001);
 

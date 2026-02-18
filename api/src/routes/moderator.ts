@@ -1,16 +1,16 @@
 import { Elysia, t } from 'elysia';
 import { cookie } from '@elysiajs/cookie';
 import { container } from '../container';
-import { verifyXAuthHeaderMiddleware } from '@/middleware/admin.middleware';
+import { verifyXAuthHeaderMiddleware } from '@/middleware/moderator.middleware';
 
-const adminController = container.getControllers().admin;
+const moderatorController = container.getControllers().moderator;
 
-export const adminRouter = new Elysia({ prefix: '/admin', tags: ['admin'] })
+export const moderatorRouter = new Elysia({ prefix: '/moderator', tags: ['moderator'] })
   .use(verifyXAuthHeaderMiddleware)
   .post(
     '/seed',
     async ({ xAuthId, body }) => {
-      const result = await adminController.adminSeed(xAuthId, body);
+      const result = await moderatorController.moderatorSeed(xAuthId, body);
       return result;
     },
     {
