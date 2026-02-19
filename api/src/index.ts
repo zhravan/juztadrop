@@ -6,12 +6,15 @@ import { errorHandler, responseEnvelope } from './middleware';
 import { runMigrations } from './db/index.js';
 import { logger } from './utils/logger';
 import { validateEnvOnStartup } from './config/env.js';
+import { moderatorRouter } from './routes/moderator';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldRunMigrations = process.env.RUN_MIGRATIONS !== 'false';
 
 const corsOrigin = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+  ? process.env.CORS_ORIGIN.split(',')
+      .map((o) => o.trim())
+      .filter(Boolean)
   : isProduction
     ? []
     : ['http://localhost:3000', 'http://localhost:3002'];
@@ -126,10 +129,12 @@ async function startServer() {
     );
   }
 
-  app.get('/', () => ({ message: 'Just a Drop API' }))
+  app
+    .get('/', () => ({ message: 'Just a Drop API' }))
     .use(healthRouter)
     .use(authRouter)
     .use(usersRouter)
+    .use(moderatorRouter)
     .use(organizationsRouter)
     .use(opportunitiesRouter)
     .use(applicationsRouter)

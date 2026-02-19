@@ -12,12 +12,16 @@ import { SessionService } from './services/session.service';
 import { AuthService } from './services/auth.service';
 import { StorageService } from './services/storage.service';
 import { AuthController } from './controllers/auth.controller';
+import { ModeratorRepository } from './repositories/moderator.repository';
+import { ModeratorService } from './services/moderator.service';
+import { ModeratorController } from './controllers/moderator.controller';
 
 class Container {
   private _repositories: {
     otp: OtpRepository;
     session: SessionRepository;
     user: UserRepository;
+    moderator: ModeratorRepository;
     organization: OrganizationRepository;
     opportunity: OpportunityRepository;
     application: ApplicationRepository;
@@ -31,10 +35,12 @@ class Container {
     session: SessionService;
     auth: AuthService;
     storage: StorageService;
+    moderator: ModeratorService;
   } | null = null;
 
   private _controllers: {
     auth: AuthController;
+    moderator: ModeratorController;
   } | null = null;
 
   private get repositories() {
@@ -43,6 +49,7 @@ class Container {
         otp: new OtpRepository(),
         session: new SessionRepository(),
         user: new UserRepository(),
+        moderator: new ModeratorRepository(),
         organization: new OrganizationRepository(),
         opportunity: new OpportunityRepository(),
         application: new ApplicationRepository(),
@@ -57,12 +64,20 @@ class Container {
     if (!this._services) {
       const emailService = new EmailService();
       const otpService = new OtpService(this.repositories.otp, emailService);
-      const sessionService = new SessionService(this.repositories.session, this.repositories.user);
+      const sessionService = new SessionService(
+        this.repositories.session,
+        this.repositories.user,
+        this.repositories.moderator
+      );
       const authService = new AuthService(
         otpService,
         sessionService,
         emailService,
         this.repositories.user
+      );
+      const moderatorService = new ModeratorService(
+        this.repositories.user,
+        this.repositories.moderator
       );
 
       this._services = {
@@ -71,6 +86,7 @@ class Container {
         session: sessionService,
         auth: authService,
         storage: new StorageService(),
+        moderator: moderatorService,
       };
     }
     return this._services;
@@ -80,6 +96,7 @@ class Container {
     if (!this._controllers) {
       this._controllers = {
         auth: new AuthController(this.services.auth),
+        moderator: new ModeratorController(this.services.moderator),
       };
     }
     return this._controllers;

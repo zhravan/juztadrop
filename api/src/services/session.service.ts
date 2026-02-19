@@ -2,6 +2,7 @@ import { createId } from '@paralleldrive/cuid2';
 import type { User } from '../repositories/user.repository.js';
 import { SessionRepository } from '../repositories/session.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { ModeratorRepository, Moderator } from '../repositories/moderator.repository.js';
 import { logger } from '../utils/logger';
 
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -9,7 +10,8 @@ const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 export class SessionService {
   constructor(
     private readonly sessionRepository: SessionRepository,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly moderatorRepository: ModeratorRepository
   ) {}
 
   async createSession(userId: string): Promise<string> {
@@ -45,6 +47,35 @@ export class SessionService {
     return {
       userId: session.userId,
       user,
+    };
+  }
+
+  async validateModeratorSession(
+    token: string
+  ): Promise<{ userId: string; moderator: Moderator } | null> {
+    const session = await this.sessionRepository.findByToken(token);
+
+    if (!session) {
+      return null;
+    }
+
+    const moderator = await this.moderatorRepository.findByUserId(session.userId);
+
+    if (!moderator) {
+      await this.deleteSession(token);
+      return null;
+    }
+
+    if (moderator.user.isBanned || moderator.user.deletedAt) {
+      await this.deleteSession(token);
+      return null;
+    }
+
+    await this.sessionRepository.updateLastAccessed(session.id);
+
+    return {
+      userId: session.userId,
+      moderator,
     };
   }
 

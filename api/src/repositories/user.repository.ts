@@ -7,7 +7,6 @@ export interface User {
   id: string;
   email: string;
   emailVerified: boolean;
-  isAdmin: boolean;
   name: string | null;
   phone: string | null;
   gender: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
@@ -32,7 +31,6 @@ export class UserRepository {
       id: user.id,
       email: user.email,
       emailVerified: user.emailVerified,
-      isAdmin: user.isAdmin,
       name: user.name,
       phone: user.phone,
       gender: user.gender,
@@ -57,7 +55,6 @@ export class UserRepository {
       id: user.id,
       email: user.email,
       emailVerified: user.emailVerified,
-      isAdmin: user.isAdmin,
       name: user.name,
       phone: user.phone,
       gender: user.gender,
@@ -86,10 +83,7 @@ export class UserRepository {
   }
 
   async updateEmailVerified(id: string, emailVerified: boolean): Promise<void> {
-    await db
-      .update(users)
-      .set({ emailVerified })
-      .where(eq(users.id, id));
+    await db.update(users).set({ emailVerified }).where(eq(users.id, id));
   }
 
   async updateUser(
@@ -98,7 +92,11 @@ export class UserRepository {
       name?: string;
       phone?: string;
       gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
-      volunteering?: { isInterest: boolean; skills: Array<{ name: string; expertise: string }>; causes: string[] };
+      volunteering?: {
+        isInterest: boolean;
+        skills: Array<{ name: string; expertise: string }>;
+        causes: string[];
+      };
     }
   ): Promise<User | null> {
     await db
