@@ -4,9 +4,9 @@ import { container } from '../container';
 
 const sessionService = container.getServices().session;
 
-export const optionalAuthMiddleware = new Elysia({ name: 'optional-auth' })
+export const softAuthMiddleware = new Elysia({ name: 'soft-auth' })
   .use(cookie())
-  .derive(async ({ cookie: { sessionToken } }) => {
+  .derive({ as: 'scoped' }, async ({ cookie: { sessionToken } }) => {
     const token = typeof sessionToken?.value === 'string' ? sessionToken.value : undefined;
     if (!token) {
       return { user: null as any, userId: null as string | null };

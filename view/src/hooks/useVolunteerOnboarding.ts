@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/use-auth';
+import { authClient } from '@/lib/auth/auth-client';
 import { toast } from 'sonner';
 
 interface VolunteerOnboardingForm {
@@ -62,8 +63,14 @@ export function useVolunteerOnboarding() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to save');
+
+      // Refetch the session to get the latest user data
+      const updatedUser = await authClient.getSession();
+      if (updatedUser) {
+        queryClient.setQueryData(['auth', 'session'], updatedUser);
+      }
+
       toast.success('Volunteer profile saved');
-      await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
       router.push('/opportunities');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save profile');

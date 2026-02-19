@@ -99,16 +99,41 @@ export class UserRepository {
       };
     }
   ): Promise<User | null> {
-    await db
-      .update(users)
-      .set({
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.phone !== undefined && { phone: data.phone }),
-        ...(data.gender !== undefined && { gender: data.gender }),
-        ...(data.volunteering !== undefined && { volunteering: data.volunteering }),
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, id));
-    return this.findById(id);
+    const updateFields: Record<string, unknown> = {
+      updatedAt: new Date(),
+    };
+
+    if (data.name !== undefined) {
+      updateFields.name = data.name || null;
+    }
+    if (data.phone !== undefined) {
+      updateFields.phone = data.phone || null;
+    }
+    if (data.gender !== undefined) {
+      updateFields.gender = data.gender || null;
+    }
+    if (data.volunteering !== undefined) {
+      updateFields.volunteering = data.volunteering;
+    }
+
+    const [updated] = await db.update(users).set(updateFields).where(eq(users.id, id)).returning();
+
+    if (!updated) {
+      return null;
+    }
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      emailVerified: updated.emailVerified,
+      name: updated.name,
+      phone: updated.phone,
+      gender: updated.gender,
+      isBanned: updated.isBanned,
+      volunteering: updated.volunteering,
+      deletedAt: updated.deletedAt,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
   }
 }

@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia';
 import { cookie } from '@elysiajs/cookie';
 import { container } from '../container';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { optionalAuthMiddleware } from '../middleware/optional-auth.middleware.js';
+import { softAuthMiddleware } from '../middleware/soft-auth.middleware.js';
 import { CAUSE_VALUES } from '../constants/causes.js';
 import { NotFoundError, ForbiddenError } from '../utils/errors.js';
 
@@ -13,11 +13,7 @@ const userRepository = container.getRepositories().user;
 const feedbackRepository = container.getRepositories().feedback;
 
 const causeSchema = t.Array(t.String({ pattern: `^(${CAUSE_VALUES.join('|')})$` }));
-const modeSchema = t.Union([
-  t.Literal('onsite'),
-  t.Literal('remote'),
-  t.Literal('hybrid'),
-]);
+const modeSchema = t.Union([t.Literal('onsite'), t.Literal('remote'), t.Literal('hybrid')]);
 const statusSchema = t.Union([
   t.Literal('draft'),
   t.Literal('active'),
@@ -30,7 +26,20 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
   .get(
     '/',
     async ({ query }) => {
-      const { status, ngoId, city, state, country, causes, opportunityMode, includePast, startDateFrom, startDateTo, limit, offset } = query;
+      const {
+        status,
+        ngoId,
+        city,
+        state,
+        country,
+        causes,
+        opportunityMode,
+        includePast,
+        startDateFrom,
+        startDateTo,
+        limit,
+        offset,
+      } = query;
       const filters: any = {
         status: status ?? 'active',
         ngoId,
@@ -56,7 +65,9 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
         state: t.Optional(t.String()),
         country: t.Optional(t.String()),
         causes: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-        opportunityMode: t.Optional(t.Union([t.Literal('onsite'), t.Literal('remote'), t.Literal('hybrid')])),
+        opportunityMode: t.Optional(
+          t.Union([t.Literal('onsite'), t.Literal('remote'), t.Literal('hybrid')])
+        ),
         includePast: t.Optional(t.Union([t.Boolean(), t.String()])),
         startDateFrom: t.Optional(t.String()),
         startDateTo: t.Optional(t.String()),
@@ -65,7 +76,7 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       }),
     }
   )
-  .use(optionalAuthMiddleware)
+  .use(softAuthMiddleware)
   .get(
     '/:id',
     async (ctx: any) => {
@@ -74,7 +85,11 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       if (!opp) throw new NotFoundError('Opportunity not found');
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const oppEnd = opp.endDate ? new Date(opp.endDate) : opp.startDate ? new Date(opp.startDate) : null;
+      const oppEnd = opp.endDate
+        ? new Date(opp.endDate)
+        : opp.startDate
+          ? new Date(opp.startDate)
+          : null;
       if (oppEnd && oppEnd < today) {
         if (!userId) throw new NotFoundError('Opportunity not found');
         const hasAccess = await organizationRepository.hasManageAccess(opp.ngoId, userId);
@@ -92,7 +107,10 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
     async (ctx: any) => {
       const { userId, body } = ctx;
       const hasAccess = await organizationRepository.hasManageAccess(body.ngoId, userId);
-      if (!hasAccess) throw new ForbiddenError('You do not have permission to create opportunities for this organization');
+      if (!hasAccess)
+        throw new ForbiddenError(
+          'You do not have permission to create opportunities for this organization'
+        );
 
       if (body.status === 'active') {
         const org = await organizationRepository.findById(body.ngoId);
@@ -106,8 +124,16 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
         userCreatedBy: userId,
         causeCategoryNames: body.causeCategoryNames ?? [],
         requiredSkills: body.requiredSkills ?? [],
-        startDate: body.startDate ? (typeof body.startDate === 'string' ? new Date(body.startDate) : body.startDate) : undefined,
-        endDate: body.endDate ? (typeof body.endDate === 'string' ? new Date(body.endDate) : body.endDate) : undefined,
+        startDate: body.startDate
+          ? typeof body.startDate === 'string'
+            ? new Date(body.startDate)
+            : body.startDate
+          : undefined,
+        endDate: body.endDate
+          ? typeof body.endDate === 'string'
+            ? new Date(body.endDate)
+            : body.endDate
+          : undefined,
       });
       return { opportunity };
     },
@@ -133,10 +159,12 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
         contactName: t.String({ minLength: 1 }),
         contactPhoneNumber: t.Optional(t.String()),
         contactEmail: t.String({ format: 'email' }),
-        stipendInfo: t.Optional(t.Object({
-          amount: t.Optional(t.Number()),
-          duration: t.Optional(t.String()),
-        })),
+        stipendInfo: t.Optional(
+          t.Object({
+            amount: t.Optional(t.Number()),
+            duration: t.Optional(t.String()),
+          })
+        ),
         isCertificateOffered: t.Optional(t.Boolean()),
         latitude: t.Optional(t.Number()),
         longitude: t.Optional(t.Number()),
@@ -150,10 +178,15 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       const existing = await opportunityRepository.findById(params.id);
       if (!existing) throw new NotFoundError('Opportunity not found');
       const hasAccess = await organizationRepository.hasManageAccess(existing.ngoId, userId);
-      if (!hasAccess) throw new ForbiddenError('You do not have permission to update this opportunity');
+      if (!hasAccess)
+        throw new ForbiddenError('You do not have permission to update this opportunity');
       const updateData: any = { ...body };
-      if (body.startDate) updateData.startDate = typeof body.startDate === 'string' ? new Date(body.startDate) : body.startDate;
-      if (body.endDate) updateData.endDate = typeof body.endDate === 'string' ? new Date(body.endDate) : body.endDate;
+      if (body.startDate)
+        updateData.startDate =
+          typeof body.startDate === 'string' ? new Date(body.startDate) : body.startDate;
+      if (body.endDate)
+        updateData.endDate =
+          typeof body.endDate === 'string' ? new Date(body.endDate) : body.endDate;
       const updated = await opportunityRepository.update(params.id, updateData, userId);
       return { opportunity: updated };
     },
@@ -179,10 +212,12 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
         contactName: t.Optional(t.String()),
         contactPhoneNumber: t.Optional(t.String()),
         contactEmail: t.Optional(t.String({ format: 'email' })),
-        stipendInfo: t.Optional(t.Object({
-          amount: t.Optional(t.Number()),
-          duration: t.Optional(t.String()),
-        })),
+        stipendInfo: t.Optional(
+          t.Object({
+            amount: t.Optional(t.Number()),
+            duration: t.Optional(t.String()),
+          })
+        ),
         isCertificateOffered: t.Optional(t.Boolean()),
         latitude: t.Optional(t.Number()),
         longitude: t.Optional(t.Number()),
@@ -196,7 +231,8 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       const existing = await opportunityRepository.findById(params.id);
       if (!existing) throw new NotFoundError('Opportunity not found');
       const hasAccess = await organizationRepository.hasManageAccess(existing.ngoId, userId);
-      if (!hasAccess) throw new ForbiddenError('You do not have permission to delete this opportunity');
+      if (!hasAccess)
+        throw new ForbiddenError('You do not have permission to delete this opportunity');
       await opportunityRepository.delete(params.id);
       return { success: true };
     },
@@ -210,11 +246,13 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       const { userId, params, body } = ctx;
       const opp = await opportunityRepository.findById(params.id);
       if (!opp) throw new NotFoundError('Opportunity not found');
-      if (opp.status !== 'active') throw new ForbiddenError('This opportunity is not accepting applications');
+      if (opp.status !== 'active')
+        throw new ForbiddenError('This opportunity is not accepting applications');
       const existing = await applicationRepository.findByOpportunityAndUser(params.id, userId);
       if (existing) throw new ForbiddenError('You have already applied to this opportunity');
       const user = await userRepository.findById(userId);
-      if (!user?.volunteering?.isInterest) throw new ForbiddenError('Please complete your volunteer profile to apply');
+      if (!user?.volunteering?.isInterest)
+        throw new ForbiddenError('Please complete your volunteer profile to apply');
       const application = await applicationRepository.create(
         params.id,
         userId,
@@ -262,7 +300,8 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       const opp = await opportunityRepository.findById(params.id);
       if (!opp) throw new NotFoundError('Opportunity not found');
       const hasAccess = await organizationRepository.hasManageAccess(opp.ngoId, userId);
-      if (!hasAccess) throw new ForbiddenError('You do not have permission to view these applications');
+      if (!hasAccess)
+        throw new ForbiddenError('You do not have permission to view these applications');
       const applications = await applicationRepository.findByOpportunity(params.id);
       return { applications };
     },
@@ -278,7 +317,11 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       if (!opp) throw new NotFoundError('Opportunity not found');
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const oppEnd = opp.endDate ? new Date(opp.endDate) : opp.startDate ? new Date(opp.startDate) : null;
+      const oppEnd = opp.endDate
+        ? new Date(opp.endDate)
+        : opp.startDate
+          ? new Date(opp.startDate)
+          : null;
       if (!oppEnd || oppEnd >= today) {
         throw new ForbiddenError('Feedback is only available after the opportunity has ended');
       }
@@ -312,22 +355,40 @@ export const opportunitiesRouter = new Elysia({ prefix: '/opportunities', tags: 
       if (!opp) throw new NotFoundError('Opportunity not found');
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const oppEnd = opp.endDate ? new Date(opp.endDate) : opp.startDate ? new Date(opp.startDate) : null;
+      const oppEnd = opp.endDate
+        ? new Date(opp.endDate)
+        : opp.startDate
+          ? new Date(opp.startDate)
+          : null;
       if (!oppEnd || oppEnd >= today) {
         throw new ForbiddenError('Feedback is only available after the opportunity has ended');
       }
-      const volunteerApp = await applicationRepository.findByOpportunityAndUser(params.id, params.volunteerId);
+      const volunteerApp = await applicationRepository.findByOpportunityAndUser(
+        params.id,
+        params.volunteerId
+      );
       if (!volunteerApp || volunteerApp.status !== 'approved' || !volunteerApp.hasAttended) {
         throw new ForbiddenError('You can only rate volunteers who attended this opportunity');
       }
       const hasOrgAccess = await organizationRepository.hasManageAccess(opp.ngoId, userId);
       const myApp = await applicationRepository.findByOpportunityAndUser(params.id, userId);
-      const isPeer = myApp && myApp.status === 'approved' && myApp.hasAttended && myApp.userId !== params.volunteerId;
+      const isPeer =
+        myApp &&
+        myApp.status === 'approved' &&
+        myApp.hasAttended &&
+        myApp.userId !== params.volunteerId;
       if (!hasOrgAccess && !isPeer) {
-        throw new ForbiddenError('Only NGO staff or fellow volunteers who attended can rate this volunteer');
+        throw new ForbiddenError(
+          'Only NGO staff or fellow volunteers who attended can rate this volunteer'
+        );
       }
-      const existing = await feedbackRepository.hasVolunteerFeedback(userId, params.volunteerId, params.id);
-      if (existing) throw new ForbiddenError('You have already rated this volunteer for this opportunity');
+      const existing = await feedbackRepository.hasVolunteerFeedback(
+        userId,
+        params.volunteerId,
+        params.id
+      );
+      if (existing)
+        throw new ForbiddenError('You have already rated this volunteer for this opportunity');
       const result = await feedbackRepository.createVolunteerFeedback(
         userId,
         params.volunteerId,

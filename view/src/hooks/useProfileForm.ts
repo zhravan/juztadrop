@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/use-auth';
+import { authClient } from '@/lib/auth/auth-client';
 import { toast } from 'sonner';
 
 interface ProfileForm {
@@ -84,8 +85,14 @@ export function useProfileForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to update profile');
+
+      // Refetch the session to get the latest user data
+      const updatedUser = await authClient.getSession();
+      if (updatedUser) {
+        queryClient.setQueryData(['auth', 'session'], updatedUser);
+      }
+
       toast.success('Profile updated successfully');
-      await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to update profile');
     } finally {
