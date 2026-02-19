@@ -4,43 +4,68 @@ import { useClickOutside } from './useClickOutside';
 import { useAuth } from '@/lib/auth/use-auth';
 import { useNgo } from '@/contexts/NgoContext';
 
+function useHoverDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openDropdown = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  }, []);
+
+  const closeDropdown = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(false);
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }, []);
+
+  const toggle = useCallback(() => setOpen((prev) => !prev), []);
+
+  const hoverHandlers = {
+    onMouseEnter: openDropdown,
+    onMouseLeave: scheduleClose,
+  };
+
+  return { open, ref, openDropdown, closeDropdown, scheduleClose, toggle, hoverHandlers };
+}
+
 export function useAppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [ngoDropdownOpen, setNgoDropdownOpen] = useState(false);
-  const [myWorkDropdownOpen, setMyWorkDropdownOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const ngoDropdownRef = useRef<HTMLDivElement>(null);
-  const myWorkDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { organizations, selectedOrgId, setSelectedOrgId, selectedOrg } = useNgo();
 
+  const userMenu = useHoverDropdown();
+  const ngoDropdown = useHoverDropdown();
+  const myWorkDropdown = useHoverDropdown();
+
   const closeMenu = useCallback(() => setMobileMenuOpen(false), []);
-  const closeUserMenu = useCallback(() => setUserMenuOpen(false), []);
-  const closeNgoDropdown = useCallback(() => setNgoDropdownOpen(false), []);
-  const closeMyWorkDropdown = useCallback(() => setMyWorkDropdownOpen(false), []);
 
   useClickOutside(menuRef, mobileMenuOpen, closeMenu);
-  useClickOutside(userMenuRef, userMenuOpen, closeUserMenu);
-  useClickOutside(ngoDropdownRef, ngoDropdownOpen, closeNgoDropdown);
-  useClickOutside(myWorkDropdownRef, myWorkDropdownOpen, closeMyWorkDropdown);
+  useClickOutside(userMenu.ref, userMenu.open, userMenu.closeDropdown);
+  useClickOutside(ngoDropdown.ref, ngoDropdown.open, ngoDropdown.closeDropdown);
+  useClickOutside(myWorkDropdown.ref, myWorkDropdown.open, myWorkDropdown.closeDropdown);
 
   const toggleMobileMenu = useCallback(() => setMobileMenuOpen((prev) => !prev), []);
-  const toggleUserMenu = useCallback(() => setUserMenuOpen((prev) => !prev), []);
-  const toggleNgoDropdown = useCallback(() => setNgoDropdownOpen((prev) => !prev), []);
-  const toggleMyWorkDropdown = useCallback(() => setMyWorkDropdownOpen((prev) => !prev), []);
 
   return {
     mobileMenuOpen,
-    userMenuOpen,
-    ngoDropdownOpen,
-    myWorkDropdownOpen,
+    userMenuOpen: userMenu.open,
+    ngoDropdownOpen: ngoDropdown.open,
+    myWorkDropdownOpen: myWorkDropdown.open,
     menuRef,
-    userMenuRef,
-    ngoDropdownRef,
-    myWorkDropdownRef,
+    userMenuRef: userMenu.ref,
+    ngoDropdownRef: ngoDropdown.ref,
+    myWorkDropdownRef: myWorkDropdown.ref,
+    userMenuHover: userMenu.hoverHandlers,
+    ngoDropdownHover: ngoDropdown.hoverHandlers,
+    myWorkDropdownHover: myWorkDropdown.hoverHandlers,
     pathname,
     user,
     logout,
@@ -49,11 +74,11 @@ export function useAppHeader() {
     setSelectedOrgId,
     selectedOrg,
     closeMenu,
-    closeUserMenu,
+    closeUserMenu: userMenu.closeDropdown,
     toggleMobileMenu,
-    toggleUserMenu,
-    toggleNgoDropdown,
-    toggleMyWorkDropdown,
-    closeMyWorkDropdown,
+    toggleUserMenu: userMenu.toggle,
+    toggleNgoDropdown: ngoDropdown.toggle,
+    toggleMyWorkDropdown: myWorkDropdown.toggle,
+    closeMyWorkDropdown: myWorkDropdown.closeDropdown,
   };
 }

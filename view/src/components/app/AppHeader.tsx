@@ -50,6 +50,9 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
     userMenuRef,
     ngoDropdownRef,
     myWorkDropdownRef,
+    userMenuHover,
+    ngoDropdownHover,
+    myWorkDropdownHover,
     pathname,
     user,
     logout,
@@ -127,7 +130,7 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
           })}
 
           {/* My Work Dropdown */}
-          <div ref={myWorkDropdownRef} className="relative ml-2">
+          <div ref={myWorkDropdownRef} className="relative ml-2" {...myWorkDropdownHover}>
             <button
               type="button"
               onClick={toggleMyWorkDropdown}
@@ -191,7 +194,7 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
 
           {/* NGO Selector */}
           {organizations.length > 0 && (
-            <div ref={ngoDropdownRef} className="relative ml-2">
+            <div ref={ngoDropdownRef} className="relative ml-2" {...ngoDropdownHover}>
               <button
                 type="button"
                 onClick={toggleNgoDropdown}
@@ -246,7 +249,7 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
           )}
 
           {/* Profile Icon */}
-          <div ref={userMenuRef} className="relative ml-2">
+          <div ref={userMenuRef} className="relative ml-2" {...userMenuHover}>
             <button
               type="button"
               onClick={toggleUserMenu}
