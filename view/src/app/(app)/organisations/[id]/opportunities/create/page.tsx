@@ -3,15 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  ArrowLeft,
-  Calendar,
-  MapPin,
-  User,
-  DollarSign,
-  Award,
-  Loader2,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, User, DollarSign, Award, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/use-auth';
 import { useNgo } from '@/contexts/NgoContext';
 import { LOCATIONS, VOLUNTEER_CAUSES } from '@/lib/constants';
@@ -62,9 +54,7 @@ function buildFullAddress(form: {
   state?: string;
   country?: string;
 }): string {
-  return [form.address, form.city, form.state, form.country || 'India']
-    .filter(Boolean)
-    .join(', ');
+  return [form.address, form.city, form.state, form.country || 'India'].filter(Boolean).join(', ');
 }
 
 export default function CreateOpportunityPage() {
@@ -176,8 +166,11 @@ export default function CreateOpportunityPage() {
       });
       const data = await res.json().catch(() => ({}));
       const payload = data?.data ?? data;
-      if (!res.ok) throw new Error(payload?.error ?? payload?.message ?? 'Failed to create opportunity');
-      toast.success(form.status === 'active' ? 'Opportunity published' : 'Opportunity saved as draft');
+      if (!res.ok)
+        throw new Error(payload?.error ?? payload?.message ?? 'Failed to create opportunity');
+      toast.success(
+        form.status === 'active' ? 'Opportunity published' : 'Opportunity saved as draft'
+      );
       router.push(`/organisations/${ngoId}/opportunities`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create opportunity');
@@ -195,9 +188,12 @@ export default function CreateOpportunityPage() {
     return (
       <div className="container max-w-2xl">
         <p className="text-foreground/70">Organization not found.</p>
-        <Link href="/organisations" className="mt-4 inline-flex items-center gap-2 text-jad-primary hover:underline">
+        <Link
+          href="/organisations"
+          className="mt-4 inline-flex items-center gap-2 text-jad-primary hover:underline"
+        >
           <ArrowLeft className="h-4 w-4" />
-          Back to My NGOs
+          Back to My Organizations
         </Link>
       </div>
     );
@@ -209,9 +205,12 @@ export default function CreateOpportunityPage() {
         <p className="text-foreground/70">
           Your organization must be verified to create opportunities.
         </p>
-        <Link href="/organisations" className="mt-4 inline-flex items-center gap-2 text-jad-primary hover:underline">
+        <Link
+          href="/organisations"
+          className="mt-4 inline-flex items-center gap-2 text-jad-primary hover:underline"
+        >
           <ArrowLeft className="h-4 w-4" />
-          Back to My NGOs
+          Back to My Organizations
         </Link>
       </div>
     );
@@ -227,9 +226,7 @@ export default function CreateOpportunityPage() {
         Back to opportunities
       </Link>
 
-      <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">
-        Create opportunity
-      </h1>
+      <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">Create opportunity</h1>
       <p className="mt-1 text-foreground/70">
         Add a new volunteering opportunity for {org.orgName}
       </p>
@@ -333,7 +330,10 @@ export default function CreateOpportunityPage() {
               id="opportunityMode"
               value={form.opportunityMode}
               onChange={(e) =>
-                setForm({ ...form, opportunityMode: e.target.value as 'onsite' | 'remote' | 'hybrid' })
+                setForm({
+                  ...form,
+                  opportunityMode: e.target.value as 'onsite' | 'remote' | 'hybrid',
+                })
               }
             >
               {OPPORTUNITY_MODES.map((m) => (
@@ -492,9 +492,7 @@ export default function CreateOpportunityPage() {
             <FormSelect
               id="status"
               value={form.status}
-              onChange={(e) =>
-                setForm({ ...form, status: e.target.value as 'draft' | 'active' })
-              }
+              onChange={(e) => setForm({ ...form, status: e.target.value as 'draft' | 'active' })}
             >
               {OPPORTUNITY_STATUSES.map((s) => (
                 <option key={s.value} value={s.value}>

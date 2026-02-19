@@ -12,6 +12,8 @@ import {
   Compass,
   ChevronDown,
   Building2,
+  Briefcase,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAppHeader } from '@/hooks';
 import { cn } from '@/lib/common';
@@ -43,9 +45,11 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
     mobileMenuOpen,
     userMenuOpen,
     ngoDropdownOpen,
+    myWorkDropdownOpen,
     menuRef,
     userMenuRef,
     ngoDropdownRef,
+    myWorkDropdownRef,
     pathname,
     user,
     logout,
@@ -58,8 +62,16 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
     toggleMobileMenu,
     toggleUserMenu,
     toggleNgoDropdown,
+    toggleMyWorkDropdown,
+    closeMyWorkDropdown,
   } = useAppHeader();
   const { openModal } = onboardingModal;
+
+  const isMyWorkActive =
+    pathname === '/organisations' ||
+    pathname === '/my-opportunities' ||
+    pathname === '/dashboard' ||
+    pathname.startsWith('/organisations/');
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-foreground/5 bg-white/80 backdrop-blur-xl">
@@ -114,6 +126,69 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
             );
           })}
 
+          {/* My Work Dropdown */}
+          <div ref={myWorkDropdownRef} className="relative ml-2">
+            <button
+              type="button"
+              onClick={toggleMyWorkDropdown}
+              className={cn(
+                'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-jad-mint/60 hover:text-jad-foreground',
+                isMyWorkActive
+                  ? 'bg-jad-mint/60 text-jad-foreground font-semibold'
+                  : 'text-foreground/80'
+              )}
+            >
+              <Briefcase className="h-4 w-4" />
+              My Work
+              <ChevronDown
+                className={cn('h-4 w-4 transition-transform', myWorkDropdownOpen && 'rotate-180')}
+              />
+            </button>
+            {myWorkDropdownOpen && (
+              <div className="absolute right-0 top-full z-50 mt-2 min-w-[200px] overflow-hidden rounded-2xl border border-foreground/10 bg-white py-2 shadow-xl">
+                <Link
+                  href="/organisations"
+                  onClick={closeMyWorkDropdown}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2.5 text-sm',
+                    pathname === '/organisations' || pathname.startsWith('/organisations/')
+                      ? 'bg-jad-mint font-medium text-jad-foreground'
+                      : 'text-foreground hover:bg-muted/50'
+                  )}
+                >
+                  <Building2 className="h-4 w-4" />
+                  My Organizations
+                </Link>
+                <Link
+                  href="/my-opportunities"
+                  onClick={closeMyWorkDropdown}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2.5 text-sm',
+                    pathname === '/my-opportunities'
+                      ? 'bg-jad-mint font-medium text-jad-foreground'
+                      : 'text-foreground hover:bg-muted/50'
+                  )}
+                >
+                  <Heart className="h-4 w-4" />
+                  My Opportunities
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={closeMyWorkDropdown}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2.5 text-sm',
+                    pathname === '/dashboard'
+                      ? 'bg-jad-mint font-medium text-jad-foreground'
+                      : 'text-foreground hover:bg-muted/50'
+                  )}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  My Applications
+                </Link>
+              </div>
+            )}
+          </div>
+
           {/* NGO Selector */}
           {organizations.length > 0 && (
             <div ref={ngoDropdownRef} className="relative ml-2">
@@ -153,7 +228,7 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
                     onClick={toggleNgoDropdown}
                     className="block border-t border-foreground/10 px-4 py-2.5 text-sm text-jad-primary hover:bg-jad-mint/30"
                   >
-                    Manage NGOs
+                    Manage Organizations
                   </Link>
                   {selectedOrgId && (
                     <Link
@@ -272,10 +347,56 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
                 );
               })}
 
+              {/* My Work section in mobile */}
+              <div className="border-t border-foreground/5 px-5 py-3">
+                <p className="mb-2 text-xs font-medium text-foreground/60">My Work</p>
+                <Link
+                  href="/organisations"
+                  onClick={closeMenu}
+                  className={cn(
+                    'flex items-center gap-2 py-2 text-sm',
+                    pathname === '/organisations' || pathname.startsWith('/organisations/')
+                      ? 'font-medium text-jad-foreground'
+                      : 'text-foreground/70'
+                  )}
+                >
+                  <Building2 className="h-4 w-4" />
+                  My Organizations
+                </Link>
+                <Link
+                  href="/my-opportunities"
+                  onClick={closeMenu}
+                  className={cn(
+                    'flex items-center gap-2 py-2 text-sm',
+                    pathname === '/my-opportunities'
+                      ? 'font-medium text-jad-foreground'
+                      : 'text-foreground/70'
+                  )}
+                >
+                  <Heart className="h-4 w-4" />
+                  My Opportunities
+                </Link>
+                <Link
+                  href="/dashboard"
+                  onClick={closeMenu}
+                  className={cn(
+                    'flex items-center gap-2 py-2 text-sm',
+                    pathname === '/dashboard'
+                      ? 'font-medium text-jad-foreground'
+                      : 'text-foreground/70'
+                  )}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  My Applications
+                </Link>
+              </div>
+
               {/* NGO selector in mobile */}
               {organizations.length > 0 && (
                 <div className="border-t border-foreground/5 px-5 py-3">
-                  <p className="mb-2 text-xs font-medium text-foreground/60">My NGOs</p>
+                  <p className="mb-2 text-xs font-medium text-foreground/60">
+                    Current Organization
+                  </p>
                   {organizations.map((org) => (
                     <Link
                       key={org.id}
@@ -294,13 +415,6 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
                       {org.orgName}
                     </Link>
                   ))}
-                  <Link
-                    href="/organisations"
-                    onClick={closeMenu}
-                    className="block py-2 text-sm text-jad-primary"
-                  >
-                    Manage NGOs
-                  </Link>
                 </div>
               )}
 

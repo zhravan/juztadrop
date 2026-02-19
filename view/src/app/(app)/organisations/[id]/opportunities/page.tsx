@@ -78,7 +78,9 @@ export default function OrgOpportunitiesPage() {
   if (!isAuthenticated) return null;
 
   const formatDate = (d: string | null) =>
-    d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    d
+      ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+      : '—';
 
   return (
     <div className="container">
@@ -89,14 +91,12 @@ export default function OrgOpportunitiesPage() {
             className="inline-flex items-center gap-1 text-sm font-medium text-foreground/70 hover:text-jad-primary mb-2"
           >
             <ChevronLeft className="h-4 w-4" />
-            Back to My NGOs
+            Back to My Organizations
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-jad-foreground sm:text-3xl">
             {org?.orgName ?? 'Opportunities'}
           </h1>
-          <p className="mt-1 text-foreground/70">
-            Manage opportunities for this organization
-          </p>
+          <p className="mt-1 text-foreground/70">Manage opportunities for this organization</p>
         </div>
         {org?.verificationStatus === 'verified' && (
           <Link
@@ -147,10 +147,10 @@ export default function OrgOpportunitiesPage() {
                       opp.status === 'active'
                         ? 'bg-emerald-100 text-emerald-700'
                         : opp.status === 'draft'
-                        ? 'bg-amber-100 text-amber-700'
-                        : opp.status === 'completed'
-                        ? 'bg-slate-100 text-slate-600'
-                        : 'bg-red-100 text-red-700'
+                          ? 'bg-amber-100 text-amber-700'
+                          : opp.status === 'completed'
+                            ? 'bg-slate-100 text-slate-600'
+                            : 'bg-red-100 text-red-700'
                     )}
                   >
                     {opp.status}
@@ -158,11 +158,7 @@ export default function OrgOpportunitiesPage() {
                   <span className="rounded-full bg-muted px-2.5 py-0.5 capitalize">
                     {opp.opportunityMode}
                   </span>
-                  {opp.city && (
-                    <span>
-                      {[opp.city, opp.state].filter(Boolean).join(', ')}
-                    </span>
-                  )}
+                  {opp.city && <span>{[opp.city, opp.state].filter(Boolean).join(', ')}</span>}
                   <span>
                     {formatDate(opp.startDate)} – {formatDate(opp.endDate)}
                   </span>
