@@ -3,15 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  ArrowLeft,
-  Calendar,
-  MapPin,
-  User,
-  DollarSign,
-  Award,
-  Loader2,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, User, DollarSign, Award, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/use-auth';
 import { useNgo } from '@/contexts/NgoContext';
 import { LOCATIONS, VOLUNTEER_CAUSES } from '@/lib/constants';
@@ -65,9 +57,7 @@ function buildFullAddress(form: {
   state?: string;
   country?: string;
 }): string {
-  return [form.address, form.city, form.state, form.country || 'India']
-    .filter(Boolean)
-    .join(', ');
+  return [form.address, form.city, form.state, form.country || 'India'].filter(Boolean).join(', ');
 }
 
 function toDateStr(d: string | Date | null): string {
@@ -228,7 +218,8 @@ export default function EditOpportunityPage() {
       });
       const data = await res.json().catch(() => ({}));
       const payload = data?.data ?? data;
-      if (!res.ok) throw new Error(payload?.error ?? payload?.message ?? 'Failed to update opportunity');
+      if (!res.ok)
+        throw new Error(payload?.error ?? payload?.message ?? 'Failed to update opportunity');
       toast.success('Opportunity updated');
       router.push(`/organisations/${ngoId}/opportunities`);
     } catch (err) {
@@ -247,9 +238,12 @@ export default function EditOpportunityPage() {
     return (
       <div className="container max-w-2xl">
         <p className="text-foreground/70">Organization not found.</p>
-        <Link href="/organisations" className="mt-4 inline-flex items-center gap-2 text-jad-primary hover:underline">
+        <Link
+          href="/organisations"
+          className="mt-4 inline-flex items-center gap-2 text-jad-primary hover:underline"
+        >
           <ArrowLeft className="h-4 w-4" />
-          Back to My NGOs
+          Back to My Organizations
         </Link>
       </div>
     );
@@ -274,12 +268,8 @@ export default function EditOpportunityPage() {
         Back to opportunities
       </Link>
 
-      <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">
-        Edit opportunity
-      </h1>
-      <p className="mt-1 text-foreground/70">
-        Update opportunity for {org.orgName}
-      </p>
+      <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">Edit opportunity</h1>
+      <p className="mt-1 text-foreground/70">Update opportunity for {org.orgName}</p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-8">
         <FormSection
@@ -378,7 +368,10 @@ export default function EditOpportunityPage() {
               id="opportunityMode"
               value={form.opportunityMode}
               onChange={(e) =>
-                setForm({ ...form, opportunityMode: e.target.value as 'onsite' | 'remote' | 'hybrid' })
+                setForm({
+                  ...form,
+                  opportunityMode: e.target.value as 'onsite' | 'remote' | 'hybrid',
+                })
               }
             >
               {OPPORTUNITY_MODES.map((m) => (
@@ -538,7 +531,10 @@ export default function EditOpportunityPage() {
               id="status"
               value={form.status}
               onChange={(e) =>
-                setForm({ ...form, status: e.target.value as 'draft' | 'active' | 'completed' | 'cancelled' })
+                setForm({
+                  ...form,
+                  status: e.target.value as 'draft' | 'active' | 'completed' | 'cancelled',
+                })
               }
             >
               {OPPORTUNITY_STATUSES.map((s) => (

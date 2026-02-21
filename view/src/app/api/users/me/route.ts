@@ -20,18 +20,25 @@ export async function PATCH(request: NextRequest) {
         'Content-Type': 'application/json',
         Cookie: `sessionToken=${token}`,
       },
+      credentials: 'include',
       body: JSON.stringify(body),
     });
 
     const json = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const err = json?.error;
-      return NextResponse.json(
-        { error: err?.message || json?.message || 'Failed to update' },
-        { status: res.status }
-      );
+      // Backend returns { success: false, error: { message, code, details } }
+      const errorMessage = json?.error?.message || json?.message || 'Failed to update';
+      return NextResponse.json({ error: errorMessage }, { status: res.status });
     }
-    return NextResponse.json(json?.data ?? json);
+
+    // Backend returns { success: true, data: { user } } via response envelope
+    const responseData = json?.data ?? json;
+    if (responseData?.user === null) {
+      return NextResponse.json({ error: 'User not found after update' }, { status: 500 });
+    }
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Users me PATCH error:', error);
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });

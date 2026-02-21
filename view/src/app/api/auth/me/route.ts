@@ -18,6 +18,7 @@ export async function GET() {
       headers: {
         Cookie: `sessionToken=${token}`,
       },
+      cache: 'no-store',
     });
 
     const json = await res.json().catch(() => null);
@@ -30,7 +31,10 @@ export async function GET() {
     console.error('Auth me error:', error);
     const hint = getBackendErrorHint(error);
     return NextResponse.json(
-      { error: 'Failed to get session', hint: process.env.NODE_ENV === 'development' ? hint : undefined },
+      {
+        error: 'Failed to get session',
+        hint: process.env.NODE_ENV === 'development' ? hint : undefined,
+      },
       { status: 500 }
     );
   }

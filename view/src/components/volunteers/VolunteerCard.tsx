@@ -1,6 +1,5 @@
 'use client';
 
-import { User, Heart } from 'lucide-react';
 import { cn } from '@/lib/common';
 
 export interface VolunteerCardData {
@@ -11,6 +10,23 @@ export interface VolunteerCardData {
   skills: Array<{ name: string; expertise: string }>;
 }
 
+const AVATAR_COLORS = [
+  'bg-jad-mint text-jad-primary',
+  'bg-amber-100 text-amber-700',
+  'bg-sky-100 text-sky-700',
+  'bg-rose-100 text-rose-700',
+  'bg-violet-100 text-violet-700',
+  'bg-emerald-100 text-emerald-700',
+];
+
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
 function getInitials(name: string | null, email: string): string {
   if (name?.trim()) {
     const parts = name.trim().split(/\s+/);
@@ -19,48 +35,41 @@ function getInitials(name: string | null, email: string): string {
     }
     return name.slice(0, 2).toUpperCase();
   }
-  if (email) {
-    return email.slice(0, 2).toUpperCase();
-  }
-  return '?';
+  return email ? email.slice(0, 2).toUpperCase() : '?';
 }
 
-export function VolunteerCard({ volunteer, className }: { volunteer: VolunteerCardData; className?: string }) {
+export function VolunteerCard({
+  volunteer,
+  className,
+}: {
+  volunteer: VolunteerCardData;
+  className?: string;
+}) {
   const initials = getInitials(volunteer.name, volunteer.email);
   const displayName = volunteer.name || 'Volunteer';
-  const skillsList = volunteer.skills?.slice(0, 3).map((s) => s.name) ?? [];
+  const colorClass = AVATAR_COLORS[hashCode(volunteer.id) % AVATAR_COLORS.length];
+  const topCause = volunteer.causes?.[0]?.replace(/_/g, ' ') ?? null;
 
   return (
     <div
       className={cn(
-        'rounded-2xl border border-foreground/10 bg-white p-6 shadow-lg transition-shadow hover:shadow-xl',
+        'flex flex-col items-center gap-3 rounded-2xl bg-white/50 p-6 text-center shadow-sm transition-all hover:bg-white/80 hover:shadow-md',
         className
       )}
     >
-      <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-jad-mint text-lg font-bold text-jad-primary">
-          {initials}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-jad-foreground">{displayName}</h3>
-          {volunteer.causes?.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {volunteer.causes.slice(0, 4).map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full bg-jad-mint/50 px-2 py-0.5 text-xs text-jad-foreground"
-                >
-                  {c.replace(/_/g, ' ')}
-                </span>
-              ))}
-            </div>
-          )}
-          {skillsList.length > 0 && (
-            <p className="mt-2 text-sm text-foreground/70">
-              Skills: {skillsList.join(', ')}
-            </p>
-          )}
-        </div>
+      <div
+        className={cn(
+          'flex h-16 w-16 items-center justify-center rounded-full text-lg font-bold',
+          colorClass
+        )}
+      >
+        {initials}
+      </div>
+      <div className="min-w-0 w-full">
+        <p className="truncate text-sm font-semibold text-jad-foreground">{displayName}</p>
+        {topCause && (
+          <p className="mt-0.5 truncate text-xs text-foreground/45 capitalize">{topCause}</p>
+        )}
       </div>
     </div>
   );

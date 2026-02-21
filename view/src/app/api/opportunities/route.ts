@@ -13,10 +13,14 @@ export async function GET(request: NextRequest) {
     const res = await fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const errMsg = json?.error?.message ?? json?.message ?? (typeof json?.error === 'object' ? json?.error?.message : null);
+      const errMsg =
+        json?.error?.message ??
+        json?.message ??
+        (typeof json?.error === 'object' ? json?.error?.message : null);
       return NextResponse.json(
         { error: errMsg || 'Failed to fetch opportunities' },
         { status: res.status }
@@ -27,7 +31,10 @@ export async function GET(request: NextRequest) {
     console.error('Opportunities GET error:', error);
     const hint = getBackendErrorHint(error);
     return NextResponse.json(
-      { error: 'Failed to fetch opportunities', hint: process.env.NODE_ENV === 'development' ? hint : undefined },
+      {
+        error: 'Failed to fetch opportunities',
+        hint: process.env.NODE_ENV === 'development' ? hint : undefined,
+      },
       { status: 500 }
     );
   }
@@ -62,7 +69,10 @@ export async function POST(request: NextRequest) {
     console.error('Opportunities POST error:', error);
     const hint = getBackendErrorHint(error);
     return NextResponse.json(
-      { error: 'Failed to create opportunity', hint: process.env.NODE_ENV === 'development' ? hint : undefined },
+      {
+        error: 'Failed to create opportunity',
+        hint: process.env.NODE_ENV === 'development' ? hint : undefined,
+      },
       { status: 500 }
     );
   }

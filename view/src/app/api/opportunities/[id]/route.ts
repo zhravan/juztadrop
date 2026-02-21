@@ -5,15 +5,13 @@ export const dynamic = 'force-dynamic';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const res = await fetch(`${API_URL}/opportunities/${id}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -29,10 +27,7 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('sessionToken')?.value;

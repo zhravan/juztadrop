@@ -4,21 +4,24 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function AppShellSkeleton() {
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar skeleton */}
-      <aside className="hidden w-64 flex-col border-r border-foreground/10 bg-white md:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-foreground/5 px-4">
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar skeleton */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-foreground/5 bg-white/80 backdrop-blur-xl">
+        <div className="container flex h-14 items-center justify-between sm:h-16">
           <Skeleton className="h-6 w-24" />
+          <div className="hidden md:flex items-center gap-2">
+            <Skeleton className="h-8 w-20 rounded-full" />
+            <Skeleton className="h-8 w-24 rounded-full" />
+            <Skeleton className="h-8 w-20 rounded-full" />
+            <Skeleton className="h-8 w-24 rounded-full" />
+            <Skeleton className="h-10 w-10 rounded-full" />
+          </div>
+          <Skeleton className="h-10 w-10 rounded-full md:hidden" />
         </div>
-        <div className="flex-1 space-y-2 p-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </div>
-      </aside>
+      </header>
 
       {/* Main content */}
-      <main className="flex-1 pt-14 md:pl-64 md:pt-0">
+      <main className="flex-1 pt-14 sm:pt-16">
         <div className="container space-y-8 pt-8">
           <div className="space-y-2">
             <Skeleton className="h-8 w-64" />
@@ -29,8 +32,8 @@ export function AppShellSkeleton() {
             <Skeleton className="h-10 w-32 rounded-full" />
           </div>
           <div className="grid gap-6 lg:grid-cols-3">
-            <Skeleton className="h-64 lg:col-span-2" />
-            <Skeleton className="h-64" />
+            <Skeleton className="h-64 lg:col-span-2 rounded-2xl" />
+            <Skeleton className="h-64 rounded-2xl" />
           </div>
         </div>
       </main>

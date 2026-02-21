@@ -7,7 +7,7 @@ const sessionService = container.getServices().session;
 
 export const moderatorMiddleware = new Elysia({ name: 'moderator' })
   .use(cookie())
-  .derive(async ({ cookie: { sessionToken } }) => {
+  .derive({ as: 'scoped' }, async ({ cookie: { sessionToken } }) => {
     const token = sessionToken?.value as string | undefined;
     if (!token) {
       throw new UnauthorizedError('Authentication required');
@@ -26,7 +26,7 @@ export const moderatorMiddleware = new Elysia({ name: 'moderator' })
   });
 
 export const verifyXAuthHeaderMiddleware = new Elysia({ name: 'verify-x-auth-id' }).derive(
-  { as: 'global' },
+  { as: 'scoped' },
   async ({ headers }) => {
     const xAuthId = headers['x-auth-id'] || headers['X-AUTH-ID'];
     const expected = process.env.X_AUTH_ID;

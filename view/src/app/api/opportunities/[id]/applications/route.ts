@@ -5,10 +5,7 @@ export const dynamic = 'force-dynamic';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('sessionToken')?.value;
@@ -19,6 +16,7 @@ export async function GET(
     const res = await fetch(`${API_URL}/opportunities/${id}/applications`, {
       method: 'GET',
       headers: { Cookie: `sessionToken=${token}` },
+      cache: 'no-store',
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {

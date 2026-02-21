@@ -28,7 +28,7 @@ export default function OrganisationsPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-jad-foreground sm:text-3xl">
-            My NGOs
+            My Organizations
           </h1>
           <p className="mt-1 text-foreground/70">
             Manage your organizations and create opportunities
@@ -39,7 +39,7 @@ export default function OrganisationsPage() {
           className="inline-flex items-center gap-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-jad-primary/25 hover:bg-jad-dark"
         >
           <Plus className="h-4 w-4" />
-          Create NGO
+          Create Organization
         </Link>
       </div>
 
@@ -55,7 +55,7 @@ export default function OrganisationsPage() {
             className="mt-6 inline-flex items-center gap-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-jad-dark"
           >
             <Plus className="h-4 w-4" />
-            Create NGO
+            Create Organization
           </Link>
         </div>
       ) : (
@@ -73,8 +73,8 @@ export default function OrganisationsPage() {
                     org.verificationStatus === 'verified'
                       ? 'bg-emerald-100 text-emerald-700'
                       : org.verificationStatus === 'rejected'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-amber-100 text-amber-700'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-amber-100 text-amber-700'
                   )}
                 >
                   {org.verificationStatus}

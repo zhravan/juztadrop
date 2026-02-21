@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const res = await fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -25,7 +26,10 @@ export async function GET(request: NextRequest) {
     console.error('Volunteers GET error:', error);
     const hint = getBackendErrorHint(error);
     return NextResponse.json(
-      { error: 'Failed to fetch volunteers', hint: process.env.NODE_ENV === 'development' ? hint : undefined },
+      {
+        error: 'Failed to fetch volunteers',
+        hint: process.env.NODE_ENV === 'development' ? hint : undefined,
+      },
       { status: 500 }
     );
   }

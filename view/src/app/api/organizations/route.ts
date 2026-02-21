@@ -23,15 +23,30 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const err = json?.error;
-      return NextResponse.json(
-        { error: err?.message || json?.message || 'Failed to create organization' },
-        { status: res.status }
-      );
+    const text = await res.text();
+    let json: any = {};
+    try {
+      json = JSON.parse(text);
+    } catch {
+      console.error('Failed to parse response as JSON:', text);
     }
-    return NextResponse.json(json?.data ?? json);
+
+    if (!res.ok) {
+      console.error('Backend error response:', {
+        status: res.status,
+        statusText: res.statusText,
+        json,
+        text,
+        body,
+      });
+      // Backend returns { success: false, error: { message, code, details } }
+      const errorMessage = json?.error?.message || json?.message || 'Failed to create organization';
+      return NextResponse.json({ error: errorMessage }, { status: res.status });
+    }
+
+    // Backend returns { success: true, data: { organization: {...} } }
+    const responseData = json?.data ?? json;
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Organizations POST error:', error);
     return NextResponse.json({ error: 'Failed to create organization' }, { status: 500 });
@@ -51,13 +66,32 @@ export async function GET(request: NextRequest) {
       headers: {
         Cookie: `sessionToken=${token}`,
       },
+      cache: 'no-store',
     });
 
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      return NextResponse.json(json?.error ?? { error: 'Failed to fetch' }, { status: res.status });
+    const text = await res.text();
+    let json: any = {};
+    try {
+      json = JSON.parse(text);
+    } catch {
+      console.error('Failed to parse response as JSON:', text);
     }
-    return NextResponse.json(json?.data ?? json);
+
+    if (!res.ok) {
+      console.error('Backend error response:', {
+        status: res.status,
+        statusText: res.statusText,
+        json,
+        text,
+      });
+      // Backend returns { success: false, error: { message, code, details } }
+      const errorMessage = json?.error?.message || json?.message || 'Failed to fetch organizations';
+      return NextResponse.json({ error: errorMessage }, { status: res.status });
+    }
+
+    // Backend returns { success: true, data: { organizations: [...] } }
+    const responseData = json?.data ?? json;
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Organizations GET error:', error);
     return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 });

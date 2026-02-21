@@ -1,85 +1,48 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Heart, Loader2, User, Sparkles } from 'lucide-react';
+import { Heart, User, Sparkles, Check, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth/use-auth';
-import { useQueryClient } from '@tanstack/react-query';
 import { VOLUNTEER_CAUSES, VOLUNTEER_SKILLS } from '@/lib/constants';
-import { toast } from 'sonner';
 import { FormPageSkeleton } from '@/components/skeletons';
 import {
   FormField,
   FormInput,
   FormSection,
   ChipGroup,
-  FormActions,
+  StepperWizard,
+  SearchableChipGroup,
 } from '@/components/ui/form';
+import type { WizardStep } from '@/components/ui/form';
+import { useVolunteerOnboarding } from '@/hooks';
+
+function SaveIndicator({ status }: { status: string }) {
+  if (status === 'saving') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-foreground/50">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Saving…
+      </span>
+    );
+  }
+  if (status === 'saved') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-jad-primary">
+        <Check className="h-3 w-3" />
+        Saved
+      </span>
+    );
+  }
+  return null;
+}
 
 export default function VolunteerOnboardingPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { user, isAuthenticated, isLoading, isReady } = useAuth();
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    causes: [] as string[],
-    skills: [] as string[],
-  });
-
-  useEffect(() => {
-    if (user) {
-      setForm((f) => ({
-        ...f,
-        name: user.name ?? '',
-        causes: user.volunteering?.causes ?? [],
-        skills: (user.volunteering?.skills ?? []).map((s) => s.name),
-      }));
-    }
-  }, [user]);
-
-  const toggleCause = (value: string) =>
-    setForm((f) => ({
-      ...f,
-      causes: f.causes.includes(value) ? f.causes.filter((x) => x !== value) : [...f.causes, value],
-    }));
-
-  const toggleSkill = (skill: string) =>
-    setForm((f) => ({
-      ...f,
-      skills: f.skills.includes(skill) ? f.skills.filter((x) => x !== skill) : [...f.skills, skill],
-    }));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/users/me', {
-        credentials: 'include',
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({
-          name: form.name,
-          volunteering: {
-            isInterest: true,
-            skills: form.skills.map((name) => ({ name, expertise: 'intermediate' })),
-            causes: form.causes,
-          },
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? 'Failed to save');
-      toast.success('Volunteer profile saved');
-      await queryClient.invalidateQueries({ queryKey: ['auth', 'session'] });
-      router.push('/opportunities');
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to save profile');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  const { form, saveStatus, updateName, toggleCause, toggleSkill } = useVolunteerOnboarding();
+  const [activeStep, setActiveStep] = useState('name');
 
   if (!isReady || isLoading || !user) {
     return <FormPageSkeleton />;
@@ -90,81 +53,113 @@ export default function VolunteerOnboardingPage() {
     return null;
   }
 
-  return (
-    <div className="container max-w-2xl">
-          <Link
-            href="/onboarding"
-            className="inline-flex items-center gap-2 text-sm font-medium text-foreground/70 hover:text-jad-primary transition-colors mb-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Link>
-
-          <div className="flex items-center gap-4 mb-10">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-jad-mint text-jad-primary shadow-lg shadow-jad-primary/10">
-              <Heart className="h-7 w-7" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">
-                Volunteer profile
-              </h1>
-              <p className="mt-1 text-sm text-foreground/70">
-                Tell us about yourself so we can match you with the right opportunities.
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <FormSection
-              title="Basic info"
-              description="We'll use this to personalise your experience"
-              icon={<User className="h-5 w-5" />}
-            >
-              <FormField label="Full name" htmlFor="name" required>
-                <FormInput
-                  id="name"
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Your name"
-                  required
-                />
-              </FormField>
-            </FormSection>
-
-            <FormSection
-              title="Causes you care about"
-              description="Select all that resonate with you"
-              icon={<Heart className="h-5 w-5" />}
-            >
-              <ChipGroup
-                options={VOLUNTEER_CAUSES}
-                selected={form.causes}
-                onChange={toggleCause}
-              />
-            </FormSection>
-
-            <FormSection
-              title="Skills (optional)"
-              description="Add skills that could help organisations"
-              icon={<Sparkles className="h-5 w-5" />}
-            >
-              <ChipGroup
-                options={VOLUNTEER_SKILLS.map((s) => ({ value: s, label: s }))}
-                selected={form.skills}
-                onChange={toggleSkill}
-                variant="mint"
-              />
-            </FormSection>
-
-            <FormActions
-              submitLabel="Save & browse opportunities"
-              secondaryLabel="Skip for now — go to dashboard"
-              secondaryHref="/dashboard"
-              loading={submitting}
-              disabled={!form.name}
+  const steps: WizardStep[] = [
+    {
+      id: 'name',
+      label: 'Basic info',
+      icon: <User className="h-5 w-5" />,
+      isComplete: !!form.name.trim(),
+      content: (
+        <FormSection
+          title="Basic info"
+          description="We'll use this to personalise your experience"
+          icon={<User className="h-5 w-5" />}
+        >
+          <FormField label="Full name" htmlFor="name" required>
+            <FormInput
+              id="name"
+              type="text"
+              value={form.name}
+              onChange={(e) => updateName(e.target.value)}
+              placeholder="Your name"
             />
-          </form>
+          </FormField>
+        </FormSection>
+      ),
+    },
+    {
+      id: 'causes',
+      label: 'Causes',
+      icon: <Heart className="h-5 w-5" />,
+      isComplete: form.causes.length > 0,
+      content: (
+        <FormSection
+          title="Causes you care about"
+          description="Select all that resonate with you"
+          icon={<Heart className="h-5 w-5" />}
+        >
+          <SearchableChipGroup
+            options={VOLUNTEER_CAUSES}
+            selected={form.causes}
+            onChange={toggleCause}
+            placeholder="Search causes…"
+          />
+        </FormSection>
+      ),
+    },
+    {
+      id: 'skills',
+      label: 'Skills',
+      icon: <Sparkles className="h-5 w-5" />,
+      isComplete: form.skills.length > 0,
+      content: (
+        <FormSection
+          title="Skills (optional)"
+          description="Add skills that could help organisations"
+          icon={<Sparkles className="h-5 w-5" />}
+        >
+          <SearchableChipGroup
+            options={VOLUNTEER_SKILLS.map((s) => ({ value: s, label: s }))}
+            selected={form.skills}
+            onChange={toggleSkill}
+            placeholder="Search skills…"
+            variant="mint"
+          />
+        </FormSection>
+      ),
+    },
+  ];
+
+  const allDone = !!form.name.trim() && form.causes.length > 0;
+
+  return (
+    <div className="container">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-jad-mint text-jad-primary shadow-lg shadow-jad-primary/10">
+          <Heart className="h-7 w-7" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">Volunteer profile</h1>
+          <p className="mt-1 text-sm text-foreground/70">
+            Tell us about yourself so we can match you with the right opportunities.
+          </p>
+        </div>
+      </div>
+
+      <StepperWizard
+        steps={steps}
+        activeStep={activeStep}
+        onStepChange={setActiveStep}
+        headerExtra={<SaveIndicator status={saveStatus} />}
+      />
+
+      {/* Navigation actions */}
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Link
+          href="/dashboard"
+          className="order-2 sm:order-1 text-center text-sm font-medium text-foreground/70 hover:text-jad-primary transition-colors"
+        >
+          Skip for now — go to dashboard
+        </Link>
+        {allDone && (
+          <Link
+            href="/opportunities"
+            className="order-1 sm:order-2 flex items-center justify-center gap-2 rounded-xl bg-jad-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-jad-primary/25 transition-all hover:bg-jad-dark hover:shadow-xl"
+          >
+            Browse opportunities →
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
