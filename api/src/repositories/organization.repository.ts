@@ -1,5 +1,10 @@
 import { db } from '../db/index.js';
-import { organizations, organizationMembers, organizationDocuments } from '../db/schema.js';
+import {
+  organizations,
+  organizationMembers,
+  organizationDocuments,
+  documentTypeEnum,
+} from '../db/schema.js';
 import { eq, inArray, and } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
