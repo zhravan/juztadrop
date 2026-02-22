@@ -3,7 +3,7 @@ import { cookie } from '@elysiajs/cookie';
 import { UnauthorizedError } from '../utils/errors';
 import { container } from '../container';
 
-const sessionService = container.getServices().session;
+const moderatorSessionService = container.getServices().moderatorSession;
 
 export const moderatorMiddleware = new Elysia({ name: 'moderator' })
   .use(cookie())
@@ -13,14 +13,14 @@ export const moderatorMiddleware = new Elysia({ name: 'moderator' })
       throw new UnauthorizedError('Authentication required');
     }
 
-    const session = await sessionService.validateModeratorSession(token);
+    const session = await moderatorSessionService.validateSession(token);
     if (!session) {
       throw new UnauthorizedError('Invalid or expired session');
     }
 
     return {
       moderator: session.moderator,
-      userId: session.userId,
+      userId: session.moderator.userId,
       moderatorId: session.moderator.id,
     };
   });

@@ -86,6 +86,27 @@ export const sessions = pgTable(
   })
 );
 
+export const moderatorSessions = pgTable(
+  'moderator_sessions',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    moderatorId: text('moderator_id')
+      .notNull()
+      .references(() => moderators.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    lastAccessedAt: timestamp('last_accessed_at').notNull().defaultNow(),
+  },
+  (table) => ({
+    moderatorIdIdx: index('sessions_moderator_id_idx').on(table.moderatorId),
+    tokenIdx: index('sessions_moderator_token_idx').on(table.token),
+    expiresAtIdx: index('sessions_moderator_expires_at_idx').on(table.expiresAt),
+  })
+);
+
 export const organizationStatusEnum = pgEnum('organization_status', [
   'pending',
   'verified',

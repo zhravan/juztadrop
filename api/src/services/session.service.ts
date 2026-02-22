@@ -10,8 +10,7 @@ const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 export class SessionService {
   constructor(
     private readonly sessionRepository: SessionRepository,
-    private readonly userRepository: UserRepository,
-    private readonly moderatorRepository: ModeratorRepository
+    private readonly userRepository: UserRepository
   ) {}
 
   async createSession(userId: string): Promise<string> {
@@ -47,35 +46,6 @@ export class SessionService {
     return {
       userId: session.userId,
       user,
-    };
-  }
-
-  async validateModeratorSession(
-    token: string
-  ): Promise<{ userId: string; moderator: Moderator } | null> {
-    const session = await this.sessionRepository.findByToken(token);
-
-    if (!session) {
-      return null;
-    }
-
-    const moderator = await this.moderatorRepository.findByUserId(session.userId);
-
-    if (!moderator) {
-      await this.deleteSession(token);
-      return null;
-    }
-
-    if (moderator.user.isBanned || moderator.user.deletedAt) {
-      await this.deleteSession(token);
-      return null;
-    }
-
-    await this.sessionRepository.updateLastAccessed(session.id);
-
-    return {
-      userId: session.userId,
-      moderator,
     };
   }
 
