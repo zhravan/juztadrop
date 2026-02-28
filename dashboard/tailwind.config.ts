@@ -18,6 +18,19 @@ const config: Config = {
     },
     extend: {
       colors: {
+        jad: {
+          primary: 'hsl(var(--jad-primary))',
+          dark: 'hsl(var(--jad-dark))',
+          accent: 'hsl(var(--jad-accent))',
+          mint: 'hsl(var(--jad-mint))',
+          foreground: 'hsl(var(--jad-foreground))',
+          // Aliases for existing usage
+          teal: '#15836B',
+          'teal-dark': '#116A58',
+          'teal-light': '#1FA889',
+          green: '#15836B',
+          'green-light': '#1FA889',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
