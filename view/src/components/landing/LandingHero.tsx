@@ -40,7 +40,7 @@ export function LandingHero() {
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-[10px] font-medium uppercase tracking-wider text-jad-foreground/60">Where</span>
-                    <input type="text" placeholder="Eg. Kolkata" className="w-full bg-transparent text-sm text-jad-foreground placeholder:text-jad-foreground/50 focus:outline-none focus:ring-0" />
+                    <input type="text" placeholder="Eg. Kolkata" className="w-full bg-transparent text-sm text-jad-foreground placeholder:text-jad-foreground/50 focus:outline-none focus:ring-0 ring-offset-0"  />
                   </div>
                 </div>
                 <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-jad-mint/30 px-4 py-3 transition-colors focus-within:bg-jad-mint/50 sm:rounded-none">
@@ -51,7 +51,7 @@ export function LandingHero() {
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-[10px] font-medium uppercase tracking-wider text-jad-foreground/60">Category</span>
-                    <input type="text" placeholder="Eg. Care" className="w-full bg-transparent text-sm text-jad-foreground placeholder:text-jad-foreground/50 focus:outline-none focus:ring-0" />
+                    <input type="text" placeholder="Eg. Care" className="w-full bg-transparent text-sm text-jad-foreground placeholder:text-jad-foreground/50 focus:outline-none focus:ring-0 ring-offset-0" />
                   </div>
                 </div>
                 <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-jad-mint/30 px-4 py-3 transition-colors focus-within:bg-jad-mint/50 sm:rounded-none">
@@ -62,7 +62,7 @@ export function LandingHero() {
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-[10px] font-medium uppercase tracking-wider text-jad-foreground/60">When</span>
-                    <input type="text" placeholder="Tomorrow" className="w-full bg-transparent text-sm text-jad-foreground placeholder:text-jad-foreground/50 focus:outline-none focus:ring-0" />
+                    <input type="text" placeholder="Tomorrow" className="w-full bg-transparent text-sm text-jad-foreground placeholder:text-jad-foreground/50 focus:outline-none focus:ring-0 ring-offset-0" />
                   </div>
                 </div>
                 <button
