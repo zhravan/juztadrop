@@ -6,7 +6,7 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    --jad-primary: 163 71% 31%;
+    --jad-primary: 333% 78% 54%;
     --jad-dark: 167 73% 24%;
     --jad-accent: 166 74% 38%;
     --jad-mint: 163 39% 92%;
@@ -61,4 +61,9 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+html,
+body {
+  font-family: 'Helvetica Neue';
 }

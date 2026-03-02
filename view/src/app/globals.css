@@ -2,6 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Open Runde';
+  src:
+    url('/fonts/OpenRunde-Regular.woff2') format('woff2'),
+    url('/fonts/OpenRunde-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Open Runde';
+  src:
+    url('/fonts/OpenRunde-Medium.woff2') format('woff2'),
+    url('/fonts/OpenRunde-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Open Runde';
+  src:
+    url('/fonts/OpenRunde-Semibold.woff2') format('woff2'),
+    url('/fonts/OpenRunde-Semibold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Open Runde';
+  src:
+    url('/fonts/OpenRunde-Bold.woff2') format('woff2'),
+    url('/fonts/OpenRunde-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+html,
+body {
+  font-family: 'Open Runde';
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -10,8 +55,8 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    --jad-primary: 163 71% 31%;
-    --jad-dark: 167 73% 24%;
+    --jad-primary: 333 78% 54%;
+    --jad-dark: 341 80% 21%;
     --jad-accent: 166 74% 38%;
     --jad-mint: 163 39% 92%;
     --jad-foreground: 167 69% 13%;
@@ -63,11 +108,15 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground antialiased;
-    background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(163 39% 96%) 50%, hsl(163 39% 92%) 100%);
+    @apply text-foreground antialiased font-sans;
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 100%) 0%,
+      hsl(163 39% 96%) 50%,
+      hsl(163 39% 92%) 100%
+    );
     min-height: 100vh;
   }
-  /* Focus ring - visible, not generic */
   :focus-visible {
     @apply outline-none ring-2 ring-jad-accent ring-offset-2 ring-offset-background;
   }
