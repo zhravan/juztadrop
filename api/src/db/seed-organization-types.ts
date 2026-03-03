@@ -38,7 +38,7 @@ export async function runSeedOrganizationTypes(): Promise<void> {
   } catch (error) {
     logger.warn(
       { error },
-      'Seed organization_types failed (table may not exist yet — run migrations first)'
+      'Seed organization_types failed (table may not exist yet - run migrations first)'
     );
     // Do not throw: allow server to start; run migration and restart to seed
   }

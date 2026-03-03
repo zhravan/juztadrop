@@ -7,6 +7,7 @@ import {
   usersRouter,
   organizationsRouter,
   organizationTypesRouter,
+  causesRouter,
   opportunitiesRouter,
   applicationsRouter,
   volunteersRouter,
@@ -15,6 +16,7 @@ import {
 import { errorHandler, responseEnvelope } from './middleware';
 import { runMigrations } from './db/index.js';
 import { runSeedOrganizationTypes } from './db/seed-organization-types.js';
+import { runSeedCauses } from './db/seed-causes.js';
 import { logger } from './utils/logger';
 import { validateEnvOnStartup } from './config/env.js';
 import { moderatorRouter } from './routes/moderator';
@@ -98,6 +100,11 @@ async function startServer() {
       } catch (seedErr) {
         logger.warn({ error: seedErr }, 'Organization types seed failed');
       }
+      try {
+        await runSeedCauses();
+      } catch (seedErr) {
+        logger.warn({ error: seedErr }, 'Causes seed failed');
+      }
     } catch (error: any) {
       const errorMessage = error?.message || String(error);
       logger.error({ error, message: errorMessage }, 'Failed to run migrations');
@@ -156,6 +163,7 @@ async function startServer() {
     .use(moderatorRouter)
     .use(organizationsRouter)
     .use(organizationTypesRouter)
+    .use(causesRouter)
     .use(opportunitiesRouter)
     .use(applicationsRouter)
     .use(volunteersRouter)
