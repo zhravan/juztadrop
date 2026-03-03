@@ -108,12 +108,10 @@ export function GetInvolvedSection() {
             <button
               type="button"
               onClick={() => setLocationOpen(!locationOpen)}
-              className="flex items-center gap-2 rounded-full border-2 border-jad-primary/30 bg-white px-5 py-2.5 text-sm font-semibold text-jad-foreground shadow-sm transition-all duration-200 hover:border-jad-primary hover:shadow-md"
+              className="flex items-center gap-2 rounded-full border-2 border-jad-primary/30 bg-white px-5 py-2.5 text-sm font-semibold text-jad-foreground shadow-sm hover:border-jad-primary hover:shadow-md"
             >
               {location}
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${locationOpen ? 'rotate-180' : ''}`}
-              />
+              <ChevronDown className={locationOpen ? 'h-4 w-4 rotate-180' : 'h-4 w-4'} />
             </button>
             {locationOpen && (
               <div
@@ -202,9 +200,9 @@ export function GetInvolvedSection() {
                 <Link
                   key={opp.id}
                   href={`/opportunities/${opp.id}`}
-                  className="group relative min-w-[260px] shrink-0 overflow-hidden rounded-2xl border-0 bg-white p-4 shadow-lg shadow-jad-foreground/5 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-jad-primary/15 sm:min-w-[280px] sm:p-6 md:min-w-[320px] md:snap-center"
+                  className="group relative min-w-[260px] shrink-0 overflow-hidden rounded-2xl border-0 bg-white p-4 shadow-lg shadow-jad-foreground/5 hover:shadow-xl sm:min-w-[280px] sm:p-6 md:min-w-[320px] md:snap-center"
                 >
-                  <div className="absolute right-4 top-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100">
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-jad-primary/10 text-jad-primary">
                       <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} />
                     </span>
@@ -245,7 +243,7 @@ export function GetInvolvedSection() {
             <button
               type="button"
               onClick={goToPrevPage}
-              className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-jad-primary/30 bg-white text-jad-primary shadow-sm transition-all duration-200 hover:border-jad-primary hover:bg-jad-mint hover:shadow-md"
+              className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-jad-primary/30 bg-white text-jad-primary shadow-sm hover:border-jad-primary hover:bg-jad-mint hover:shadow-md"
               aria-label="Previous opportunities"
             >
               <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
@@ -256,7 +254,7 @@ export function GetInvolvedSection() {
                   key={i}
                   type="button"
                   onClick={() => scrollToPage(i)}
-                  className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+                  className={`h-2.5 w-2.5 rounded-full ${
                     i === activePageIndex
                       ? 'bg-jad-primary scale-125'
                       : 'bg-jad-primary/25 hover:bg-jad-primary/50'
@@ -269,7 +267,7 @@ export function GetInvolvedSection() {
             <button
               type="button"
               onClick={goToNextPage}
-              className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-jad-primary/30 bg-white text-jad-primary shadow-sm transition-all duration-200 hover:border-jad-primary hover:bg-jad-mint hover:shadow-md"
+              className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-jad-primary/30 bg-white text-jad-primary shadow-sm hover:border-jad-primary hover:bg-jad-mint hover:shadow-md"
               aria-label="Next opportunities"
             >
               <ChevronRight className="h-5 w-5" strokeWidth={2.5} />

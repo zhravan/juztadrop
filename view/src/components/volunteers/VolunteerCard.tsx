@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/common';
+import type { CauseOption } from '@/hooks/useCauses';
 
 export interface VolunteerCardData {
   id: string;
@@ -9,6 +10,10 @@ export interface VolunteerCardData {
   causes: string[];
   skills: Array<{ name: string; expertise: string }>;
 }
+
+/** Max causes and skills to show on card. Keeps layout consistent. */
+const MAX_CAUSES = 2;
+const MAX_SKILLS = 2;
 
 const AVATAR_COLORS = [
   'bg-jad-mint text-jad-primary',
@@ -38,39 +43,71 @@ function getInitials(name: string | null, email: string): string {
   return email ? email.slice(0, 2).toUpperCase() : '?';
 }
 
+function getCauseLabel(value: string, causeOptions?: CauseOption[]): string {
+  if (causeOptions?.length) {
+    const found = causeOptions.find((c) => c.value === value);
+    if (found) return found.label;
+  }
+  return value.replace(/_/g, ' ');
+}
+
 export function VolunteerCard({
   volunteer,
+  causeOptions,
   className,
 }: {
   volunteer: VolunteerCardData;
+  causeOptions?: CauseOption[];
   className?: string;
 }) {
   const initials = getInitials(volunteer.name, volunteer.email);
   const displayName = volunteer.name || 'Volunteer';
   const colorClass = AVATAR_COLORS[hashCode(volunteer.id) % AVATAR_COLORS.length];
-  const topCause = volunteer.causes?.[0]?.replace(/_/g, ' ') ?? null;
+  const causes = (volunteer.causes ?? []).slice(0, MAX_CAUSES);
+  const skills = (volunteer.skills ?? []).slice(0, MAX_SKILLS).map((s) => s.name);
+  const hasTags = causes.length > 0 || skills.length > 0;
 
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-3 rounded-2xl bg-white/50 p-6 text-center shadow-sm transition-all hover:bg-white/80 hover:shadow-md',
+        'flex flex-col rounded-2xl border border-foreground/10 bg-white p-4 shadow-lg shadow-foreground/5 hover:shadow-xl',
         className
       )}
     >
-      <div
-        className={cn(
-          'flex h-16 w-16 items-center justify-center rounded-full text-lg font-bold',
-          colorClass
-        )}
-      >
-        {initials}
+      <div className="flex flex-col items-center text-center">
+        <div
+          className={cn(
+            'flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold',
+            colorClass
+          )}
+        >
+          {initials}
+        </div>
+        <p className="mt-2 truncate w-full font-semibold text-jad-foreground text-sm">
+          {displayName}
+        </p>
       </div>
-      <div className="min-w-0 w-full">
-        <p className="truncate text-sm font-semibold text-jad-foreground">{displayName}</p>
-        {topCause && (
-          <p className="mt-0.5 truncate text-xs text-foreground/45 capitalize">{topCause}</p>
-        )}
-      </div>
+
+      {hasTags && (
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {causes.map((c) => (
+            <span
+              key={c}
+              className="rounded-full bg-jad-mint/50 px-2 py-0.5 text-xs font-medium text-jad-foreground"
+            >
+              {getCauseLabel(c, causeOptions)}
+            </span>
+          ))}
+          {skills.map((name) => (
+            <span
+              key={name}
+              className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs text-foreground/80"
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

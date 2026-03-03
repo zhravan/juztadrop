@@ -106,7 +106,7 @@ export function LandingHero() {
                 <button
                   type="button"
                   aria-label="Search"
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-jad-accent text-white shadow-lg shadow-jad-accent/30 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-jad-accent/40 active:scale-95 sm:rounded-r-xl sm:rounded-l-none"
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-jad-accent text-white shadow-lg shadow-jad-accent/30 hover:shadow-xl hover:shadow-jad-accent/40 sm:rounded-r-xl sm:rounded-l-none"
                 >
                   <Search className="h-5 w-5" strokeWidth={2.5} />
                 </button>
@@ -129,7 +129,7 @@ export function LandingHero() {
                 src="/images/hero-volunteers.png"
                 alt="Volunteers making a difference in their community"
                 fill
-                className="object-cover transition-transform duration-500 hover:scale-105"
+                className="object-cover"
                 priority
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 50vw"
               />

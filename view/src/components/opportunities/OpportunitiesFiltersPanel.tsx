@@ -106,15 +106,13 @@ export function OpportunitiesFiltersPanel({
             aria-expanded={locationOpen}
             onClick={() => setLocationOpen((o) => !o)}
             className={cn(
-              'flex w-full items-center justify-between rounded-xl border border-foreground/15 bg-white px-3.5 py-2.5 text-left text-sm transition-colors',
+              'flex w-full items-center justify-between rounded-xl border border-foreground/15 bg-white px-3.5 py-2.5 text-left text-sm',
               'focus:border-jad-primary/40 focus:outline-none focus:ring-2 focus:ring-jad-primary/20',
               !city && 'text-foreground/60'
             )}
           >
             <span className="truncate">{locationLabel}</span>
-            <ChevronDown
-              className={cn('h-4 w-4 shrink-0 transition-transform', locationOpen && 'rotate-180')}
-            />
+            <ChevronDown className={cn('h-4 w-4 shrink-0', locationOpen && 'rotate-180')} />
           </button>
           {locationOpen && (
             <div
