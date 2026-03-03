@@ -1,3 +1,37 @@
+# [0.0.21](https://github.com/juztadrop/juztadrop/compare/v1.0.17...v0.0.21) (2026-03-03)
+
+### Changes
+
+* fix: patch build dockerfile issues (#79) (138f1c4)
+* Bump version from 0.0.19 to 0.0.20 (b6a7d1f)
+* Revert "Fix build" (#78) (4c034be)
+* fix: image build failure (#77) (5bb3503)
+* chore: trigger build (#76) (4c37dce)
+* ci: prod release setup (#75) (6ad9f66)
+* ci: release workflow for prod and dev (#74) (15bf7f2)
+* chore: refactored with custom hooks and subcomponents (#73) (f4dedc3)
+* Fix typo in project title from 'Just' to 'Juzt' (48d3fe5)
+* docs: revise project description and add formatting elements (#59) (03ec906)
+* feat: setup design and theme for juztadrop (#58) (34d300b)
+* fix(view): remove green focus state from location field (#46) (27aebfc)
+* feat: moderator dashboard authentication (#37) (87db576)
+* feat: add  moderator authentication and middleware pipeline (#32) (e9f52ad)
+* chore: release v1.0.18 (#30) (7c824e8)
+* feat: moderator service and repository (#28) (d6aaf1e)
+* feat: seed moderator to DB (#23) (d97dae7)
+* feat: support for supabase storage CRUD APIs for file uploads (#25) (1ec123c)
+* feat: Dashboard UI and API endpoints for organizations, opportunities, and volunteers (#24) (d77f7fb)
+* fix: resolve auth flow, CORS config, login UX, and add cause validation (#22) (40791e4)
+* feat: UI base setup intg (#21) (532d1e6)
+* test: e2e tc for auth workflow (eae3887)
+* test: e2e tc for auth workflow (7ea4c65)
+* test: e2e tc for auth workflow (646c907)
+* test: e2e tc for auth workflow (547f335)
+* feat: cleanup code (940ea07)
+* feat: migrate from mono-repo (23488d6)
+
+---
+
 # [1.0.0](https://github.com/zhravan/justadrop.xyz/compare/v1.0.16...v1.0.0) (2026-02-13)
 
 
