@@ -1,6 +1,7 @@
 {
   "name": "@justadrop/api",
   "version": "1.0.0",
+  "description": "Just a Drop API",
   "private": false,
   "type": "module",
   "scripts": {

@@ -1,6 +1,7 @@
 {
   "name": "@justadrop/dashboard",
   "version": "1.0.0",
+  "description": "Just a Drop Admin",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3002",
