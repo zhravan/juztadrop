@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Phone, Mail, Heart, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { User, Phone, Mail, Heart, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth/use-auth';
 import { VOLUNTEER_SKILLS, SKILL_EXPERTISE, GENDER_OPTIONS } from '@/lib/constants';
 import { useCauses } from '@/hooks';
@@ -21,12 +22,25 @@ import { SaveIndicator } from '@/components/ui';
 import type { SaveIndicatorStatus } from '@/components/ui';
 import { useProfileForm } from '@/hooks';
 
+const VOLUNTEER_INTEREST_OPTIONS = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+];
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, isReady } = useAuth();
   const { options: causeOptions } = useCauses();
-  const { form, saveStatus, updateField, setGender, toggleCause, toggleSkill, setSkillExpertise } =
-    useProfileForm();
+  const {
+    form,
+    saveStatus,
+    updateField,
+    setGender,
+    setIsInterest,
+    toggleCause,
+    toggleSkill,
+    setSkillExpertise,
+  } = useProfileForm();
   const [activeStep, setActiveStep] = useState('account');
 
   if (!isReady || isLoading || !user) {
@@ -98,6 +112,36 @@ export default function ProfilePage() {
               onChange={setGender}
             />
           </FormField>
+        </FormSection>
+      ),
+    },
+    {
+      id: 'volunteer',
+      label: 'Volunteer',
+      icon: <Heart className="h-5 w-5" />,
+      isComplete: form.isInterest !== undefined,
+      content: (
+        <FormSection
+          title="Volunteer interest"
+          description="You can set up or edit your volunteer profile (causes, skills) anytime."
+          icon={<Heart className="h-5 w-5" />}
+        >
+          <FormField label="Are you interested in volunteering?" htmlFor="isInterest">
+            <ChipGroup
+              options={VOLUNTEER_INTEREST_OPTIONS}
+              selected={form.isInterest ? ['yes'] : ['no']}
+              onChange={(value) => setIsInterest(value === 'yes')}
+            />
+          </FormField>
+          <div className="mt-4">
+            <Link
+              href="/onboarding/volunteer"
+              className="inline-flex items-center gap-2 text-sm font-medium text-jad-primary hover:text-jad-dark"
+            >
+              Set up or edit volunteer profile
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </FormSection>
       ),
     },
