@@ -1,0 +1,121 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  BUN_VERSION: "1.2"
+
+jobs:
+  version-bump-check:
+    name: Version bump check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version bump when app dirs change
+        run: |
+          chmod +x scripts/version-bump-check.sh
+          ./scripts/version-bump-check.sh origin/main HEAD
+
+  changed-dirs:
+    name: Detect changed dirs
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      view: ${{ steps.filter.outputs.view }}
+      dashboard: ${{ steps.filter.outputs.dashboard }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter changed app dirs
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'api/**'
+            view:
+              - 'view/**'
+            dashboard:
+              - 'dashboard/**'
+
+  build-typecheck-api:
+    name: Build & typecheck (api)
+    needs: [version-bump-check, changed-dirs]
+    if: needs.changed-dirs.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies (api)
+        run: cd api && bun install --frozen-lockfile
+
+      - name: Typecheck (api)
+        run: cd api && bun run typecheck
+
+      - name: Build (api)
+        run: cd api && bun run build
+
+  build-typecheck-view:
+    name: Build & typecheck (view)
+    needs: [version-bump-check, changed-dirs]
+    if: needs.changed-dirs.outputs.view == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies (view)
+        run: cd view && bun install --frozen-lockfile
+
+      - name: Typecheck (view)
+        run: cd view && bun run typecheck
+
+      - name: Build (view)
+        run: cd view && bun run build
+
+  build-typecheck-dashboard:
+    name: Build & typecheck (dashboard)
+    needs: [version-bump-check, changed-dirs]
+    if: needs.changed-dirs.outputs.dashboard == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies (dashboard)
+        run: cd dashboard && bun install --frozen-lockfile
+
+      - name: Typecheck (dashboard)
+        run: cd dashboard && bun run typecheck
+
+      - name: Build (dashboard)
+        run: cd dashboard && bun run build
