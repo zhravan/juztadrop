@@ -49,7 +49,7 @@ while IFS= read -r file; do
 done <<< "$CHANGED_FILES"
 
 if [[ "$APP_DIRS_CHANGED" != "true" ]]; then
-  echo "No changes in api/, view/, or dashboard/ — version bump not required."
+  echo "No changes in api/, view/, or dashboard/ - version bump not required."
   exit 0
 fi
 

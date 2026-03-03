@@ -71,3 +71,63 @@ export async function organizationsGet(): Promise<NextResponse> {
     'Organizations GET'
   );
 }
+
+export async function organizationGet(id: string): Promise<NextResponse> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('sessionToken')?.value;
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  return withServerError(
+    async () => {
+      const res = await fetch(`${getBackendUrl()}/organizations/${encodeURIComponent(id)}`, {
+        method: 'GET',
+        headers: { Cookie: `sessionToken=${token}` },
+        cache: 'no-store',
+      });
+      const json = await parseJsonRes(res);
+      if (!res.ok) {
+        return NextResponse.json(
+          { error: getApiErrorMessage(json, 'Failed to fetch organization') },
+          { status: res.status }
+        );
+      }
+      return NextResponse.json(json?.data ?? json);
+    },
+    'Failed to fetch organization',
+    'Organization GET'
+  );
+}
+
+export async function organizationPatch(
+  id: string,
+  body: Record<string, unknown>
+): Promise<NextResponse> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('sessionToken')?.value;
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  return withServerError(
+    async () => {
+      const res = await fetch(`${getBackendUrl()}/organizations/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: `sessionToken=${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const json = await parseJsonRes(res);
+      if (!res.ok) {
+        return NextResponse.json(
+          { error: getApiErrorMessage(json, 'Failed to update organization') },
+          { status: res.status }
+        );
+      }
+      return NextResponse.json(json?.data ?? json);
+    },
+    'Failed to update organization',
+    'Organization PATCH'
+  );
+}

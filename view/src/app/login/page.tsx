@@ -286,7 +286,7 @@ function LoginPageContent() {
           </div>
 
           <p className="mt-6 text-center text-sm text-foreground/60">
-            No password needed — we&apos;ll send a secure code to your inbox.
+            No password needed - we&apos;ll send a secure code to your inbox.
           </p>
         </div>
       </main>

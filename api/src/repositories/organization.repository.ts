@@ -184,6 +184,55 @@ export class OrganizationRepository {
     }));
   }
 
+  async update(
+    id: string,
+    data: {
+      orgName?: string;
+      type?: string | null;
+      description?: string | null;
+      causes?: string[];
+      website?: string | null;
+      registrationNumber?: string | null;
+      contactPersonName?: string;
+      contactPersonEmail?: string;
+      contactPersonNumber?: string | null;
+      address?: string | null;
+      city?: string | null;
+      state?: string | null;
+      country?: string | null;
+    }
+  ): Promise<Organization | null> {
+    const [updated] = await db
+      .update(organizations)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(organizations.id, id))
+      .returning();
+    if (!updated) return null;
+    return {
+      id: updated.id,
+      createdBy: updated.createdBy,
+      orgName: updated.orgName,
+      type: updated.type ?? null,
+      description: updated.description,
+      causes: updated.causes,
+      website: updated.website,
+      registrationNumber: updated.registrationNumber,
+      contactPersonName: updated.contactPersonName,
+      contactPersonEmail: updated.contactPersonEmail,
+      contactPersonNumber: updated.contactPersonNumber,
+      address: updated.address,
+      city: updated.city,
+      state: updated.state,
+      country: updated.country,
+      verificationStatus: updated.verificationStatus,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
   async hasManageAccess(ngoId: string, userId: string): Promise<boolean> {
     const org = await db.query.organizations.findFirst({
       where: eq(organizations.id, ngoId),

@@ -129,6 +129,21 @@ export const organizationTypes = pgTable('organization_types', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+/**
+ * Lookup table for causes (animal_welfare, education, etc.).
+ * Organizations and opportunities store cause values as string[]; no FK.
+ */
+export const causes = pgTable('causes', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  value: text('value').notNull().unique(), // value stored in organizations.causes / opportunities.causeCategoryNames, e.g. "animal_welfare"
+  label: text('label').notNull(), // display label, e.g. "Animal welfare"
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const documentTypeEnum = pgEnum('document_type', [
   'registration_certificate',
   '80G_certificate',

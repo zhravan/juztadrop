@@ -45,13 +45,13 @@ export function OpportunityCard({
     <Link
       href={`/opportunities/${opportunity.id}`}
       className={cn(
-        'group flex flex-col rounded-2xl border border-foreground/10 bg-white p-5 shadow-lg shadow-foreground/5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-jad-primary/10',
+        'group flex flex-col rounded-2xl border border-foreground/10 bg-white p-5 shadow-lg shadow-foreground/5 hover:shadow-xl',
         className
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-lg font-bold text-jad-foreground line-clamp-2">{opportunity.title}</h3>
-        <span className="shrink-0 rounded-full bg-jad-primary/10 p-1.5 text-jad-primary opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="shrink-0 rounded-full bg-jad-primary/10 p-1.5 text-jad-primary opacity-0 group-hover:opacity-100">
           <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
         </span>
       </div>

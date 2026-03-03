@@ -3,6 +3,7 @@ import { cookie } from '@elysiajs/cookie';
 import { container } from '../container';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { CAUSE_VALUES } from '../constants/causes.js';
+import { NotFoundError, ForbiddenError } from '../utils/errors.js';
 
 const organizationRepository = container.getRepositories().organization;
 
@@ -37,17 +38,17 @@ export const organizationsRouter = new Elysia({ prefix: '/organizations', tags: 
     {
       body: t.Object({
         orgName: t.String({ minLength: 1 }),
-        type: t.Optional(t.Union([t.String(), t.Null()])),
-        description: t.Optional(t.String()),
-        causes: t.Optional(causeSchema),
-        website: t.Optional(t.String()),
-        registrationNumber: t.Optional(t.String()),
+        type: t.String({ minLength: 1 }),
+        description: t.String({ minLength: 1 }),
+        causes: t.Array(t.String({ pattern: `^(${CAUSE_VALUES.join('|')})$` }), { minLength: 1 }),
+        website: t.String({ minLength: 1 }),
+        registrationNumber: t.String({ minLength: 1 }),
         contactPersonName: t.String({ minLength: 1 }),
         contactPersonEmail: t.String({ format: 'email' }),
         contactPersonNumber: t.Optional(t.String()),
-        address: t.Optional(t.String()),
-        city: t.Optional(t.String()),
-        state: t.Optional(t.String()),
+        address: t.String({ minLength: 1 }),
+        city: t.String({ minLength: 1 }),
+        state: t.String({ minLength: 1 }),
         country: t.Optional(t.String()),
         documents: t.Optional(
           t.Array(
@@ -71,4 +72,63 @@ export const organizationsRouter = new Elysia({ prefix: '/organizations', tags: 
     const { userId } = ctx;
     const orgs = await organizationRepository.findByUserId(userId);
     return { organizations: orgs };
-  });
+  })
+  .get(
+    '/:id',
+    async (ctx: any) => {
+      const { userId } = ctx;
+      const { id } = ctx.params;
+      const hasAccess = await organizationRepository.hasManageAccess(id, userId);
+      if (!hasAccess) throw new ForbiddenError('You do not have access to this organization');
+      const org = await organizationRepository.findById(id);
+      if (!org) throw new NotFoundError('Organization not found');
+      return { organization: org };
+    },
+    { params: t.Object({ id: t.String() }) }
+  )
+  .patch(
+    '/:id',
+    async (ctx: any) => {
+      const { userId } = ctx;
+      const { id } = ctx.params;
+      const body = ctx.body;
+      const hasAccess = await organizationRepository.hasManageAccess(id, userId);
+      if (!hasAccess)
+        throw new ForbiddenError('You do not have permission to update this organization');
+      const org = await organizationRepository.update(id, {
+        orgName: body.orgName,
+        type: body.type,
+        description: body.description,
+        causes: body.causes,
+        website: body.website,
+        registrationNumber: body.registrationNumber,
+        contactPersonName: body.contactPersonName,
+        contactPersonEmail: body.contactPersonEmail,
+        contactPersonNumber: body.contactPersonNumber,
+        address: body.address,
+        city: body.city,
+        state: body.state,
+        country: body.country,
+      });
+      if (!org) throw new NotFoundError('Organization not found');
+      return { organization: org };
+    },
+    {
+      params: t.Object({ id: t.String() }),
+      body: t.Object({
+        orgName: t.String({ minLength: 1 }),
+        type: t.String({ minLength: 1 }),
+        description: t.String({ minLength: 1 }),
+        causes: t.Array(t.String({ pattern: `^(${CAUSE_VALUES.join('|')})$` }), { minLength: 1 }),
+        website: t.String({ minLength: 1 }),
+        registrationNumber: t.String({ minLength: 1 }),
+        contactPersonName: t.String({ minLength: 1 }),
+        contactPersonEmail: t.String({ format: 'email' }),
+        contactPersonNumber: t.Optional(t.Union([t.String(), t.Null()])),
+        address: t.String({ minLength: 1 }),
+        city: t.String({ minLength: 1 }),
+        state: t.String({ minLength: 1 }),
+        country: t.Optional(t.Union([t.String(), t.Null()])),
+      }),
+    }
+  );

@@ -9,7 +9,7 @@ export interface WizardStep {
   label: string;
   icon: React.ReactNode;
   content: React.ReactNode;
-  /** Optional — mark step as complete (shows checkmark) */
+  /** Optional - mark step as complete (shows checkmark) */
   isComplete?: boolean;
 }
 
@@ -76,17 +76,13 @@ export function StepperWizard({
       {/* Progress bar */}
       <div className="h-1 w-full rounded-full bg-foreground/5">
         <div
-          className="h-full rounded-full bg-jad-primary transition-all duration-500 ease-out"
+          className="h-full rounded-full bg-jad-primary"
           style={{ width: `${((activeIndex + 1) / steps.length) * 100}%` }}
         />
       </div>
 
       {/* Active step content */}
-      {currentStep && (
-        <div className="animate-in fade-in slide-in-from-right-2 duration-200">
-          {currentStep.content}
-        </div>
-      )}
+      {currentStep && <div>{currentStep.content}</div>}
     </div>
   );
 }

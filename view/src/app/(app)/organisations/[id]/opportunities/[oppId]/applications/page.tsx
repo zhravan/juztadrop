@@ -195,7 +195,7 @@ export default function OpportunityApplicationsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <p className="max-w-xs truncate text-sm text-foreground/80">
-                      {app.motivationDescription || '—'}
+                      {app.motivationDescription || '-'}
                     </p>
                   </td>
                   <td className="px-4 py-3">
@@ -229,7 +229,7 @@ export default function OpportunityApplicationsPage() {
                         )}
                       </label>
                     ) : (
-                      <span className="text-sm text-foreground/50">—</span>
+                      <span className="text-sm text-foreground/50">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">

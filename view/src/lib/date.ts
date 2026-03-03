@@ -7,7 +7,7 @@ export function formatDate(d: string | Date | null | undefined): string {
 }
 
 export function formatDateLong(d: string | Date | null | undefined): string {
-  if (d == null) return '—';
+  if (d == null) return '-';
   const date = typeof d === 'string' ? new Date(d) : d;
   return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }

@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { VOLUNTEER_CAUSES } from '@/lib/constants';
+import type { CauseOption } from './useCauses';
 
 const PAGE_SIZE = 12;
 
-export function causeLabel(value: string): string {
-  return VOLUNTEER_CAUSES.find((c) => c.value === value)?.label ?? value;
+export function causeLabel(value: string, causeOptions?: CauseOption[]): string {
+  const options = causeOptions ?? VOLUNTEER_CAUSES;
+  return options.find((c) => c.value === value)?.label ?? value;
 }
 
 export interface OpportunityListItem {

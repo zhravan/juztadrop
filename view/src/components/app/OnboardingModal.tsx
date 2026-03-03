@@ -30,7 +30,7 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
               What would you like to do?
             </h2>
             <p className="mt-2 text-foreground/70">
-              You can do both — volunteer and run an NGO. Pick where to start.
+              You can do both - volunteer and run an NGO. Pick where to start.
             </p>
           </div>
           <button

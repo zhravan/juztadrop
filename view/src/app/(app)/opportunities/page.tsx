@@ -2,6 +2,7 @@
 
 import { Heart, Loader2 } from 'lucide-react';
 import { useOpportunitiesList, causeLabel } from '@/hooks/useOpportunitiesList';
+import { useCauses } from '@/hooks';
 import { OpportunityCard } from '@/components/opportunities/OpportunityCard';
 import { OpportunityCardSkeleton } from '@/components/opportunities/OpportunityCardSkeleton';
 import { OpportunitiesHero } from '@/components/opportunities/OpportunitiesHero';
@@ -10,6 +11,7 @@ import { OpportunitiesFiltersToggle } from '@/components/opportunities/Opportuni
 import { FilterBadge } from '@/components/ui';
 
 export default function OpportunitiesPage() {
+  const { options: causeOptions } = useCauses();
   const {
     opportunities,
     total,
@@ -49,7 +51,11 @@ export default function OpportunitiesPage() {
           {city && <FilterBadge label={city} onRemove={() => setCity('')} />}
           {mode && <FilterBadge label={mode} onRemove={() => setMode('')} />}
           {causes.map((c) => (
-            <FilterBadge key={c} label={causeLabel(c)} onRemove={() => toggleCause(c)} />
+            <FilterBadge
+              key={c}
+              label={causeLabel(c, causeOptions)}
+              onRemove={() => toggleCause(c)}
+            />
           ))}
           {dateFrom && <FilterBadge label={`From ${dateFrom}`} onRemove={() => setDateFrom('')} />}
           {dateTo && <FilterBadge label={`To ${dateTo}`} onRemove={() => setDateTo('')} />}
@@ -76,6 +82,7 @@ export default function OpportunitiesPage() {
             setDateTo={setDateTo}
             causes={causes}
             toggleCause={toggleCause}
+            causeOptions={causeOptions}
             activeFilterCount={activeFilterCount}
             clearAllFilters={clearAllFilters}
           />
@@ -103,7 +110,7 @@ export default function OpportunitiesPage() {
           <p className="mt-1 text-sm text-foreground/60">
             {activeFilterCount > 0
               ? 'Try adjusting your filters or check back later.'
-              : 'Check back soon — new opportunities are added regularly.'}
+              : 'Check back soon - new opportunities are added regularly.'}
           </p>
           {activeFilterCount > 0 && (
             <button

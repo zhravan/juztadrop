@@ -33,7 +33,7 @@ export function ChipGroup({
             type="button"
             onClick={() => onChange(value)}
             className={cn(
-              'rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]',
+              'rounded-full px-4 py-2 text-sm font-medium',
               isSelected
                 ? variant === 'primary'
                   ? 'bg-jad-primary text-white shadow-md shadow-jad-primary/20'

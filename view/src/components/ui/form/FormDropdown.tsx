@@ -58,7 +58,7 @@ export function FormDropdown({
         <span className="truncate">{displayLabel}</span>
         <ChevronDown
           className={cn(
-            'pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 shrink-0 transition-transform',
+            'pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 shrink-0',
             open && 'rotate-180',
             selectedOption ? 'text-foreground/40' : 'text-foreground/30'
           )}

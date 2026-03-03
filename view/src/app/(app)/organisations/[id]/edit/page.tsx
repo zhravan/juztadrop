@@ -1,27 +1,24 @@
 'use client';
 
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Building2,
-  Upload,
-  FileText,
   MapPin,
   Mail,
   User,
   Globe,
-  FileCheck,
+  FileText,
   ChevronDown,
   Search,
+  ChevronLeft,
 } from 'lucide-react';
-import { useAuth } from '@/lib/auth/use-auth';
+import { useParams } from 'next/navigation';
 import { LOCATIONS } from '@/lib/constants';
 import { cn } from '@/lib/common';
-import { FormPageSkeleton } from '@/components/skeletons';
 import {
   FormField,
   FormInput,
-  FormDropdown,
   FormTextarea,
   FormSection,
   ChipGroup,
@@ -29,20 +26,20 @@ import {
   StepperWizard,
 } from '@/components/ui/form';
 import type { WizardStep } from '@/components/ui/form';
-import { useCreateOrganization, useOrganizationTypes, useCauses, useClickOutside } from '@/hooks';
+import { useEditOrganization, useOrganizationTypes, useCauses, useClickOutside } from '@/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const STEP_IDS = ['basic', 'causes', 'address', 'contact', 'about', 'documents'] as const;
-
+const STEP_IDS = ['basic', 'causes', 'address', 'contact', 'about'] as const;
 const CITY_DROPDOWN_MAX_HEIGHT = 280;
 const CITY_SEARCH_PLACEHOLDER = 'Search city…';
 
-export default function CreateOrganisationPage() {
-  const router = useRouter();
-  const { user, isAuthenticated, isLoading, isReady } = useAuth();
+export default function EditOrganisationPage() {
+  const params = useParams<{ id: string }>();
+  const orgId = params.id;
   const { options: orgTypeOptions, isLoading: orgTypesLoading } = useOrganizationTypes();
   const { options: causeOptions } = useCauses();
-  const { form, submitting, toggleCause, handleFileChange, handleSubmit, setForm } =
-    useCreateOrganization();
+  const { form, setForm, loading, submitting, toggleCause, handleSubmit } =
+    useEditOrganization(orgId);
 
   const [activeStep, setActiveStep] = useState<(typeof STEP_IDS)[number]>('basic');
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
@@ -71,13 +68,13 @@ export default function CreateOrganisationPage() {
 
   const cityLabel = form.city || 'Select city';
 
-  if (!isReady || isLoading || !user) {
-    return <FormPageSkeleton />;
-  }
-
-  if (!isAuthenticated) {
-    router.replace('/login?redirect=/organisations/create');
-    return null;
+  if (loading) {
+    return (
+      <div className="container">
+        <Skeleton className="mb-6 h-6 w-48" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
+    );
   }
 
   const steps: WizardStep[] = [
@@ -104,14 +101,21 @@ export default function CreateOrganisationPage() {
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Organisation type" htmlFor="type" required>
-              <FormDropdown
+              <select
                 id="type"
                 value={form.type}
-                onChange={(value) => setForm({ ...form, type: value })}
-                options={orgTypeOptions}
-                placeholder={orgTypesLoading ? 'Loading...' : 'Select type'}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                className="w-full rounded-xl border border-foreground/15 bg-white px-4 py-2.5 text-sm focus:border-jad-primary focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
                 disabled={orgTypesLoading}
-              />
+                required
+              >
+                <option value="">{orgTypesLoading ? 'Loading...' : 'Select type'}</option>
+                {orgTypeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </FormField>
             <FormField label="Registration number" htmlFor="registrationNumber" required>
               <FormInput
@@ -329,75 +333,25 @@ export default function CreateOrganisationPage() {
         </FormSection>
       ),
     },
-    {
-      id: 'documents',
-      label: 'Documents',
-      icon: <FileCheck className="h-5 w-5" />,
-      isComplete: !!(form.registrationDoc || form.proofDoc),
-      content: (
-        <FormSection
-          title="Documents"
-          description="Verification documents (optional, max 1 MB each)"
-          icon={<FileCheck className="h-5 w-5" />}
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Registration certificate">
-              <label
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-foreground/15 bg-white px-4 py-4 hover:border-jad-primary/30 hover:bg-jad-mint/20',
-                  form.registrationDoc && 'border-jad-primary/40 bg-jad-mint/30'
-                )}
-              >
-                <Upload className="h-5 w-5 text-jad-primary shrink-0" />
-                <span className="text-sm text-foreground/80 truncate">
-                  {form.registrationDoc?.name ?? 'Choose PDF (max 1 MB)'}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange('registrationDoc')}
-                  className="hidden"
-                />
-              </label>
-            </FormField>
-            <FormField label="Proof of address">
-              <label
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-foreground/15 bg-white px-4 py-4 hover:border-jad-primary/30 hover:bg-jad-mint/20',
-                  form.proofDoc && 'border-jad-primary/40 bg-jad-mint/30'
-                )}
-              >
-                <Upload className="h-5 w-5 text-jad-primary shrink-0" />
-                <span className="text-sm text-foreground/80 truncate">
-                  {form.proofDoc?.name ?? 'Choose PDF or image (max 1 MB)'}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleFileChange('proofDoc')}
-                  className="hidden"
-                />
-              </label>
-            </FormField>
-          </div>
-        </FormSection>
-      ),
-    },
   ];
 
   return (
     <div className="container">
-      <div className="flex items-center gap-4 mb-8">
+      <Link
+        href={orgId ? `/organisations/${orgId}` : '/organisations'}
+        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-foreground/70 hover:text-jad-primary"
+      >
+        <ChevronLeft className="h-4 w-4" aria-hidden />
+        Back to organisation
+      </Link>
+
+      <div className="mb-8 flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-jad-mint text-jad-primary shadow-lg shadow-jad-primary/10">
           <Building2 className="h-7 w-7" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">
-            Register your organisation
-          </h1>
-          <p className="mt-1 text-sm text-foreground/70">
-            We&apos;ll verify your details before you can post opportunities.
-          </p>
+          <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">Edit organisation</h1>
+          <p className="mt-1 text-sm text-foreground/70">Update your organisation details.</p>
         </div>
       </div>
 
@@ -408,11 +362,11 @@ export default function CreateOrganisationPage() {
           onStepChange={(id) => setActiveStep(id as (typeof STEP_IDS)[number])}
         />
 
-        {activeStep === 'documents' && (
+        {activeStep === 'about' && (
           <FormActions
-            submitLabel="Submit for verification"
-            secondaryLabel="Save draft"
-            secondaryHref="/dashboard"
+            submitLabel="Save changes"
+            secondaryLabel="Cancel"
+            secondaryHref={orgId ? `/organisations/${orgId}` : '/organisations'}
             loading={submitting}
             disabled={
               !form.orgName?.trim() ||
