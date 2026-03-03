@@ -7,8 +7,6 @@ COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 
 COPY . .
-# Ensure public exists for Next.js (optional; avoids COPY failure when project has no public/)
-RUN mkdir -p /app/public
 RUN bun run build
 
 # Production stage (Next.js standalone)
