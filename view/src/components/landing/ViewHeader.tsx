@@ -4,7 +4,6 @@ import { useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, LogOut, User, LayoutDashboard, UserCircle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useClickOutside } from '@/hooks';
 import { useAuth } from '@/lib/auth/use-auth';
 import { cn } from '@/lib/common';
@@ -16,37 +15,6 @@ const navLinks = [
   { href: '/about', label: 'About' },
   { href: '/team', label: 'Team' },
 ];
-
-const menuVariants = {
-  closed: {
-    opacity: 0,
-    scale: 0.98,
-    y: -5,
-    transition: {
-      duration: 0.2,
-      ease: 'easeInOut' as const,
-      staggerChildren: 0.05,
-      staggerDirection: -1,
-    },
-  },
-  open: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 300,
-      damping: 24,
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  closed: { opacity: 0, y: 10 },
-  open: { opacity: 1, y: 0 },
-};
 
 export function ViewHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -62,10 +30,10 @@ export function ViewHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-foreground/5 bg-white backdrop-blur-xl">
-      <div className="container flex h-14 items-center justify-between pt-[env(safe-area-inset-top)] sm:h-16 transition-all duration-300">
+      <div className="container flex h-14 items-center justify-between pt-[env(safe-area-inset-top)] sm:h-16">
         <Link
           href="/"
-          className="flex items-center gap-1 text-lg font-bold tracking-tight sm:text-xl transition-transform duration-200 active:scale-[0.98]"
+          className="flex items-center gap-1 text-lg font-bold tracking-tight sm:text-xl"
         >
           <img src="/images/jad.svg" />
         </Link>
@@ -78,7 +46,7 @@ export function ViewHeader() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-jad-mint/60 hover:text-jad-foreground',
+                  'rounded-full px-4 py-2 text-sm font-medium hover:bg-jad-mint/60 hover:text-jad-foreground',
                   isActive
                     ? 'bg-jad-mint/60 text-jad-foreground font-semibold'
                     : 'text-foreground/80'
@@ -92,7 +60,7 @@ export function ViewHeader() {
             <Link
               href="/dashboard"
               className={cn(
-                'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200',
+                'flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold',
                 pathname.startsWith('/dashboard')
                   ? 'bg-jad-primary/20 text-jad-dark'
                   : 'bg-jad-primary/10 text-jad-primary hover:bg-jad-primary/20 hover:text-jad-dark'
@@ -107,50 +75,42 @@ export function ViewHeader() {
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 rounded-full border border-jad-primary/20 bg-jad-mint/50 px-4 py-2.5 text-sm font-medium text-jad-foreground transition-all hover:bg-jad-mint"
+                className="flex items-center gap-2 rounded-full border border-jad-primary/20 bg-jad-mint/50 px-4 py-2.5 text-sm font-medium text-jad-foreground hover:bg-jad-mint"
               >
                 <User className="h-4 w-4" />
                 <span className="max-w-[120px] truncate">{user.email}</span>
               </button>
-              <AnimatePresence>
-                {userMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-foreground/10 bg-white py-2 shadow-xl"
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-foreground/10 bg-white py-2 shadow-xl">
+                  <div className="px-4 py-2 text-sm text-foreground/70">
+                    {user.name || user.email}
+                  </div>
+                  <Link
+                    href="/profile"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-foreground hover:bg-jad-mint/60"
                   >
-                    <div className="px-4 py-2 text-sm text-foreground/70">
-                      {user.name || user.email}
-                    </div>
-                    <Link
-                      href="/profile"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-foreground hover:bg-jad-mint/60"
-                    >
-                      <UserCircle className="h-4 w-4" />
-                      Profile
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        logout();
-                        setUserMenuOpen(false);
-                      }}
-                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-foreground hover:bg-jad-mint/60"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Log out
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    <UserCircle className="h-4 w-4" />
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setUserMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-foreground hover:bg-jad-mint/60"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log out
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <Link
               href="/login"
-              className="ml-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-jad-dark active:scale-[0.98]"
+              className="ml-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-jad-dark"
             >
               Login
             </Link>
@@ -168,94 +128,85 @@ export function ViewHeader() {
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          <AnimatePresence>
-            {mobileMenuOpen && (
-              <motion.div
-                variants={menuVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-foreground/10 bg-white py-2 shadow-2xl origin-top-right"
-                role="menu"
-              >
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <motion.div key={link.href} variants={itemVariants}>
-                      <Link
-                        href={link.href}
-                        onClick={closeMenu}
-                        className={cn(
-                          'block px-5 py-3 text-sm font-medium transition-colors hover:bg-jad-mint/60 hover:text-jad-foreground',
-                          isActive && 'bg-jad-mint/60 text-jad-foreground font-semibold'
-                        )}
-                        role="menuitem"
-                      >
-                        {link.label}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-                {isAuthenticated && user && (
-                  <motion.div variants={itemVariants}>
+          {mobileMenuOpen && (
+            <div
+              className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-foreground/10 bg-white py-2 shadow-2xl"
+              role="menu"
+            >
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <div key={link.href}>
                     <Link
-                      href="/dashboard"
+                      href={link.href}
                       onClick={closeMenu}
                       className={cn(
-                        'flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-colors hover:bg-jad-mint/60',
-                        pathname.startsWith('/dashboard')
-                          ? 'bg-jad-mint/60 text-jad-foreground'
-                          : 'text-jad-primary'
+                        'block px-5 py-3 text-sm font-medium transition-colors hover:bg-jad-mint/60 hover:text-jad-foreground',
+                        isActive && 'bg-jad-mint/60 text-jad-foreground font-semibold'
                       )}
                       role="menuitem"
                     >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
+                      {link.label}
                     </Link>
-                  </motion.div>
-                )}
-                <motion.div
-                  variants={itemVariants}
-                  className="border-t border-foreground/5 px-5 py-3 mt-1"
-                >
-                  {isAuthenticated && user ? (
-                    <div className="space-y-2">
-                      <div className="px-2 py-1.5 text-xs text-foreground/60 truncate">
-                        {user.name || user.email}
-                      </div>
-                      <Link
-                        href="/profile"
-                        onClick={closeMenu}
-                        className="flex w-full items-center justify-center gap-2 py-2.5 text-sm font-medium text-jad-foreground rounded-full hover:bg-jad-mint/60"
-                      >
-                        <UserCircle className="h-4 w-4" />
-                        Profile
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          logout();
-                          closeMenu();
-                        }}
-                        className="flex w-full items-center justify-center gap-2 rounded-full border border-jad-primary/20 py-2.5 text-sm font-medium text-jad-foreground hover:bg-jad-mint/60"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Log out
-                      </button>
+                  </div>
+                );
+              })}
+              {isAuthenticated && user && (
+                <div>
+                  <Link
+                    href="/dashboard"
+                    onClick={closeMenu}
+                    className={cn(
+                      'flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-colors hover:bg-jad-mint/60',
+                      pathname.startsWith('/dashboard')
+                        ? 'bg-jad-mint/60 text-jad-foreground'
+                        : 'text-jad-primary'
+                    )}
+                    role="menuitem"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </div>
+              )}
+              <div className="border-t border-foreground/5 px-5 py-3 mt-1">
+                {isAuthenticated && user ? (
+                  <div className="space-y-2">
+                    <div className="px-2 py-1.5 text-xs text-foreground/60 truncate">
+                      {user.name || user.email}
                     </div>
-                  ) : (
                     <Link
-                      href="/login"
+                      href="/profile"
                       onClick={closeMenu}
-                      className="block w-full rounded-full bg-jad-primary py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-jad-dark"
+                      className="flex w-full items-center justify-center gap-2 py-2.5 text-sm font-medium text-jad-foreground rounded-full hover:bg-jad-mint/60"
                     >
-                      Login
+                      <UserCircle className="h-4 w-4" />
+                      Profile
                     </Link>
-                  )}
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        closeMenu();
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-full border border-jad-primary/20 py-2.5 text-sm font-medium text-jad-foreground hover:bg-jad-mint/60"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Log out
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={closeMenu}
+                    className="block w-full rounded-full bg-jad-primary py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-jad-dark"
+                  >
+                    Login
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />

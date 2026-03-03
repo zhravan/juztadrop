@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronRight, Pencil } from 'lucide-react';
 import { getOrgVerificationStatusClass } from '@/lib/status';
 
 export interface OrganisationCardProps {
@@ -12,8 +15,21 @@ export interface OrganisationCardProps {
 }
 
 export function OrganisationCard({ org }: OrganisationCardProps) {
+  const router = useRouter();
+
   return (
-    <div className="rounded-2xl border border-foreground/10 bg-white p-6 shadow-lg transition-shadow hover:shadow-xl">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => router.push(`/organisations/${org.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          router.push(`/organisations/${org.id}`);
+        }
+      }}
+      className="cursor-pointer rounded-2xl border border-foreground/10 bg-white p-6 shadow-lg transition-shadow hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
+    >
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-lg font-bold text-jad-foreground">{org.orgName}</h2>
         <span
@@ -36,7 +52,16 @@ export function OrganisationCard({ org }: OrganisationCardProps) {
       )}
       <div className="mt-4 flex flex-wrap gap-2">
         <Link
+          href={`/organisations/${org.id}/edit`}
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1 rounded-xl border border-foreground/20 px-3 py-2 text-sm font-medium text-foreground/80 hover:border-jad-primary/40 hover:bg-jad-mint/20 hover:text-jad-foreground"
+        >
+          <Pencil className="h-4 w-4" aria-hidden />
+          Edit
+        </Link>
+        <Link
           href={`/organisations/${org.id}/opportunities`}
+          onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-1 rounded-xl border border-jad-primary px-3 py-2 text-sm font-medium text-jad-primary hover:bg-jad-mint/30"
         >
           View opportunities
@@ -45,6 +70,7 @@ export function OrganisationCard({ org }: OrganisationCardProps) {
         {org.verificationStatus === 'verified' && (
           <Link
             href={`/organisations/${org.id}/opportunities/create`}
+            onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center gap-1 rounded-xl bg-jad-primary px-3 py-2 text-sm font-medium text-white hover:bg-jad-dark"
           >
             Create opportunity

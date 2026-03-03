@@ -6,7 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Calendar, MapPin, User, DollarSign, Award, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/use-auth';
 import { useNgo } from '@/contexts/NgoContext';
-import { LOCATIONS, VOLUNTEER_CAUSES } from '@/lib/constants';
+import { LOCATIONS } from '@/lib/constants';
+import { useCauses } from '@/hooks';
 import { LocationMapPreview } from '@/components/map/LocationMapPreview';
 import {
   FormField,
@@ -63,6 +64,7 @@ export default function CreateOpportunityPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const { organizations } = useNgo();
+  const { options: causeOptions } = useCauses();
   const [submitting, setSubmitting] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const [form, setForm] = useState({
@@ -259,7 +261,7 @@ export default function CreateOpportunityPage() {
           </FormField>
           <FormField label="Causes" htmlFor="causes">
             <ChipGroup
-              options={VOLUNTEER_CAUSES}
+              options={causeOptions}
               selected={form.causeCategoryNames}
               onChange={toggleCause}
             />

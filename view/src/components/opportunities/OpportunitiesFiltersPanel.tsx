@@ -1,7 +1,14 @@
 'use client';
 
-import { VOLUNTEER_CAUSES, LOCATIONS } from '@/lib/constants';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { ChevronDown, Search } from 'lucide-react';
+import { LOCATIONS } from '@/lib/constants';
 import { cn } from '@/lib/common';
+import type { CauseOption } from '@/hooks/useCauses';
+import { useClickOutside } from '@/hooks';
+
+const LOCATION_DROPDOWN_MAX_HEIGHT = 280;
+const LOCATION_SEARCH_PLACEHOLDER = 'Search city…';
 
 export interface OpportunitiesFiltersPanelProps {
   city: string;
@@ -14,6 +21,7 @@ export interface OpportunitiesFiltersPanelProps {
   setDateTo: (v: string) => void;
   causes: string[];
   toggleCause: (value: string) => void;
+  causeOptions: CauseOption[];
   activeFilterCount: number;
   clearAllFilters: () => void;
 }
@@ -29,9 +37,36 @@ export function OpportunitiesFiltersPanel({
   setDateTo,
   causes,
   toggleCause,
+  causeOptions,
   activeFilterCount,
   clearAllFilters,
 }: OpportunitiesFiltersPanelProps) {
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [locationSearch, setLocationSearch] = useState('');
+  const locationRef = useRef<HTMLDivElement>(null);
+  const locationSearchRef = useRef<HTMLInputElement>(null);
+
+  const handleLocationClickOutside = useCallback(() => {
+    setLocationOpen(false);
+    setLocationSearch('');
+  }, []);
+  useClickOutside(locationRef, locationOpen, handleLocationClickOutside);
+
+  const filteredLocations = useMemo(() => {
+    const q = locationSearch.trim().toLowerCase();
+    if (!q) return ['', ...LOCATIONS];
+    return ['', ...LOCATIONS.filter((loc) => loc.toLowerCase().includes(q))];
+  }, [locationSearch]);
+
+  useEffect(() => {
+    if (locationOpen) {
+      setLocationSearch('');
+      setTimeout(() => locationSearchRef.current?.focus(), 0);
+    }
+  }, [locationOpen]);
+
+  const locationLabel = city || 'All cities';
+
   return (
     <div className="mb-8 space-y-5 rounded-2xl border border-foreground/10 bg-white/80 p-5 backdrop-blur-sm">
       <div className="flex items-center justify-between">
@@ -57,26 +92,78 @@ export function OpportunitiesFiltersPanel({
         role="group"
         aria-labelledby="opportunities-filters-heading"
       >
-        <div>
+        <div ref={locationRef} className="relative">
           <label
             htmlFor="filter-location"
             className="mb-1.5 block text-xs font-medium text-foreground/60"
           >
             Location
           </label>
-          <select
+          <button
+            type="button"
             id="filter-location"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded-xl border border-foreground/15 bg-white px-3.5 py-2.5 text-sm focus:border-jad-primary/40 focus:outline-none focus:ring-2 focus:ring-jad-primary/20"
+            aria-haspopup="listbox"
+            aria-expanded={locationOpen}
+            onClick={() => setLocationOpen((o) => !o)}
+            className={cn(
+              'flex w-full items-center justify-between rounded-xl border border-foreground/15 bg-white px-3.5 py-2.5 text-left text-sm',
+              'focus:border-jad-primary/40 focus:outline-none focus:ring-2 focus:ring-jad-primary/20',
+              !city && 'text-foreground/60'
+            )}
           >
-            <option value="">All cities</option>
-            {LOCATIONS.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </select>
+            <span className="truncate">{locationLabel}</span>
+            <ChevronDown className={cn('h-4 w-4 shrink-0', locationOpen && 'rotate-180')} />
+          </button>
+          {locationOpen && (
+            <div
+              className="absolute left-0 top-full z-20 mt-1 w-full min-w-[12rem] overflow-hidden rounded-xl border border-foreground/15 bg-white shadow-lg"
+              style={{ maxHeight: LOCATION_DROPDOWN_MAX_HEIGHT }}
+            >
+              <div className="sticky top-0 border-b border-foreground/10 bg-white p-2">
+                <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 focus-within:border-neutral-300 focus-within:ring-0">
+                  <Search className="h-4 w-4 shrink-0 text-foreground/50" />
+                  <input
+                    ref={locationSearchRef}
+                    type="text"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    placeholder={LOCATION_SEARCH_PLACEHOLDER}
+                    className="min-w-0 flex-1 border-0 bg-transparent text-sm text-jad-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-0"
+                    aria-label="Search city"
+                  />
+                </div>
+              </div>
+              <div
+                className="overflow-y-auto py-1"
+                style={{ maxHeight: LOCATION_DROPDOWN_MAX_HEIGHT - 56 }}
+                role="listbox"
+              >
+                {filteredLocations.map((loc) => (
+                  <button
+                    key={loc || '__all__'}
+                    type="button"
+                    role="option"
+                    aria-selected={city === loc}
+                    onClick={() => {
+                      setCity(loc);
+                      setLocationOpen(false);
+                    }}
+                    className={cn(
+                      'w-full px-3.5 py-2.5 text-left text-sm transition-colors',
+                      city === loc
+                        ? 'bg-jad-mint/50 font-medium text-jad-foreground'
+                        : 'text-foreground hover:bg-foreground/5'
+                    )}
+                  >
+                    {loc || 'All cities'}
+                  </button>
+                ))}
+                {filteredLocations.length === 0 && (
+                  <p className="px-3.5 py-3 text-sm text-foreground/50">No city matches</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div>
@@ -140,7 +227,7 @@ export function OpportunitiesFiltersPanel({
       <div>
         <span className="mb-2 block text-xs font-medium text-foreground/60">Causes</span>
         <div className="flex flex-wrap gap-2">
-          {VOLUNTEER_CAUSES.map(({ value, label }) => (
+          {causeOptions.map(({ value, label }) => (
             <button
               key={value}
               type="button"

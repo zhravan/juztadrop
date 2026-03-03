@@ -8,6 +8,7 @@ interface ProfileForm {
   name: string;
   phone: string;
   gender: string;
+  isInterest: boolean;
   causes: string[];
   skills: Array<{ name: string; expertise: string }>;
 }
@@ -20,7 +21,7 @@ function buildPayload(form: ProfileForm) {
     phone: form.phone || undefined,
     gender: form.gender || undefined,
     volunteering: {
-      isInterest: true,
+      isInterest: form.isInterest,
       skills: form.skills,
       causes: form.causes,
     },
@@ -32,6 +33,7 @@ function formsEqual(a: ProfileForm, b: ProfileForm): boolean {
     a.name === b.name &&
     a.phone === b.phone &&
     a.gender === b.gender &&
+    a.isInterest === b.isInterest &&
     JSON.stringify(a.causes) === JSON.stringify(b.causes) &&
     JSON.stringify(a.skills) === JSON.stringify(b.skills)
   );
@@ -47,6 +49,7 @@ export function useProfileForm() {
     name: '',
     phone: '',
     gender: '',
+    isInterest: true,
     causes: [],
     skills: [],
   });
@@ -72,6 +75,7 @@ export function useProfileForm() {
         name: user.name ?? '',
         phone: user.phone ?? '',
         gender: user.gender ?? '',
+        isInterest: user.volunteering?.isInterest ?? true,
         causes: user.volunteering?.causes ?? [],
         skills:
           user.volunteering?.skills?.map((s) => ({
@@ -165,6 +169,17 @@ export function useProfileForm() {
     [saveImmediately]
   );
 
+  const setIsInterest = useCallback(
+    (value: boolean) => {
+      setForm((f) => {
+        const next = { ...f, isInterest: value };
+        saveImmediately(next);
+        return next;
+      });
+    },
+    [saveImmediately]
+  );
+
   const toggleCause = useCallback(
     (value: string) => {
       setForm((f) => {
@@ -214,6 +229,7 @@ export function useProfileForm() {
     saveStatus,
     updateField,
     setGender,
+    setIsInterest,
     toggleCause,
     toggleSkill,
     setSkillExpertise,

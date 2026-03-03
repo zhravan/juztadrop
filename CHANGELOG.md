@@ -1,3 +1,13 @@
+# [0.0.24](https://github.com/juztadrop/juztadrop/compare/v0.0.22...v0.0.24) (2026-03-03)
+
+### Changes
+
+* ci: build failure retrigger (8149a36)
+* feat: edit organization workflow & update create org flow / seed entities (#82) (7f0c541)
+* feat: remove isAdmin from user table (31ce289)
+
+---
+
 # [0.0.22](https://github.com/juztadrop/juztadrop/compare/v0.0.21...v0.0.22) (2026-03-03)
 
 ### Changes

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 interface VolunteerOnboardingForm {
   name: string;
+  isInterest: boolean;
   causes: string[];
   skills: string[];
 }
@@ -15,6 +16,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 function formsEqual(a: VolunteerOnboardingForm, b: VolunteerOnboardingForm): boolean {
   return (
     a.name === b.name &&
+    a.isInterest === b.isInterest &&
     JSON.stringify(a.causes) === JSON.stringify(b.causes) &&
     JSON.stringify(a.skills) === JSON.stringify(b.skills)
   );
@@ -28,6 +30,7 @@ export function useVolunteerOnboarding() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [form, setForm] = useState<VolunteerOnboardingForm>({
     name: '',
+    isInterest: true,
     causes: [],
     skills: [],
   });
@@ -50,6 +53,7 @@ export function useVolunteerOnboarding() {
       hydratedRef.current = true;
       const serverForm: VolunteerOnboardingForm = {
         name: user.name ?? '',
+        isInterest: user.volunteering?.isInterest ?? true,
         causes: user.volunteering?.causes ?? [],
         skills: (user.volunteering?.skills ?? []).map((s) => s.name),
       };
@@ -73,7 +77,7 @@ export function useVolunteerOnboarding() {
           body: JSON.stringify({
             name: formToSave.name || undefined,
             volunteering: {
-              isInterest: true,
+              isInterest: formToSave.isInterest,
               skills: formToSave.skills.map((name) => ({ name, expertise: 'intermediate' })),
               causes: formToSave.causes,
             },
@@ -135,6 +139,17 @@ export function useVolunteerOnboarding() {
     [scheduleSave]
   );
 
+  const setIsInterest = useCallback(
+    (value: boolean) => {
+      setForm((f) => {
+        const next = { ...f, isInterest: value };
+        saveImmediately(next);
+        return next;
+      });
+    },
+    [saveImmediately]
+  );
+
   const toggleCause = useCallback(
     (value: string) => {
       setForm((f) => {
@@ -171,6 +186,7 @@ export function useVolunteerOnboarding() {
     form,
     saveStatus,
     updateName,
+    setIsInterest,
     toggleCause,
     toggleSkill,
     setForm,

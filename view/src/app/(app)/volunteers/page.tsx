@@ -1,19 +1,26 @@
 'use client';
 
-import { Users, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Users, SlidersHorizontal, ChevronDown, Loader2 } from 'lucide-react';
 import { useVolunteersList, causeLabelForVolunteers } from '@/hooks/useVolunteersList';
+import { useCauses } from '@/hooks';
 import { VolunteerCard } from '@/components/volunteers/VolunteerCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { VOLUNTEER_CAUSES, VOLUNTEER_SKILLS } from '@/lib/constants';
+import { VOLUNTEER_SKILLS } from '@/lib/constants';
 import { SearchableChipGroup } from '@/components/ui/form';
 import { FilterBadge } from '@/components/ui';
 import { cn } from '@/lib/common';
 
 export default function VolunteersPage() {
+  const { options: causeOptions } = useCauses();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const {
     volunteers,
     total,
     isLoading,
+    loadingMore,
+    hasMore,
+    loadMore,
     filtersOpen,
     setFiltersOpen,
     causes,
@@ -23,6 +30,20 @@ export default function VolunteersPage() {
     activeFilterCount,
     clearAllFilters,
   } = useVolunteersList();
+
+  useEffect(() => {
+    if (!hasMore || loadingMore || isLoading) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: '200px', threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, isLoading, loadMore]);
 
   return (
     <div className="container">
@@ -74,7 +95,7 @@ export default function VolunteersPage() {
           {causes.map((c) => (
             <FilterBadge
               key={c}
-              label={causeLabelForVolunteers(c)}
+              label={causeLabelForVolunteers(c, causeOptions)}
               onRemove={() => toggleCause(c)}
             />
           ))}
@@ -109,7 +130,7 @@ export default function VolunteersPage() {
           <div>
             <span className="mb-2 block text-xs font-medium text-foreground/60">Causes</span>
             <SearchableChipGroup
-              options={VOLUNTEER_CAUSES}
+              options={causeOptions}
               selected={causes}
               onChange={toggleCause}
               placeholder="Search causes…"
@@ -161,11 +182,32 @@ export default function VolunteersPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {volunteers.map((v) => (
-            <VolunteerCard key={v.id} volunteer={v} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {volunteers.map((v) => (
+              <VolunteerCard key={v.id} volunteer={v} causeOptions={causeOptions} />
+            ))}
+          </div>
+          {hasMore && (
+            <div
+              ref={loadMoreRef}
+              className="mt-8 flex min-h-[80px] items-center justify-center"
+              aria-hidden
+            >
+              {loadingMore && (
+                <span className="inline-flex items-center gap-2 text-sm text-foreground/60">
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  Loading more…
+                </span>
+              )}
+            </div>
+          )}
+          {!hasMore && volunteers.length > 0 && total > 0 && (
+            <p className="mt-8 text-center text-sm text-foreground/50">
+              Showing all {total} {total === 1 ? 'volunteer' : 'volunteers'}
+            </p>
+          )}
+        </>
       )}
     </div>
   );

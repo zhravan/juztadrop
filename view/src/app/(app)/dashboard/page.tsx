@@ -23,7 +23,7 @@ export default function DashboardPage() {
           Your dashboard
         </h1>
         <p className="mt-1 text-foreground/70">
-          Welcome back, {user.name || user.email} — volunteer, create an NGO, or do both.
+          Welcome back, {user.name || user.email} - volunteer, create an NGO, or do both.
         </p>
       </div>
 

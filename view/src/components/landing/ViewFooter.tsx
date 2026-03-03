@@ -60,8 +60,8 @@ export function ViewFooter() {
               <Droplets className="h-5 w-5 text-jad-accent/80 sm:h-6 sm:w-6" />
             </Link>
             <p className="mt-3 max-w-sm text-xs leading-relaxed text-jad-mint/80 sm:text-sm">
-              Small actions. Lasting impacts. We connect volunteers with
-              organisations that need help — one drop at a time.
+              Small actions. Lasting impacts. We connect volunteers with organisations that need
+              help - one drop at a time.
             </p>
             <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-jad-mint/20 bg-jad-mint/5 px-3 py-1.5 text-[11px] font-medium text-jad-mint/90">
               <Sparkles className="h-3 w-3" />
@@ -168,8 +168,8 @@ export function ViewFooter() {
         {/* Bottom bar */}
         <div className="mt-6 flex flex-col gap-3 border-t border-jad-mint/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-1.5 text-[11px] text-jad-mint/40 sm:text-xs">
-            <Heart className="h-3 w-3 text-jad-accent/60 sm:h-3.5 sm:w-3.5" fill="currentColor" />
-            © {new Date().getFullYear()} juztadrop. Made with intention.
+            <Heart className="h-3 w-3 text-jad-accent/60 sm:h-3.5 sm:w-3.5" fill="currentColor" />©{' '}
+            {new Date().getFullYear()} juztadrop. Made with intention.
           </p>
           <div className="flex flex-wrap gap-4 text-[11px] sm:gap-5 sm:text-xs">
             <Link
