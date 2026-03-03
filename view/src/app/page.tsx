@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   ViewHeader,
   ViewFooter,
@@ -12,7 +13,9 @@ export default function HomePage() {
       <ViewHeader />
       <main className="flex-1">
         <LandingHero />
-        <GetInvolvedSection />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <GetInvolvedSection />
+        </Suspense>
         <HowItWorksSection />
       </main>
       <ViewFooter />
