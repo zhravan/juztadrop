@@ -1,3 +1,11 @@
+# [0.0.25](https://github.com/juztadrop/juztadrop/compare/v0.0.24...v0.0.25) (2026-03-03)
+
+### Changes
+
+* fix: dashboard login UI (#83) (0926734)
+
+---
+
 # [0.0.24](https://github.com/juztadrop/juztadrop/compare/v0.0.22...v0.0.24) (2026-03-03)
 
 ### Changes
