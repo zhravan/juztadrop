@@ -19,14 +19,14 @@ export function TeamCTA() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/opportunities"
-              className="inline-flex items-center gap-2 rounded-full bg-jad-mint px-6 py-3 font-semibold text-jad-foreground shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-jad-mint px-6 py-3 font-semibold text-jad-foreground shadow-lg hover:shadow-xl"
             >
               Explore opportunities
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
               href="/about"
-              className="inline-flex items-center rounded-full border-2 border-jad-mint/50 px-6 py-3 font-semibold text-jad-mint transition-colors hover:bg-jad-mint/10"
+              className="inline-flex items-center rounded-full border-2 border-jad-mint/50 px-6 py-3 font-semibold text-jad-mint hover:bg-jad-mint/10"
             >
               Learn more about us
             </Link>

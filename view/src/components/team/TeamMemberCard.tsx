@@ -20,29 +20,24 @@ interface TeamMemberCardProps {
   style?: React.CSSProperties;
 }
 
-export function TeamMemberCard({
-  member,
-  size = 'md',
-  className,
-  style,
-}: TeamMemberCardProps) {
+export function TeamMemberCard({ member, size = 'md', className, style }: TeamMemberCardProps) {
   const gradientClass = accentStyles[member.accent];
 
   return (
     <article
       style={style}
-        className={cn(
-          'group relative overflow-hidden rounded-2xl border border-jad-primary/10 bg-white p-4 shadow-lg shadow-jad-foreground/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:shadow-jad-primary/15 hover:border-jad-primary/20 sm:p-6',
+      className={cn(
+        'relative overflow-hidden rounded-2xl border border-jad-primary/10 bg-white p-4 shadow-lg shadow-jad-foreground/5 sm:p-6',
         size === 'lg' && 'md:row-span-2 md:p-8',
         size === 'md' && 'md:p-6',
         size === 'sm' && 'md:p-5',
         className
       )}
     >
-      {/* Decorative gradient blob - appears on hover */}
+      {/* Decorative gradient blob (static) */}
       <div
         className={cn(
-          'absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-25',
+          'absolute -right-12 -top-12 h-40 w-40 rounded-full bg-gradient-to-br opacity-10 blur-3xl',
           gradientClass
         )}
       />
@@ -125,7 +120,7 @@ export function TeamMemberCard({
                   href={member.linkedIn}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-jad-mint/50 text-jad-primary transition-colors hover:bg-jad-mint"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-jad-mint/50 text-jad-primary hover:bg-jad-mint"
                   aria-label={`${member.name} on LinkedIn`}
                 >
                   <Linkedin className="h-4 w-4" strokeWidth={2} />
@@ -134,7 +129,7 @@ export function TeamMemberCard({
               {member.email && (
                 <a
                   href={`mailto:${member.email}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-jad-mint/50 text-jad-primary transition-colors hover:bg-jad-mint"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-jad-mint/50 text-jad-primary hover:bg-jad-mint"
                   aria-label={`Email ${member.name}`}
                 >
                   <Mail className="h-4 w-4" strokeWidth={2} />
