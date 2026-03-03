@@ -243,23 +243,6 @@ export function AppHeader({ onboardingModal }: AppHeaderProps) {
                       {org.orgName}
                     </Link>
                   ))}
-                  <Link
-                    href="/organisations"
-                    onClick={toggleNgoDropdown}
-                    className="block border-t border-foreground/10 px-4 py-2.5 text-sm text-jad-primary hover:bg-jad-mint/30"
-                  >
-                    Manage Organizations
-                  </Link>
-                  {selectedOrgId && (
-                    <Link
-                      href={`/organisations/${selectedOrgId}/opportunities/create`}
-                      onClick={toggleNgoDropdown}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-jad-primary hover:bg-jad-mint/30"
-                    >
-                      <Heart className="h-4 w-4" />
-                      Create opportunity
-                    </Link>
-                  )}
                 </div>
               )}
             </div>

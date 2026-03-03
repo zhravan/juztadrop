@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/use-auth';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { toast } from 'sonner';
 
 interface ProfileForm {
@@ -98,7 +99,7 @@ export function useProfileForm() {
           body: JSON.stringify(buildPayload(formToSave)),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error ?? 'Failed to update profile');
+        if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to update profile'));
 
         lastSavedRef.current = formToSave;
 

@@ -17,6 +17,7 @@ import {
   ChipGroup,
   FormActions,
 } from '@/components/ui/form';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -218,8 +219,7 @@ export default function EditOpportunityPage() {
       });
       const data = await res.json().catch(() => ({}));
       const payload = data?.data ?? data;
-      if (!res.ok)
-        throw new Error(payload?.error ?? payload?.message ?? 'Failed to update opportunity');
+      if (!res.ok) throw new Error(getApiErrorMessage(payload, 'Failed to update opportunity'));
       toast.success('Opportunity updated');
       router.push(`/organisations/${ngoId}/opportunities`);
     } catch (err) {

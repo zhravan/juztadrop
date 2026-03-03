@@ -114,6 +114,21 @@ export const organizationStatusEnum = pgEnum('organization_status', [
   'suspended',
 ]);
 
+/**
+ * Lookup table for organization types (NGO, NPO, Trust, etc.).
+ * Organizations store the type as a string (name) in organizations.type; no FK.
+ */
+export const organizationTypes = pgTable('organization_types', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  name: text('name').notNull().unique(), // value stored in organizations.type, e.g. "NGO"
+  label: text('label').notNull(), // display label, e.g. "NGO"
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const documentTypeEnum = pgEnum('document_type', [
   'registration_certificate',
   '80G_certificate',
@@ -151,6 +166,7 @@ export const organizations = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     orgName: text('org_name').notNull(),
+    type: text('type'), // organization type name (e.g. "NGO"), no FK to organization_types
     description: text('description'),
     causes: text('causes').array().notNull().default([]),
     website: text('website'),

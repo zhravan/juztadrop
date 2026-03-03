@@ -14,6 +14,7 @@ export interface Organization {
   id: string;
   createdBy: string;
   orgName: string;
+  type: string | null;
   description: string | null;
   causes: string[];
   website: string | null;
@@ -34,6 +35,7 @@ export class OrganizationRepository {
   async create(data: {
     createdBy: string;
     orgName: string;
+    type?: string | null;
     description?: string;
     causes?: string[];
     website?: string;
@@ -53,6 +55,7 @@ export class OrganizationRepository {
         id,
         createdBy: data.createdBy,
         orgName: data.orgName,
+        type: data.type ?? null,
         description: data.description ?? null,
         causes: data.causes ?? [],
         website: data.website ?? null,
@@ -98,6 +101,7 @@ export class OrganizationRepository {
       id: org.id,
       createdBy: org.createdBy,
       orgName: org.orgName,
+      type: org.type ?? null,
       description: org.description,
       causes: org.causes,
       website: org.website,
@@ -124,6 +128,7 @@ export class OrganizationRepository {
       id: org.id,
       createdBy: org.createdBy,
       orgName: org.orgName,
+      type: org.type ?? null,
       description: org.description,
       causes: org.causes,
       website: org.website,
@@ -161,6 +166,7 @@ export class OrganizationRepository {
       id: org.id,
       createdBy: org.createdBy,
       orgName: org.orgName,
+      type: org.type ?? null,
       description: org.description,
       causes: org.causes,
       website: org.website,
@@ -202,6 +208,7 @@ export class OrganizationRepository {
       id: org.id,
       createdBy: org.createdBy,
       orgName: org.orgName,
+      type: org.type ?? null,
       description: org.description,
       causes: org.causes,
       website: org.website,

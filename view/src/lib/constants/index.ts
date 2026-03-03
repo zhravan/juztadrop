@@ -1,8 +1,4 @@
-export {
-  LOCATIONS,
-  OPPORTUNITIES,
-  type Opportunity,
-} from './opportunities';
+export { INDIAN_CITIES, LOCATIONS, OPPORTUNITIES, type Opportunity } from './opportunities';
 
 export {
   VOLUNTEER_STEPS,

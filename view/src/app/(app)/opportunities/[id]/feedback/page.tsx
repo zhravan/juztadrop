@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Star, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/use-auth';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
@@ -49,7 +50,9 @@ export default function OpportunityFeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [oppRating, setOppRating] = useState(0);
   const [oppSubmitting, setOppSubmitting] = useState(false);
-  const [volunteerRatings, setVolunteerRatings] = useState<Record<string, { rating: number; testimonial: string }>>({});
+  const [volunteerRatings, setVolunteerRatings] = useState<
+    Record<string, { rating: number; testimonial: string }>
+  >({});
   const [volunteerSubmitting, setVolunteerSubmitting] = useState<string | null>(null);
 
   const today = new Date();
@@ -57,8 +60,8 @@ export default function OpportunityFeedbackPage() {
   const isPast = opportunity?.endDate
     ? new Date(opportunity.endDate) < today
     : opportunity?.startDate
-    ? new Date(opportunity.startDate) < today
-    : false;
+      ? new Date(opportunity.startDate) < today
+      : false;
   const iAttended = myApplication?.status === 'approved' && myApplication?.hasAttended;
   const attendedVolunteers = applications.filter(
     (a) => a.status === 'approved' && a.hasAttended && a.userId !== user?.id
@@ -73,8 +76,14 @@ export default function OpportunityFeedbackPage() {
     setLoading(true);
     Promise.all([
       fetch(`/api/opportunities/${id}`, { credentials: 'include' }).then((r) => r.json()),
-      isAuthenticated ? fetch('/api/applications', { credentials: 'include' }).then((r) => r.json()) : Promise.resolve(null),
-      isAuthenticated ? fetch(`/api/opportunities/${id}/attendees`, { credentials: 'include' }).then((r) => r.json()) : Promise.resolve(null),
+      isAuthenticated
+        ? fetch('/api/applications', { credentials: 'include' }).then((r) => r.json())
+        : Promise.resolve(null),
+      isAuthenticated
+        ? fetch(`/api/opportunities/${id}/attendees`, { credentials: 'include' }).then((r) =>
+            r.json()
+          )
+        : Promise.resolve(null),
     ])
       .then(([oppRes, appsRes, attendeesRes]) => {
         if (cancelled) return;
@@ -118,7 +127,7 @@ export default function OpportunityFeedbackPage() {
         body: JSON.stringify({ rating: oppRating }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error ?? 'Failed to submit');
+      if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to submit'));
       toast.success('Thank you for rating this opportunity!');
       setOppRating(0);
       setMyApplication((a: any) => (a ? { ...a, feedbackGiven: true } : a));
@@ -134,17 +143,14 @@ export default function OpportunityFeedbackPage() {
     if (!v || v.rating < 1) return;
     setVolunteerSubmitting(volunteerId);
     try {
-      const res = await fetch(
-        `/api/opportunities/${id}/volunteers/${volunteerId}/feedback`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ rating: v.rating, testimonial: v.testimonial || undefined }),
-        }
-      );
+      const res = await fetch(`/api/opportunities/${id}/volunteers/${volunteerId}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ rating: v.rating, testimonial: v.testimonial || undefined }),
+      });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error ?? 'Failed to submit');
+      if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to submit'));
       toast.success('Thank you for your feedback!');
       setVolunteerRatings((prev) => {
         const next = { ...prev };
@@ -179,9 +185,7 @@ export default function OpportunityFeedbackPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to opportunity
         </Link>
-        <p className="text-foreground/70">
-          Feedback is available after the opportunity has ended.
-        </p>
+        <p className="text-foreground/70">Feedback is available after the opportunity has ended.</p>
       </div>
     );
   }
@@ -203,12 +207,8 @@ export default function OpportunityFeedbackPage() {
       <div className="mt-8 space-y-8">
         {iAttended && (
           <section className="rounded-2xl border border-foreground/10 bg-white p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-jad-foreground">
-              Rate this opportunity
-            </h2>
-            <p className="mt-1 text-sm text-foreground/60">
-              How was your volunteering experience?
-            </p>
+            <h2 className="text-lg font-semibold text-jad-foreground">Rate this opportunity</h2>
+            <p className="mt-1 text-sm text-foreground/60">How was your volunteering experience?</p>
             <div className="mt-4">
               <StarRating value={oppRating} onChange={setOppRating} disabled={oppSubmitting} />
               <button
@@ -232,9 +232,7 @@ export default function OpportunityFeedbackPage() {
 
         {attendedVolunteers.length > 0 && (
           <section className="rounded-2xl border border-foreground/10 bg-white p-6 shadow-lg">
-            <h2 className="text-lg font-semibold text-jad-foreground">
-              Rate fellow volunteers
-            </h2>
+            <h2 className="text-lg font-semibold text-jad-foreground">Rate fellow volunteers</h2>
             <p className="mt-1 text-sm text-foreground/60">
               Share feedback for volunteers who attended with you
             </p>
@@ -243,10 +241,7 @@ export default function OpportunityFeedbackPage() {
                 const vr = volunteerRatings[app.userId] ?? { rating: 0, testimonial: '' };
                 const loading = volunteerSubmitting === app.userId;
                 return (
-                  <div
-                    key={app.userId}
-                    className="rounded-xl border border-foreground/10 p-4"
-                  >
+                  <div key={app.userId} className="rounded-xl border border-foreground/10 p-4">
                     <p className="font-medium text-jad-foreground">
                       {app.userName || app.userEmail || 'Volunteer'}
                     </p>
@@ -281,11 +276,7 @@ export default function OpportunityFeedbackPage() {
                       disabled={vr.rating < 1 || loading}
                       className="mt-2 rounded-xl bg-jad-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-jad-dark disabled:opacity-50"
                     >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        'Submit'
-                      )}
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit'}
                     </button>
                   </div>
                 );

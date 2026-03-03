@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/use-auth';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { toast } from 'sonner';
 
 interface VolunteerOnboardingForm {
@@ -79,7 +80,7 @@ export function useVolunteerOnboarding() {
           }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error ?? 'Failed to save');
+        if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to save'));
 
         lastSavedRef.current = formToSave;
 

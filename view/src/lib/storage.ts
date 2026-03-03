@@ -1,3 +1,5 @@
+import { getApiErrorMessage } from '@/lib/api-proxy';
+
 /**
  * Upload a file to Supabase Storage via the storage API.
  * Returns { url, assetKey } for storing in the database.
@@ -18,8 +20,7 @@ export async function uploadToStorage(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = data?.error?.message ?? data?.error ?? 'Upload failed';
-    throw new Error(typeof msg === 'string' ? msg : 'Upload failed');
+    throw new Error(getApiErrorMessage(data, 'Upload failed'));
   }
 
   const result = data?.data ?? data;

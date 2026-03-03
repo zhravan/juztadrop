@@ -6,6 +6,8 @@ export { useVolunteerOnboarding } from './useVolunteerOnboarding';
 export { useProfileForm } from './useProfileForm';
 export { useAppHeader } from './useAppHeader';
 export { useCreateOrganization } from './useCreateOrganization';
+export { useOrganizationTypes } from './useOrganizationTypes';
+export type { OrganizationTypeOption, OrganizationType } from './useOrganizationTypes';
 export { useDashboard } from './useDashboard';
 export type { DashboardApplication } from './useDashboard';
 export { useOpportunitiesList, causeLabel } from './useOpportunitiesList';

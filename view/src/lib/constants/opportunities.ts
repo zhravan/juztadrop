@@ -1,4 +1,65 @@
-export const LOCATIONS = ['Kolkata', 'Mumbai', 'Delhi', 'Bangalore', 'Chennai'] as const;
+/**
+ * Major cities across India (state/UT capitals + large metros).
+ * Single source of truth for org/opportunity city dropdowns and filters.
+ * Alphabetically sorted for dropdown UX.
+ */
+export const INDIAN_CITIES = [
+  'Agartala',
+  'Agra',
+  'Ahmedabad',
+  'Aizawl',
+  'Allahabad',
+  'Amritsar',
+  'Bangalore',
+  'Bengaluru',
+  'Bhopal',
+  'Bhubaneswar',
+  'Chandigarh',
+  'Chennai',
+  'Coimbatore',
+  'Dehradun',
+  'Delhi',
+  'Dispur',
+  'Gangtok',
+  'Ghaziabad',
+  'Guwahati',
+  'Gwalior',
+  'Hyderabad',
+  'Imphal',
+  'Indore',
+  'Itanagar',
+  'Jaipur',
+  'Jammu',
+  'Kanpur',
+  'Kochi',
+  'Kohima',
+  'Kolkata',
+  'Lucknow',
+  'Ludhiana',
+  'Madurai',
+  'Mumbai',
+  'Mysuru',
+  'Nagpur',
+  'Panaji',
+  'Patna',
+  'Port Blair',
+  'Puducherry',
+  'Pune',
+  'Raipur',
+  'Ranchi',
+  'Shillong',
+  'Shimla',
+  'Srinagar',
+  'Surat',
+  'Thiruvananthapuram',
+  'Vadodara',
+  'Varanasi',
+  'Vijayawada',
+  'Visakhapatnam',
+] as const;
+
+/** @deprecated Use INDIAN_CITIES for new code. Kept for backward compatibility. */
+export const LOCATIONS = INDIAN_CITIES;
 
 export interface Opportunity {
   id: number;

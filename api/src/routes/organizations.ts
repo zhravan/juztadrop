@@ -18,6 +18,7 @@ export const organizationsRouter = new Elysia({ prefix: '/organizations', tags: 
       const org = await organizationRepository.create({
         createdBy: userId,
         orgName: body.orgName,
+        type: body.type ?? null,
         description: body.description,
         causes: body.causes ?? [],
         website: body.website,
@@ -36,6 +37,7 @@ export const organizationsRouter = new Elysia({ prefix: '/organizations', tags: 
     {
       body: t.Object({
         orgName: t.String({ minLength: 1 }),
+        type: t.Optional(t.Union([t.String(), t.Null()])),
         description: t.Optional(t.String()),
         causes: t.Optional(causeSchema),
         website: t.Optional(t.String()),

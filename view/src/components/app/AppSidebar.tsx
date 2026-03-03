@@ -57,9 +57,7 @@ export function AppSidebar({ open, onClose, isMobile }: AppSidebarProps) {
         ref={sidebarRef}
         className={cn(
           'fixed left-0 top-0 z-50 flex h-full flex-col border-r border-foreground/10 bg-white transition-transform duration-300 ease-out',
-          isMobile
-            ? 'w-72 -translate-x-full shadow-xl'
-            : 'w-64 translate-x-0',
+          isMobile ? 'w-72 -translate-x-full shadow-xl' : 'w-64 translate-x-0',
           isMobile && open && 'translate-x-0'
         )}
       >
@@ -96,11 +94,12 @@ export function AppSidebar({ open, onClose, isMobile }: AppSidebarProps) {
                 onClick={() => setNgoDropdownOpen(!ngoDropdownOpen)}
                 className="flex w-full items-center justify-between rounded-xl border border-foreground/10 bg-muted/30 px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/50"
               >
-                <span className="truncate">
-                  {selectedOrg?.orgName ?? 'Select NGO'}
-                </span>
+                <span className="truncate">{selectedOrg?.orgName ?? 'Select NGO'}</span>
                 <ChevronDown
-                  className={cn('h-4 w-4 shrink-0 transition-transform', ngoDropdownOpen && 'rotate-180')}
+                  className={cn(
+                    'h-4 w-4 shrink-0 transition-transform',
+                    ngoDropdownOpen && 'rotate-180'
+                  )}
                 />
               </button>
               {ngoDropdownOpen && (
@@ -124,26 +123,9 @@ export function AppSidebar({ open, onClose, isMobile }: AppSidebarProps) {
                       {org.orgName}
                     </Link>
                   ))}
-                  <Link
-                    href="/organisations"
-                    onClick={() => setNgoDropdownOpen(false)}
-                    className="block border-t border-foreground/10 px-3 py-2 text-sm text-jad-primary hover:bg-jad-mint/30"
-                  >
-                    Manage NGOs
-                  </Link>
                 </div>
               )}
             </div>
-            {selectedOrgId && (
-              <Link
-                href={`/organisations/${selectedOrgId}/opportunities/create`}
-                onClick={isMobile ? onClose : undefined}
-                className="mt-2 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-jad-primary hover:bg-jad-mint/30"
-              >
-                <Building2 className="h-4 w-4" />
-                Create opportunity
-              </Link>
-            )}
           </div>
         )}
 
@@ -166,8 +148,7 @@ export function AppSidebar({ open, onClose, isMobile }: AppSidebarProps) {
           )}
           {sidebarLinks.map(({ href, label, icon: Icon }) => {
             const isActive =
-              pathname === href ||
-              (href !== '/dashboard' && pathname.startsWith(href));
+              pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
             return (
               <Link
                 key={href}

@@ -4,6 +4,7 @@ import { ModeratorSessionRepository } from './repositories/moderatorSession.repo
 import { UserRepository } from './repositories/user.repository';
 import { ModeratorRepository } from './repositories/moderator.repository';
 import { OrganizationRepository } from './repositories/organization.repository';
+import { OrganizationTypeRepository } from './repositories/organization-type.repository';
 import { OpportunityRepository } from './repositories/opportunity.repository';
 import { ApplicationRepository } from './repositories/application.repository';
 import { VolunteerRepository } from './repositories/volunteer.repository';
@@ -28,6 +29,7 @@ class Container {
     user: UserRepository;
     moderator: ModeratorRepository;
     organization: OrganizationRepository;
+    organizationType: OrganizationTypeRepository;
     opportunity: OpportunityRepository;
     application: ApplicationRepository;
     volunteer: VolunteerRepository;
@@ -60,6 +62,7 @@ class Container {
         user: new UserRepository(),
         moderator: new ModeratorRepository(),
         organization: new OrganizationRepository(),
+        organizationType: new OrganizationTypeRepository(),
         opportunity: new OpportunityRepository(),
         application: new ApplicationRepository(),
         volunteer: new VolunteerRepository(),
