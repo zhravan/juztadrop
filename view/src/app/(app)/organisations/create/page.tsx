@@ -9,7 +9,7 @@ import { FormPageSkeleton } from '@/components/skeletons';
 import {
   FormField,
   FormInput,
-  FormSelect,
+  FormDropdown,
   FormTextarea,
   FormSection,
   ChipGroup,
@@ -17,7 +17,19 @@ import {
 } from '@/components/ui/form';
 import { useCreateOrganization } from '@/hooks';
 
-const ORG_TYPES = ['NGO', 'NPO', 'Trust', 'Foundation', 'Society'] as const;
+const ORG_TYPE_OPTIONS = [
+  { value: '', label: 'Select type' },
+  { value: 'NGO', label: 'NGO' },
+  { value: 'NPO', label: 'NPO' },
+  { value: 'Trust', label: 'Trust' },
+  { value: 'Foundation', label: 'Foundation' },
+  { value: 'Society', label: 'Society' },
+];
+
+const CITY_OPTIONS = [
+  { value: '', label: 'Select city' },
+  ...LOCATIONS.map((loc) => ({ value: loc, label: loc })),
+];
 
 export default function CreateOrganisationPage() {
   const router = useRouter();
@@ -68,18 +80,13 @@ export default function CreateOrganisationPage() {
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Organisation type" htmlFor="type">
-              <FormSelect
+              <FormDropdown
                 id="type"
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
-              >
-                <option value="">Select type</option>
-                {ORG_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </FormSelect>
+                onChange={(value) => setForm({ ...form, type: value })}
+                options={ORG_TYPE_OPTIONS}
+                placeholder="Select type"
+              />
             </FormField>
             <FormField label="Registration number" htmlFor="registrationNumber">
               <FormInput
@@ -118,18 +125,13 @@ export default function CreateOrganisationPage() {
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="City" htmlFor="city">
-              <FormSelect
+              <FormDropdown
                 id="city"
                 value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-              >
-                <option value="">Select city</option>
-                {LOCATIONS.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </FormSelect>
+                onChange={(value) => setForm({ ...form, city: value })}
+                options={CITY_OPTIONS}
+                placeholder="Select city"
+              />
             </FormField>
             <FormField label="State" htmlFor="state">
               <FormInput

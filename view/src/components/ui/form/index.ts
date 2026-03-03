@@ -4,6 +4,8 @@ export { FormInput } from './FormInput';
 export type { FormInputProps } from './FormInput';
 export { FormSelect } from './FormSelect';
 export type { FormSelectProps } from './FormSelect';
+export { FormDropdown } from './FormDropdown';
+export type { FormDropdownProps, FormDropdownOption } from './FormDropdown';
 export { FormTextarea } from './FormTextarea';
 export type { FormTextareaProps } from './FormTextarea';
 export { FormSection } from './FormSection';
