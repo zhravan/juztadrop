@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useNgo } from '@/contexts/NgoContext';
 import { toast } from 'sonner';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { uploadToStorage } from '@/lib/storage';
 
 interface CreateOrganizationForm {
@@ -118,7 +119,7 @@ export function useCreateOrganization() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? 'Failed to create organization');
+      if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to create organization'));
       toast.success('Organization created successfully');
       await refetchOrgs();
       router.push('/dashboard');

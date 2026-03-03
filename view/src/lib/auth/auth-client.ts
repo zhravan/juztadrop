@@ -1,3 +1,5 @@
+import { getApiErrorMessage } from '@/lib/api-proxy';
+
 const API_BASE = '/api/auth';
 
 export interface VolunteeringData {
@@ -36,7 +38,7 @@ export const authClient = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.message || data.error || 'Failed to send code');
+      throw new Error(getApiErrorMessage(data, 'Failed to send code'));
     }
     return data;
   },
@@ -53,7 +55,7 @@ export const authClient = {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.message || data.error || 'Invalid or expired code');
+      throw new Error(getApiErrorMessage(data, 'Invalid or expired code'));
     }
     return data;
   },

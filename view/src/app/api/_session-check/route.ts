@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { sessionCheckGet } from '@/lib/api-handlers';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,10 +7,5 @@ export const dynamic = 'force-dynamic';
  * Visit /api/_session-check to see if cookies are reaching the server.
  */
 export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('sessionToken')?.value;
-  return NextResponse.json({
-    hasSessionCookie: !!token,
-    cookieLength: token ? token.length : 0,
-  });
+  return sessionCheckGet();
 }

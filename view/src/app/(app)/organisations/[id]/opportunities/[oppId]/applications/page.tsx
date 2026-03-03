@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ChevronLeft, Check, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { cn } from '@/lib/common';
 import { toast } from 'sonner';
 
@@ -49,7 +50,11 @@ export default function OpportunityApplicationsPage() {
       const appsData = await appsRes.json();
       const oppPayload = oppData?.opportunity ?? oppData?.data?.opportunity ?? oppData;
       const appsPayload = appsData?.applications ?? appsData?.data?.applications ?? appsData;
-      setOpportunity(oppPayload?.id ? { id: oppPayload.id, title: oppPayload.title, ngoId: oppPayload.ngoId } : null);
+      setOpportunity(
+        oppPayload?.id
+          ? { id: oppPayload.id, title: oppPayload.title, ngoId: oppPayload.ngoId }
+          : null
+      );
       setApplications(Array.isArray(appsPayload) ? appsPayload : []);
     } catch {
       setApplications([]);
@@ -76,7 +81,7 @@ export default function OpportunityApplicationsPage() {
         body: JSON.stringify({ status }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error ?? 'Failed to update');
+      if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to update'));
       toast.success(status === 'approved' ? 'Application approved' : 'Application rejected');
       fetchData();
     } catch (err) {
@@ -96,7 +101,7 @@ export default function OpportunityApplicationsPage() {
         body: JSON.stringify({ hasAttended }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error ?? 'Failed to update');
+      if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to update'));
       toast.success(hasAttended ? 'Marked as attended' : 'Marked as not attended');
       fetchData();
     } catch (err) {
@@ -134,16 +139,12 @@ export default function OpportunityApplicationsPage() {
       <h1 className="text-2xl font-bold tracking-tight text-jad-foreground sm:text-3xl">
         Applications
       </h1>
-      <p className="mt-1 text-foreground/70">
-        {opportunity?.title ?? 'Opportunity'}
-      </p>
+      <p className="mt-1 text-foreground/70">{opportunity?.title ?? 'Opportunity'}</p>
 
       {applications.length === 0 ? (
         <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-jad-primary/20 bg-jad-mint/20 py-16 text-center">
           <p className="font-medium text-jad-foreground">No applications yet</p>
-          <p className="mt-1 text-sm text-foreground/60">
-            Volunteers who apply will appear here
-          </p>
+          <p className="mt-1 text-sm text-foreground/60">Volunteers who apply will appear here</p>
           <Link
             href={`/organisations/${ngoId}/opportunities`}
             className="mt-6 inline-flex items-center gap-2 rounded-full bg-jad-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-jad-dark"
@@ -204,8 +205,8 @@ export default function OpportunityApplicationsPage() {
                         app.status === 'approved'
                           ? 'bg-emerald-100 text-emerald-700'
                           : app.status === 'rejected'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-amber-100 text-amber-700'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-amber-100 text-amber-700'
                       )}
                     >
                       {app.status}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
+import { getApiErrorMessage } from '@/lib/api-proxy';
 import { cn } from '@/lib/common';
 
 interface ApplyModalProps {
@@ -32,7 +33,7 @@ export function ApplyModal({
         body: JSON.stringify({ motivationDescription: motivation || undefined }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error?.message || data?.error || 'Failed to apply');
+      if (!res.ok) throw new Error(getApiErrorMessage(data, 'Failed to apply'));
       toast.success('Application submitted');
       onSuccess();
       onClose();
