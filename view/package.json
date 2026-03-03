@@ -1,6 +1,7 @@
 {
   "name": "@justadrop/view",
   "version": "1.0.0",
+  "description": "Just a Drop public site",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3000",
