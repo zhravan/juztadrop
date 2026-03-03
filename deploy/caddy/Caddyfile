@@ -1,0 +1,14 @@
+# juztadrop.com production reverse proxy
+# TLS is automatic via Let's Encrypt when these domains are used
+
+juztadrop.com, www.juztadrop.com {
+	reverse_proxy view:3000
+}
+
+api.juztadrop.com {
+	reverse_proxy api:3001
+}
+
+dashboard.juztadrop.com {
+	reverse_proxy dashboard:3002
+}

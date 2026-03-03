@@ -1,0 +1,111 @@
+# Production stack for juztadrop.com
+# Uses pre-built Docker images (e.g. from GHCR). Set REGISTRY in .env.
+# Example: REGISTRY=ghcr.io/owner/justadrop.xyz
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: juztadrop-db-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required in prod}
+      POSTGRES_DB: ${POSTGRES_DB:-justadrop}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-justadrop}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - juztadrop-prod
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: juztadrop-redis-prod
+    volumes:
+      - redis_data_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - juztadrop-prod
+    restart: unless-stopped
+
+  api:
+    image: ${REGISTRY:?REGISTRY required}/api:${IMAGE_TAG:-latest}
+    container_name: juztadrop-api-prod
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-justadrop}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://juztadrop.com,https://www.juztadrop.com,https://dashboard.juztadrop.com}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
+      RESEND_FROM_NAME: ${RESEND_FROM_NAME:-Just a Drop}
+      SECRETS_BACKEND: ${SECRETS_BACKEND:-env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - juztadrop-prod
+    restart: unless-stopped
+
+  view:
+    image: ${REGISTRY:?REGISTRY required}/view:${IMAGE_TAG:-latest}
+    container_name: juztadrop-view-prod
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.juztadrop.com}
+    networks:
+      - juztadrop-prod
+    restart: unless-stopped
+
+  dashboard:
+    image: ${REGISTRY:?REGISTRY required}/dashboard:${IMAGE_TAG:-latest}
+    container_name: juztadrop-dashboard-prod
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.juztadrop.com}
+    networks:
+      - juztadrop-prod
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: juztadrop-caddy-prod
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data_prod:/data
+      - caddy_config_prod:/config
+    depends_on:
+      - api
+      - view
+      - dashboard
+    networks:
+      - juztadrop-prod
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  caddy_data_prod:
+  caddy_config_prod:
+
+networks:
+  juztadrop-prod:
+    driver: bridge
