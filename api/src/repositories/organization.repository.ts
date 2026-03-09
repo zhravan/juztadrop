@@ -4,11 +4,14 @@ import {
   organizationMembers,
   organizationDocuments,
   documentTypeEnum,
+  organizationStatusEnum,
 } from '../db/schema.js';
-import { eq, inArray, and } from 'drizzle-orm';
+import { eq, inArray, and, sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
 const ORG_OWNER_ROLE = 'owner' as const;
+
+type OrganizationStatus = (typeof organizationStatusEnum.enumValues)[number];
 
 export interface Organization {
   id: string;
@@ -143,6 +146,60 @@ export class OrganizationRepository {
       verificationStatus: org.verificationStatus,
       createdAt: org.createdAt,
       updatedAt: org.updatedAt,
+    };
+  }
+
+  async findByVerificationStatus(
+    organizationStatus: OrganizationStatus,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<{
+    data: Organization[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> {
+    const offset = (page - 1) * limit;
+
+    const data = await db
+      .select()
+      .from(organizations)
+      .leftJoin(organizationDocuments, eq(organizations.id, organizationDocuments.ngoId))
+      .where(eq(organizations.verificationStatus, organizationStatus))
+      .limit(limit)
+      .offset(offset);
+
+    const [{ total }] = await db
+      .select({ total: sql`count(*)`.mapWith(Number) })
+      .from(organizations)
+      .where(eq(organizations.verificationStatus, organizationStatus));
+
+    return {
+      data: data.map(({ organizations, organization_documents }) => ({
+        id: organizations.id,
+        createdBy: organizations.createdBy,
+        orgName: organizations.orgName,
+        type: organizations.type ?? null,
+        description: organizations.description,
+        causes: organizations.causes,
+        website: organizations.website,
+        registrationNumber: organizations.registrationNumber,
+        contactPersonName: organizations.contactPersonName,
+        contactPersonEmail: organizations.contactPersonEmail,
+        contactPersonNumber: organizations.contactPersonNumber,
+        address: organizations.address,
+        city: organizations.city,
+        state: organizations.state,
+        country: organizations.country,
+        verificationStatus: organizations.verificationStatus,
+        createdAt: organizations.createdAt,
+        updatedAt: organizations.updatedAt,
+        documents: organization_documents,
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 

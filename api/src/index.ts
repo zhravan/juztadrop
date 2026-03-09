@@ -21,6 +21,7 @@ import { logger } from './utils/logger';
 import { validateEnvOnStartup } from './config/env.js';
 import { moderatorRouter } from './routes/moderator';
 import { moderatorAuthRouter } from './routes/moderator-auth';
+import { organizationsModerationRouter } from './routes/moderation-organizations';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldRunMigrations = process.env.RUN_MIGRATIONS !== 'false';
@@ -158,9 +159,7 @@ async function startServer() {
     .get('/', () => ({ message: 'Just a Drop API' }))
     .use(healthRouter)
     .use(authRouter)
-    .use(moderatorAuthRouter)
     .use(usersRouter)
-    .use(moderatorRouter)
     .use(organizationsRouter)
     .use(organizationTypesRouter)
     .use(causesRouter)
@@ -168,6 +167,9 @@ async function startServer() {
     .use(applicationsRouter)
     .use(volunteersRouter)
     .use(storageRouter)
+    .use(moderatorRouter)
+    .use(moderatorAuthRouter)
+    .use(organizationsModerationRouter)
     .listen(3001);
 
   server = app;
