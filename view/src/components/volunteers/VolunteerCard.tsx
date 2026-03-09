@@ -53,20 +53,20 @@ export function VolunteerCard({
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-3 rounded-2xl bg-white/50 p-6 text-center shadow-sm transition-all hover:bg-white/80 hover:shadow-md',
+        'flex flex-col items-center gap-3 rounded-2xl p-6 text-center transition-all',
         className
       )}
     >
       <div
         className={cn(
-          'flex h-16 w-16 items-center justify-center rounded-full text-lg font-bold',
+          'flex h-20 w-20 items-center justify-center rounded-full text-xl font-bold shadow-md bg-white border-white border-solid border-8 cursor-pointer',
           colorClass
         )}
       >
         {initials}
       </div>
       <div className="min-w-0 w-full">
-        <p className="truncate text-sm font-semibold text-jad-foreground">{displayName}</p>
+        <p className="truncate text-base font-semibold text-jad-foreground">{displayName}</p>
         {topCause && (
           <p className="mt-0.5 truncate text-xs text-foreground/45 capitalize">{topCause}</p>
         )}

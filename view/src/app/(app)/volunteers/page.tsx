@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { VOLUNTEER_CAUSES, VOLUNTEER_SKILLS } from '@/lib/constants';
 import { SearchableChipGroup } from '@/components/ui/form';
 import { FilterBadge } from '@/components/ui';
+import Input from '@/components/common/Input';
 import { cn } from '@/lib/common';
 
 const fadeUpSpring = {
@@ -58,7 +59,7 @@ function useCountUp(target: number, duration: number = 1200, delay: number = 300
   return count;
 }
 
-function AnimatedDigit({ digit, prevDigit }: { digit: string; prevDigit: string }) {
+function AnimatedDigit({ digit }: { digit: string }) {
   return (
     <span
       style={{
@@ -67,21 +68,25 @@ function AnimatedDigit({ digit, prevDigit }: { digit: string; prevDigit: string 
         position: 'relative',
         height: '1.2em',
         verticalAlign: 'bottom',
+        perspective: '600px',
       }}
     >
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={digit}
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: '0%', opacity: 1 }}
-          exit={{ y: '-100%', opacity: 0 }}
+          initial={{ y: '60%', opacity: 0, rotateX: -15, filter: 'blur(4px)' }}
+          animate={{ y: '0%', opacity: 1, rotateX: 0, filter: 'blur(0px)' }}
+          exit={{ y: '-60%', opacity: 0, rotateX: 15, filter: 'blur(4px)' }}
           transition={{
-            type: 'spring',
-            stiffness: 300,
-            damping: 28,
-            mass: 1,
+            duration: 0.45,
+            ease: [0.16, 1, 0.3, 1],
           }}
-          style={{ display: 'inline-block', lineHeight: '1.2em' }}
+          style={{
+            display: 'inline-block',
+            lineHeight: '1.2em',
+            transformOrigin: 'center center',
+            transformStyle: 'preserve-3d',
+          }}
         >
           {digit}
         </motion.span>
@@ -101,16 +106,11 @@ function AnimatedNumber({ value }: { value: number }) {
 
   const maxLen = Math.max(str.length, prevStr.length);
   const paddedCurrent = str.padStart(maxLen, ' ');
-  const paddedPrev = prevStr.padStart(maxLen, ' ');
 
   return (
     <span style={{ display: 'inline-flex', alignItems: 'flex-end' }}>
       {paddedCurrent.split('').map((digit, i) => (
-        <AnimatedDigit
-          key={i}
-          digit={digit.trim() === '' ? '\u00A0' : digit}
-          prevDigit={paddedPrev[i]?.trim() === '' ? '\u00A0' : (paddedPrev[i] ?? digit)}
-        />
+        <AnimatedDigit key={i} digit={digit.trim() === '' ? '\u00A0' : digit} />
       ))}
     </span>
   );
@@ -131,7 +131,7 @@ export default function VolunteersPage() {
     clearAllFilters,
   } = useVolunteersList();
 
-  const volunteersCount = useCountUp(500, 1200, 300);
+  const volunteersCount = useCountUp(total, 1200, 300);
 
   return (
     <div className="container">
@@ -167,30 +167,33 @@ export default function VolunteersPage() {
         </motion.p>
       </div>
 
-      <div className="mb-6 flex items-center">
-        <button
-          type="button"
-          onClick={() => setFiltersOpen((v) => !v)}
-          aria-expanded={filtersOpen}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all',
-            filtersOpen || activeFilterCount > 0
-              ? 'border-jad-primary/30 bg-jad-mint/40 text-jad-primary'
-              : 'border-foreground/15 bg-white/80 text-foreground/70 hover:border-jad-primary/30 hover:bg-jad-mint/20'
-          )}
-        >
-          <SlidersHorizontal className="h-4 w-4" aria-hidden />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-jad-primary px-1.5 text-xs font-bold text-white">
-              {activeFilterCount}
-            </span>
-          )}
-          <ChevronDown
-            className={cn('h-3.5 w-3.5 transition-transform', filtersOpen && 'rotate-180')}
-            aria-hidden
-          />
-        </button>
+      <div className="flex align-center justify-center gap-5">
+        <Input placeholder="Search for volunteers" />
+        <div className="mb-6 flex items-center">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all',
+              filtersOpen || activeFilterCount > 0
+                ? 'border-jad-primary/30 bg-jad-mint/40 text-jad-primary'
+                : 'border-foreground/15 bg-white/80 text-foreground/70 hover:border-jad-primary/30 hover:bg-jad-mint/20'
+            )}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-jad-primary px-1.5 text-xs font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDown
+              className={cn('h-3.5 w-3.5 transition-transform', filtersOpen && 'rotate-180')}
+              aria-hidden
+            />
+          </button>
+        </div>
       </div>
 
       {activeFilterCount > 0 && !filtersOpen && (
@@ -285,7 +288,7 @@ export default function VolunteersPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
           {volunteers.map((v) => (
             <VolunteerCard key={v.id} volunteer={v} />
           ))}
