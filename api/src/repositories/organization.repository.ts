@@ -6,12 +6,12 @@ import {
   documentTypeEnum,
   organizationStatusEnum,
 } from '../db/schema.js';
-import { eq, inArray, and, sql } from 'drizzle-orm';
+import { eq, inArray, and, sql, ne } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
 const ORG_OWNER_ROLE = 'owner' as const;
 
-type OrganizationStatus = (typeof organizationStatusEnum.enumValues)[number];
+export type OrganizationStatus = (typeof organizationStatusEnum.enumValues)[number];
 
 export interface Organization {
   id: string;
@@ -330,5 +330,44 @@ export class OrganizationRepository {
       createdAt: org.createdAt,
       updatedAt: org.updatedAt,
     }));
+  }
+
+  async UpdateVerificationStatus(
+    organizationId: string,
+    organizationStatus: OrganizationStatus
+  ): Promise<Organization[]> {
+    const data = await db
+      .update(organizations)
+      .set({ verificationStatus: organizationStatus })
+      .where(
+        and(
+          ne(organizations.verificationStatus, organizationStatus),
+          eq(organizations.id, organizationId)
+        )
+      )
+      .returning();
+
+    return [
+      ...data.map((organizations) => ({
+        id: organizations.id,
+        createdBy: organizations.createdBy,
+        orgName: organizations.orgName,
+        type: organizations.type ?? null,
+        description: organizations.description,
+        causes: organizations.causes,
+        website: organizations.website,
+        registrationNumber: organizations.registrationNumber,
+        contactPersonName: organizations.contactPersonName,
+        contactPersonEmail: organizations.contactPersonEmail,
+        contactPersonNumber: organizations.contactPersonNumber,
+        address: organizations.address,
+        city: organizations.city,
+        state: organizations.state,
+        country: organizations.country,
+        verificationStatus: organizations.verificationStatus,
+        createdAt: organizations.createdAt,
+        updatedAt: organizations.updatedAt,
+      })),
+    ];
   }
 }
