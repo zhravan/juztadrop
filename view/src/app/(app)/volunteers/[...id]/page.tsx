@@ -9,6 +9,7 @@ import { Button } from '@/lib/common';
 import { Skeleton } from '@/components/ui/skeleton';
 import { causeLabelForVolunteers } from '@/hooks/useVolunteersList';
 import { cn } from '@/lib/common';
+import { useVolunteerDetails } from '@/hooks';
 
 const fadeUpSpring = {
   hidden: { opacity: 0, y: 16 },
@@ -23,35 +24,6 @@ const fadeUpSpring = {
     },
   }),
 };
-
-function useVolunteerDetails(id: string) {
-  const [volunteer, setVolunteer] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!id) return;
-    setIsLoading(true);
-    setError(null);
-
-    fetch(`/api/volunteers/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Volunteer not found');
-        return res.json();
-      })
-      .then((data) => {
-        setVolunteer(data);
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [id]);
-
-  return { volunteer, isLoading, error };
-}
 
 function CauseBadge({ cause }: { cause: string }) {
   return (

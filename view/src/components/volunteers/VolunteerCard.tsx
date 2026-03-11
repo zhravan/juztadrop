@@ -70,23 +70,22 @@ export function VolunteerCard({
   return (
     <div
       className={cn(
-        'flex flex-col items-center gap-3 rounded-2xl p-6 text-center transition-all',
+        'flex flex-col items-center gap-0 rounded-2xl p-6 text-center transition-all',
         className
       )}
     >
-      <div
-        className={cn(
-          'flex h-20 w-20 items-center justify-center rounded-full text-xl font-bold shadow-md bg-white border-white border-solid border-8 cursor-pointer',
-          colorClass
-        )}
-      >
-        {initials}
-      </div>
-      <div className="min-w-0 w-full">
-        <p className="truncate text-base font-semibold text-jad-foreground">{displayName}</p>
-        {topCause && (
-          <TextMorph className="mt-0.5 truncate text-xs text-foreground/45">{topCause}</TextMorph>
-        )}
+      <div className="flex flex-col items-center gap-3">
+        <div
+          className={cn(
+            'flex h-20 w-20 items-center justify-center rounded-full text-xl font-bold shadow-md bg-white border-white border-solid border-8 cursor-pointer',
+            colorClass
+          )}
+        >
+          {initials}
+        </div>
+        <div className="min-w-0 w-full">
+          <p className="truncate text-base font-semibold text-jad-foreground">{displayName}</p>
+        </div>
       </div>
 
       {hasTags && (
@@ -94,7 +93,7 @@ export function VolunteerCard({
           {causes.map((c) => (
             <span
               key={c}
-              className="rounded-full bg-jad-mint/50 px-2 py-0.5 text-xs font-medium text-jad-foreground"
+              className="rounded-full bg-jad-mint/50 px-2 py-0.5 text-[7px] font-medium text-jad-foreground"
             >
               {getCauseLabel(c, causeOptions)}
             </span>
@@ -102,7 +101,7 @@ export function VolunteerCard({
           {skills.map((name) => (
             <span
               key={name}
-              className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs text-foreground/80"
+              className="rounded-full bg-foreground/10 px-2 py-0.5 text-[7px] text-foreground/80"
             >
               {name}
             </span>
