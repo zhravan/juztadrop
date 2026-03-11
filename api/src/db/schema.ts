@@ -22,6 +22,13 @@ export type VolunteeringData = {
   causes: string[];
 };
 
+/** Single entry in a user's ban history (array of these stored in users.banHistory). */
+export type BanHistoryEntry = {
+  timestamp: string; // ISO 8601
+  action_type: 'banned' | 'unbanned';
+  reason?: string;
+};
+
 export const users = pgTable(
   'users',
   {
@@ -34,6 +41,7 @@ export const users = pgTable(
     phone: text('phone'),
     gender: genderEnum('gender'),
     isBanned: boolean('is_banned').notNull().default(false),
+    banHistory: jsonb('ban_history').$type<BanHistoryEntry[]>(),
     volunteering: jsonb('volunteering').$type<VolunteeringData>(),
     deletedAt: timestamp('deleted_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
