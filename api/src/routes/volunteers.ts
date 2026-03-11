@@ -7,6 +7,22 @@ const volunteerRepository = container.getRepositories().volunteer;
 export const volunteersRouter = new Elysia({ prefix: '/volunteers', tags: ['volunteers'] })
   .use(cookie())
   .get(
+    '/users/:userId',
+    async ({ params }) => {
+      const user = await volunteerRepository.findById(params.userId);
+      if (!user) {
+        return new Response(JSON.stringify({ error: 'Volunteer not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return { user };
+    },
+    {
+      params: t.Object({ userId: t.String() }),
+    }
+  )
+  .get(
     '/',
     async ({ query }) => {
       const { causes, skills, limit, offset } = query;

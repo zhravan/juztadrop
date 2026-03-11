@@ -1,5 +1,6 @@
 import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
+import type { VolunteeringData } from '../db/schema.js';
 import { and, eq, isNotNull, sql, desc } from 'drizzle-orm';
 
 export interface Volunteer {
@@ -8,6 +9,21 @@ export interface Volunteer {
   email: string;
   causes: string[];
   skills: Array<{ name: string; expertise: string }>;
+}
+
+/** User with volunteering data, for GET /volunteers/users/:userId */
+export interface VolunteerWithUser {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  name: string | null;
+  phone: string | null;
+  gender: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
+  isBanned: boolean;
+  volunteering: VolunteeringData | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface VolunteerFilters {
@@ -68,7 +84,10 @@ export class VolunteerRepository {
     const items: Volunteer[] = rows
       .filter((r) => r.volunteering && typeof r.volunteering === 'object')
       .map((r) => {
-        const v = r.volunteering as { causes?: string[]; skills?: Array<{ name: string; expertise: string }> };
+        const v = r.volunteering as {
+          causes?: string[];
+          skills?: Array<{ name: string; expertise: string }>;
+        };
         return {
           id: r.id,
           name: r.name,
@@ -79,5 +98,51 @@ export class VolunteerRepository {
       });
 
     return { items, total };
+  }
+
+  async findById(userId: string): Promise<VolunteerWithUser | null> {
+    const rows = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        emailVerified: users.emailVerified,
+        name: users.name,
+        phone: users.phone,
+        gender: users.gender,
+        isBanned: users.isBanned,
+        volunteering: users.volunteering,
+        deletedAt: users.deletedAt,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(
+        and(
+          eq(users.id, userId),
+          eq(users.isBanned, false),
+          isNotNull(users.volunteering),
+          sql`(${users.volunteering}->>'isInterest')::boolean = true`
+        )
+      )
+      .limit(1);
+
+    const row = rows[0];
+    if (!row?.volunteering || typeof row.volunteering !== 'object') {
+      return null;
+    }
+
+    return {
+      id: row.id,
+      email: row.email,
+      emailVerified: row.emailVerified,
+      name: row.name,
+      phone: row.phone,
+      gender: row.gender,
+      isBanned: row.isBanned,
+      volunteering: row.volunteering as VolunteeringData,
+      deletedAt: row.deletedAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
   }
 }
