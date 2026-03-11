@@ -1,3 +1,11 @@
+# [0.0.26](https://github.com/juztadrop/juztadrop/compare/v0.0.25...v0.0.26) (2026-03-11)
+
+### Changes
+
+* feat: fetch volunteer by userID (#88) (9bbbcae)
+
+---
+
 # [0.0.25](https://github.com/juztadrop/juztadrop/compare/v0.0.24...v0.0.25) (2026-03-03)
 
 ### Changes
