@@ -21,7 +21,6 @@ import { logger } from './utils/logger';
 import { validateEnvOnStartup } from './config/env.js';
 import { moderatorRouter } from './routes/moderator';
 import { moderatorAuthRouter } from './routes/moderator-auth';
-import { adminRouter } from './routes/admin';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const shouldRunMigrations = process.env.RUN_MIGRATIONS !== 'false';
@@ -148,7 +147,6 @@ async function startServer() {
             { name: 'health', description: 'Health check endpoints' },
             { name: 'auth', description: 'Authentication endpoints' },
             { name: 'moderator-auth', description: 'Moderator Authentication endpoints' },
-            { name: 'admin', description: 'Admin endpoints (moderator-only)' },
             { name: 'storage', description: 'File storage (Supabase Storage) endpoints' },
           ],
         },
@@ -163,7 +161,6 @@ async function startServer() {
     .use(moderatorAuthRouter)
     .use(usersRouter)
     .use(moderatorRouter)
-    .use(adminRouter)
     .use(organizationsRouter)
     .use(organizationTypesRouter)
     .use(causesRouter)

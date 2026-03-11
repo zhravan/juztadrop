@@ -1,5 +1,5 @@
 import { db, users } from '../db/index.js';
-import type { VolunteeringData } from '../db/schema.js';
+import type { BanHistoryEntry, VolunteeringData } from '../db/schema.js';
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
@@ -11,6 +11,7 @@ export interface User {
   phone: string | null;
   gender: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
   isBanned: boolean;
+  banHistory: BanHistoryEntry[] | null;
   volunteering: VolunteeringData | null;
   deletedAt: Date | null;
   createdAt: Date;
@@ -35,6 +36,7 @@ export interface VolunteerWithUser {
   phone: string | null;
   gender: 'male' | 'female' | 'other' | 'prefer_not_to_say' | null;
   isBanned: boolean;
+  banHistory: BanHistoryEntry[] | null;
   volunteering: VolunteeringData | null;
   deletedAt: Date | null;
   createdAt: Date;
@@ -76,6 +78,7 @@ export class UserRepository {
       phone: user.phone,
       gender: user.gender,
       isBanned: user.isBanned,
+      banHistory: user.banHistory ?? null,
       volunteering: user.volunteering,
       deletedAt: user.deletedAt,
       createdAt: user.createdAt,
@@ -100,6 +103,7 @@ export class UserRepository {
       phone: user.phone,
       gender: user.gender,
       isBanned: user.isBanned,
+      banHistory: user.banHistory ?? null,
       volunteering: user.volunteering,
       deletedAt: user.deletedAt,
       createdAt: user.createdAt,
@@ -171,6 +175,50 @@ export class UserRepository {
       phone: updated.phone,
       gender: updated.gender,
       isBanned: updated.isBanned,
+      banHistory: updated.banHistory ?? null,
+      volunteering: updated.volunteering,
+      deletedAt: updated.deletedAt,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  /**
+   * Set ban status for a user and append to ban history.
+   * Ban: reason required. Unban: reason optional.
+   */
+  async setBanStatus(userId: string, banned: boolean, reason?: string): Promise<User | null> {
+    const user = await this.findById(userId);
+    if (!user) return null;
+
+    const history: BanHistoryEntry[] = user.banHistory ?? [];
+    const entry: BanHistoryEntry = {
+      timestamp: new Date().toISOString(),
+      action_type: banned ? 'banned' : 'unbanned',
+      ...(reason && reason.trim() ? { reason: reason.trim() } : {}),
+    };
+
+    const [updated] = await db
+      .update(users)
+      .set({
+        isBanned: banned,
+        banHistory: [...history, entry],
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+
+    if (!updated) return null;
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      emailVerified: updated.emailVerified,
+      name: updated.name,
+      phone: updated.phone,
+      gender: updated.gender,
+      isBanned: updated.isBanned,
+      banHistory: updated.banHistory ?? null,
       volunteering: updated.volunteering,
       deletedAt: updated.deletedAt,
       createdAt: updated.createdAt,
@@ -235,6 +283,7 @@ export class UserRepository {
       phone: r.phone,
       gender: r.gender,
       isBanned: r.isBanned,
+      banHistory: r.banHistory ?? null,
       volunteering: r.volunteering,
       deletedAt: r.deletedAt,
       createdAt: r.createdAt,
@@ -320,6 +369,7 @@ export class UserRepository {
         phone: users.phone,
         gender: users.gender,
         isBanned: users.isBanned,
+        banHistory: users.banHistory,
         volunteering: users.volunteering,
         deletedAt: users.deletedAt,
         createdAt: users.createdAt,
@@ -349,6 +399,7 @@ export class UserRepository {
       phone: row.phone,
       gender: row.gender,
       isBanned: row.isBanned,
+      banHistory: row.banHistory ?? null,
       volunteering: row.volunteering as VolunteeringData,
       deletedAt: row.deletedAt,
       createdAt: row.createdAt,
