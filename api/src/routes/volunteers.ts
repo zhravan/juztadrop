@@ -2,14 +2,14 @@ import { Elysia, t } from 'elysia';
 import { cookie } from '@elysiajs/cookie';
 import { container } from '../container';
 
-const volunteerRepository = container.getRepositories().volunteer;
+const userService = container.getServices().user;
 
 export const volunteersRouter = new Elysia({ prefix: '/volunteers', tags: ['volunteers'] })
   .use(cookie())
   .get(
     '/users/:userId',
     async ({ params }) => {
-      const user = await volunteerRepository.findById(params.userId);
+      const user = await userService.getVolunteerById(params.userId);
       if (!user) {
         return new Response(JSON.stringify({ error: 'Volunteer not found' }), {
           status: 404,
@@ -32,7 +32,7 @@ export const volunteersRouter = new Elysia({ prefix: '/volunteers', tags: ['volu
         limit: limit ? parseInt(String(limit), 10) : 20,
         offset: offset ? parseInt(String(offset), 10) : 0,
       };
-      const result = await volunteerRepository.findMany(filters);
+      const result = await userService.getVolunteers(filters);
       return { volunteers: result.items, total: result.total };
     },
     {
