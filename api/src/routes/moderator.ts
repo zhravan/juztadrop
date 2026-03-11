@@ -27,8 +27,9 @@ function parseStringArray(value: string | string[] | undefined): string[] | unde
 function parseGenders(value: string | string[] | undefined): AdminUserListFilters['genders'] {
   const arr = parseStringArray(value);
   if (!arr) return undefined;
-  const valid = arr.filter((g) => GENDER_VALUES.includes(g as (typeof GENDER_VALUES)[number]));
-  return valid.length > 0 ? (valid as (typeof GENDER_VALUES)[]) : undefined;
+  type Gender = (typeof GENDER_VALUES)[number];
+  const valid = arr.filter((g): g is Gender => GENDER_VALUES.includes(g as Gender));
+  return valid.length > 0 ? valid : undefined;
 }
 
 function parseCauses(value: string | string[] | undefined): string[] | undefined {

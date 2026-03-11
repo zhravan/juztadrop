@@ -46,6 +46,7 @@ export class ModeratorRepository {
         phone: u.phone,
         gender: u.gender,
         isBanned: u.isBanned,
+        banHistory: u.banHistory ?? null,
         volunteering: u.volunteering as VolunteeringData | null,
         deletedAt: u.deletedAt,
         createdAt: u.createdAt,
