@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { CardBackground } from '@/components/volunteers/onboarding/CardBackground';
 
 import { SaveIndicator } from '@/components/ui';
+import { StaggerItem } from '@/components/common/StaggerItem';
 
 const staggerContainer = {
   hidden: {},
@@ -25,28 +26,6 @@ const staggerContainer = {
     },
   },
 };
-
-const fadeUpSpring = {
-  hidden: { opacity: 0, y: 16 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 420,
-      damping: 32,
-      mass: 0.8,
-    },
-  },
-};
-
-function StaggerItem({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <motion.div variants={fadeUpSpring} className={className}>
-      {children}
-    </motion.div>
-  );
-}
 
 export default function VolunteerOnboardingPage() {
   const router = useRouter();
