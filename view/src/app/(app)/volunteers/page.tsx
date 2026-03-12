@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { Users, SlidersHorizontal, ChevronDown, Loader2 } from 'lucide-react';
+import * as React from 'react';
+import { Users, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useVolunteersList, causeLabelForVolunteers } from '@/hooks/useVolunteersList';
 import { useCauses } from '@/hooks';
 import { VolunteerCard } from '@/components/volunteers/VolunteerCard';
@@ -9,11 +10,30 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { VOLUNTEER_SKILLS } from '@/lib/constants';
 import { SearchableChipGroup } from '@/components/ui/form';
 import { FilterBadge } from '@/components/ui';
+import Input from '@/components/common/Input';
 import { cn } from '@/lib/common';
+import Link from 'next/link';
+import { useCountUp } from '@/hooks/useCountUp';
+import { AnimatedNumber } from '@/components/common/AnimatedNumber';
+
+const fadeUpSpring = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      type: 'spring',
+      stiffness: 300,
+      damping: 30,
+      mass: 1,
+    },
+  }),
+};
 
 export default function VolunteersPage() {
   const { options: causeOptions } = useCauses();
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = React.useRef<HTMLDivElement>(null);
   const {
     volunteers,
     total,
@@ -31,63 +51,69 @@ export default function VolunteersPage() {
     clearAllFilters,
   } = useVolunteersList();
 
-  useEffect(() => {
-    if (!hasMore || loadingMore || isLoading) return;
-    const el = loadMoreRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) loadMore();
-      },
-      { rootMargin: '200px', threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasMore, loadingMore, isLoading, loadMore]);
+  const volunteersCount = useCountUp(total, 1200, 300);
 
   return (
-    <div className="container">
+    <div className="container max-w-[800px] w-full">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-jad-foreground sm:text-4xl">
-          {isLoading ? (
-            'Volunteers'
-          ) : (
-            <>
-              <span className="text-jad-primary">{total}</span> {total === 1 ? 'person' : 'people'},
-              united by purpose
-            </>
-          )}
-        </h1>
-        <p className="mx-auto mt-2 max-w-lg text-foreground/60">
-          People making a difference in their communities. Filter by cause or skill to find
-          volunteers.
-        </p>
+        <div className="flex flex-col align-center justify-center">
+          <motion.h1
+            className="text-3xl font-bold tracking-tight text-jad-primary sm:text-4xl"
+            custom={0}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpSpring}
+          >
+            <AnimatedNumber value={volunteersCount} />
+          </motion.h1>
+          <motion.h1
+            className="text-3xl font-bold tracking-tight text-jad-foreground sm:text-4xl"
+            custom={1}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpSpring}
+          >
+            Volunteers
+          </motion.h1>
+        </div>
+        <motion.p
+          className="mx-auto mt-2 max-w-lg text-foreground/60"
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={fadeUpSpring}
+        >
+          People making a difference in their communities.
+        </motion.p>
       </div>
 
-      <div className="mb-6 flex items-center">
-        <button
-          type="button"
-          onClick={() => setFiltersOpen((v) => !v)}
-          aria-expanded={filtersOpen}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all',
-            filtersOpen || activeFilterCount > 0
-              ? 'border-jad-primary/30 bg-jad-mint/40 text-jad-primary'
-              : 'border-foreground/15 bg-white/80 text-foreground/70 hover:border-jad-primary/30 hover:bg-jad-mint/20'
-          )}
-        >
-          <SlidersHorizontal className="h-4 w-4" aria-hidden />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-jad-primary px-1.5 text-xs font-bold text-white">
-              {activeFilterCount}
-            </span>
-          )}
-          <ChevronDown
-            className={cn('h-3.5 w-3.5 transition-transform', filtersOpen && 'rotate-180')}
-            aria-hidden
-          />
-        </button>
+      <div className="flex align-center justify-center gap-5">
+        <Input placeholder="Search for volunteers" />
+        <div className="mb-6 flex items-center">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-all',
+              filtersOpen || activeFilterCount > 0
+                ? 'border-jad-primary/30 bg-jad-mint/40 text-jad-primary'
+                : 'border-foreground/15 bg-white/80 text-foreground/70 hover:border-jad-primary/30 hover:bg-jad-mint/20'
+            )}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-jad-primary px-1.5 text-xs font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+            <ChevronDown
+              className={cn('h-3.5 w-3.5 transition-transform', filtersOpen && 'rotate-180')}
+              aria-hidden
+            />
+          </button>
+        </div>
       </div>
 
       {activeFilterCount > 0 && !filtersOpen && (
@@ -182,32 +208,13 @@ export default function VolunteersPage() {
           )}
         </div>
       ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {volunteers.map((v) => (
-              <VolunteerCard key={v.id} volunteer={v} causeOptions={causeOptions} />
-            ))}
-          </div>
-          {hasMore && (
-            <div
-              ref={loadMoreRef}
-              className="mt-8 flex min-h-[80px] items-center justify-center"
-              aria-hidden
-            >
-              {loadingMore && (
-                <span className="inline-flex items-center gap-2 text-sm text-foreground/60">
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  Loading more…
-                </span>
-              )}
-            </div>
-          )}
-          {!hasMore && volunteers.length > 0 && total > 0 && (
-            <p className="mt-8 text-center text-sm text-foreground/50">
-              Showing all {total} {total === 1 ? 'volunteer' : 'volunteers'}
-            </p>
-          )}
-        </>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
+          {volunteers.map((v) => (
+            <Link href={`/volunteers/` + v.id}>
+              <VolunteerCard key={v.id} volunteer={v} />
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );

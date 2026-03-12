@@ -36,7 +36,7 @@ export function ChipGroup({
               'rounded-full px-4 py-2 text-sm font-medium',
               isSelected
                 ? variant === 'primary'
-                  ? 'bg-jad-primary text-white shadow-md shadow-jad-primary/20'
+                  ? 'bg-jad-primary text-white'
                   : 'bg-jad-mint text-jad-foreground border border-jad-primary/30'
                 : 'border border-foreground/20 bg-white text-foreground/80 hover:border-jad-primary/40 hover:bg-jad-mint/30'
             )}

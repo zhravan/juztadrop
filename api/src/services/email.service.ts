@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { logger } from '../utils/logger';
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@justadrop.xyz';
+const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@juztadrop.com';
 const resendFromName = process.env.RESEND_FROM_NAME || 'Just a Drop';
 
 let resendClient: Resend | null = null;
