@@ -2,44 +2,12 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, Heart, Hand } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.09,
-      type: 'spring',
-      stiffness: 100,
-      damping: 20,
-      mass: 0.8,
-    },
-  }),
-};
-
-const imageReveal = {
-  hidden: { opacity: 0, scale: 0.88, rotate: 0 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    rotate: 15,
-    transition: {
-      delay: 0.1,
-      type: 'spring',
-      stiffness: 90,
-      damping: 14,
-      mass: 0.7,
-      ease: [1, -0.4, 0.35, 0.95],
-    },
-  },
-};
+import { ArrowRight, Search } from 'lucide-react';
 
 export function LandingHero() {
   return (
     <section className="relative overflow-hidden bg-jad-primary pt-20 pb-12 sm:pt-24 sm:pb-16 md:pt-32 md:pb-24">
+      {/* Depth gradient */}
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
         style={{
@@ -51,44 +19,17 @@ export function LandingHero() {
       <div className="container relative z-10">
         <div className="grid gap-8 sm:gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
           <div className="flex flex-col justify-center">
-            <motion.h1
-              custom={0}
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              className="text-2xl font-bold leading-[1.1] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl"
-            >
+            <h1 className="text-2xl font-bold leading-[1.1] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
               Small Actions
               <br />
               <span className="text-jad-mint">Lasting Impacts</span>
-            </motion.h1>
+            </h1>
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg md:text-xl">
+              Connect with local ❤️ NGOs and charities that need your help 👋
+            </p>
 
-            <motion.p
-              custom={1}
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              className="mt-4 max-w-lg text-base leading-relaxed text-white/90 sm:mt-6 sm:text-lg md:text-xl"
-            >
-              Connect with local{' '}
-              <Heart
-                className="inline-block h-[1em] w-[1em] text-white align-middle fill-white"
-                strokeWidth={0}
-              />{' '}
-              NGOs and charities that need your help{' '}
-              <Hand
-                className="inline-block h-[1em] w-[1em] text-white align-middle fill-white"
-                strokeWidth={0}
-              />
-            </motion.p>
-
-            <motion.div
-              custom={2}
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              className="mt-6 sm:mt-10"
-            >
+            {/* Search - floating card feel */}
+            <div className="mt-6 sm:mt-10">
               <div className="flex flex-col gap-3 rounded-2xl bg-white/95 p-3 shadow-2xl shadow-jad-foreground/20 backdrop-blur sm:flex-row sm:items-center sm:gap-0 sm:p-2">
                 <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-jad-mint/30 px-4 py-3 transition-colors focus-within:bg-jad-mint/50 sm:rounded-l-xl sm:rounded-r-none">
                   <span className="shrink-0 text-jad-foreground/50">
@@ -165,7 +106,7 @@ export function LandingHero() {
                 <button
                   type="button"
                   aria-label="Search"
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-jad-accent text-white transition-all duration-200 hover:bg-jad-primary active:scale-95 sm:rounded-r-xl sm:rounded-l-none"
+                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-jad-accent text-white shadow-lg shadow-jad-accent/30 hover:shadow-xl hover:shadow-jad-accent/40 sm:rounded-r-xl sm:rounded-l-none"
                 >
                   <Search className="h-5 w-5" strokeWidth={2.5} />
                 </button>
@@ -179,25 +120,20 @@ export function LandingHero() {
                   Create an Organisation →
                 </Link>
               </p>
-            </motion.div>
+            </div>
           </div>
 
-          <div className="relative mt-10 flex items-center justify-center lg:mt-0">
-            <motion.div
-              variants={imageReveal}
-              initial="hidden"
-              animate="visible"
-              className="relative w-[78%] aspect-[4/3] overflow-hidden rounded-3xl shadow-lg shadow-jad-foreground/30 ring-8 ring-white/50"
-            >
+          <div className="relative mt-10 lg:mt-0 lg:block">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-2xl shadow-jad-foreground/30 ring-4 ring-white/20">
               <Image
                 src="/images/hero-volunteers.png"
                 alt="Volunteers making a difference in their community"
                 fill
                 className="object-cover"
                 priority
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 40vw"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 50vw"
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

@@ -26,10 +26,6 @@ const config: Config = {
       },
     },
     extend: {
-      fontFamily: {
-        // This overrides the default sans-serif font
-        sans: ['"Open Runde"', 'ui-sans-serif', 'system-ui'],
-      },
       colors: {
         jad: {
           primary: '#E52E81',
@@ -81,14 +77,6 @@ const config: Config = {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-      },
-      borderWidth: {
-        DEFAULT: '1px',
-        '0': '0',
-        '2': '2px',
-        '4': '4px',
-        '5': '5px',
-        '8': '8px',
       },
       keyframes: {
         'accordion-down': {
