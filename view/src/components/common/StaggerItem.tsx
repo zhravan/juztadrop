@@ -1,12 +1,13 @@
-import { motion } from 'framer-motion';
+import * as React from 'react';
+import { motion, type Variants } from 'framer-motion';
 
-const fadeUpSpring = {
+const fadeUpSpring: Variants = {
   hidden: { opacity: 0, y: 16 },
   show: {
     opacity: 1,
     y: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 420,
       damping: 32,
       mass: 0.8,

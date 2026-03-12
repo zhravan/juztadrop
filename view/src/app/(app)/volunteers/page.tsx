@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Users, SlidersHorizontal, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useVolunteersList, causeLabelForVolunteers } from '@/hooks/useVolunteersList';
 import { useCauses } from '@/hooks';
 import { VolunteerCard } from '@/components/volunteers/VolunteerCard';
@@ -16,14 +16,14 @@ import Link from 'next/link';
 import { useCountUp } from '@/hooks/useCountUp';
 import { AnimatedNumber } from '@/components/common/AnimatedNumber';
 
-const fadeUpSpring = {
+const fadeUpSpring: Variants = {
   hidden: { opacity: 0, y: 12 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
       delay: i * 0.1,
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 300,
       damping: 30,
       mass: 1,
@@ -210,8 +210,8 @@ export default function VolunteersPage() {
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
           {volunteers.map((v) => (
-            <Link href={`/volunteers/` + v.id}>
-              <VolunteerCard key={v.id} volunteer={v} />
+            <Link key={v.id} href={`/volunteers/` + v.id}>
+              <VolunteerCard volunteer={v} />
             </Link>
           ))}
         </div>

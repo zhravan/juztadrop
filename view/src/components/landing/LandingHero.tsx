@@ -3,16 +3,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Heart, Hand } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
       delay: i * 0.09,
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 100,
       damping: 20,
       mass: 0.8,
@@ -20,7 +20,7 @@ const fadeUp = {
   }),
 };
 
-const imageReveal = {
+const imageReveal: Variants = {
   hidden: { opacity: 0, scale: 0.88, rotate: 0 },
   visible: {
     opacity: 1,
@@ -28,11 +28,10 @@ const imageReveal = {
     rotate: 15,
     transition: {
       delay: 0.1,
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 90,
       damping: 14,
       mass: 0.7,
-      ease: [1, -0.4, 0.35, 0.95],
     },
   },
 };

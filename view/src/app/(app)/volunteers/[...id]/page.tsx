@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { ArrowLeft, MapPin, Mail, ExternalLink, Briefcase, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Button } from '@/lib/common';
@@ -12,14 +12,14 @@ import { SkillBadge } from '@/components/volunteers/SkillBadge';
 import { DetailRow } from '@/components/volunteers/DetailRow';
 import LoadingSkeleton from '@/components/volunteers/LoadingSkeleton';
 
-const fadeUpSpring = {
+const fadeUpSpring: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
       delay: i * 0.08,
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 280,
       damping: 28,
     },

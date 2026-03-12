@@ -1,6 +1,10 @@
 'use client';
-
 import { cn } from '@/lib/common';
+
+export interface CauseOption {
+  value: string;
+  label: string;
+}
 
 export interface VolunteerCardData {
   id: string;
@@ -10,7 +14,6 @@ export interface VolunteerCardData {
   skills: Array<{ name: string; expertise: string }>;
 }
 
-/** Max causes and skills to show on card. Keeps layout consistent. */
 const MAX_CAUSES = 2;
 const MAX_SKILLS = 2;
 

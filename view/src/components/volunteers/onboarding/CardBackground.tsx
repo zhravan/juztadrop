@@ -53,7 +53,7 @@ function ProfileCard({
   };
 
   return (
-    <div class="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center">
       <VolunteerCard volunteer={volunteerData} className="py-2 px-2" />
     </div>
   );
@@ -96,7 +96,7 @@ function FlippableMiddleCard({
             position: 'absolute',
             inset: 0,
           }}
-          className="border-[1px] rounded-xl overflow-hidden bg-white border-border flex flex-col  shadow-sm"
+          className="border-[1px] rounded-xl overflow-hidden bg-white border-border flex flex-col shadow-sm"
         >
           <ProfileCard
             name={name}
@@ -115,7 +115,7 @@ function FlippableMiddleCard({
             position: 'absolute',
             inset: 0,
           }}
-          className="border-[1px] rounded-xl overflow-hidden bg-white border-border flex flex-col  shadow-sm items-center justify-center"
+          className="border-[1px] rounded-xl overflow-hidden bg-white border-border flex flex-col shadow-sm items-center justify-center"
         >
           <div className="flex flex-wrap justify-center gap-1.5 p-2">
             {causes.map((c) => (
@@ -200,7 +200,7 @@ export function CardBackground({
                   key={cardIndex}
                   className="border-[1px] h-[200px] w-[150px] shrink-0 rounded-xl overflow-hidden bg-input border-border/50"
                 >
-                  <ProfileCard name={''} causes={[]} skills={[]} userId={''} userEmail={''} />
+                  <ProfileCard name="" causes={[]} skills={[]} userId="" userEmail="" />
                 </div>
               )
             )}
