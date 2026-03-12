@@ -13,6 +13,8 @@ import { FilterBadge } from '@/components/ui';
 import Input from '@/components/common/Input';
 import { cn } from '@/lib/common';
 import Link from 'next/link';
+import { useCountUp } from '@/hooks/useCountUp';
+import { AnimatedNumber } from '@/components/common/AnimatedNumber';
 
 const fadeUpSpring = {
   hidden: { opacity: 0, y: 12 },
@@ -28,95 +30,6 @@ const fadeUpSpring = {
     },
   }),
 };
-
-function useCountUp(target: number, duration: number = 1200, delay: number = 300) {
-  const [count, setCount] = React.useState(0);
-
-  React.useEffect(() => {
-    let startTime: number | null = null;
-    let rafId: number;
-
-    const timeout = setTimeout(() => {
-      const step = (timestamp: number) => {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        setCount(Math.floor(eased * target));
-        if (progress < 1) {
-          rafId = requestAnimationFrame(step);
-        } else {
-          setCount(target);
-        }
-      };
-      rafId = requestAnimationFrame(step);
-    }, delay);
-
-    return () => {
-      clearTimeout(timeout);
-      cancelAnimationFrame(rafId);
-    };
-  }, [target, duration, delay]);
-
-  return count;
-}
-
-function AnimatedDigit({ digit }: { digit: string }) {
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        overflow: 'hidden',
-        position: 'relative',
-        height: '1.2em',
-        verticalAlign: 'bottom',
-        perspective: '600px',
-      }}
-    >
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span
-          key={digit}
-          initial={{ y: '60%', opacity: 0, rotateX: -15, filter: 'blur(4px)' }}
-          animate={{ y: '0%', opacity: 1, rotateX: 0, filter: 'blur(0px)' }}
-          exit={{ y: '-60%', opacity: 0, rotateX: 15, filter: 'blur(4px)' }}
-          transition={{
-            duration: 0.45,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          style={{
-            display: 'inline-block',
-            lineHeight: '1.2em',
-            transformOrigin: 'center center',
-            transformStyle: 'preserve-3d',
-          }}
-        >
-          {digit}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  );
-}
-
-function AnimatedNumber({ value }: { value: number }) {
-  const str = String(value);
-  const prevRef = React.useRef(str);
-  const prevStr = prevRef.current;
-
-  React.useEffect(() => {
-    prevRef.current = str;
-  });
-
-  const maxLen = Math.max(str.length, prevStr.length);
-  const paddedCurrent = str.padStart(maxLen, ' ');
-
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'flex-end' }}>
-      {paddedCurrent.split('').map((digit, i) => (
-        <AnimatedDigit key={i} digit={digit.trim() === '' ? '\u00A0' : digit} />
-      ))}
-    </span>
-  );
-}
 
 export default function VolunteersPage() {
   const { options: causeOptions } = useCauses();
