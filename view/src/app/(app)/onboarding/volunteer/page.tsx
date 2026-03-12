@@ -1,48 +1,29 @@
 'use client';
-
+import * as React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, User, Sparkles, Check, Loader2 } from 'lucide-react';
-import Link from 'next/link';
+import { Heart, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth/use-auth';
-import { VOLUNTEER_SKILLS } from '@/lib/constants';
-import { useCauses } from '@/hooks';
+import { useCauses, useVolunteerSteps } from '@/hooks';
 import { FormPageSkeleton } from '@/components/skeletons';
-import {
-  FormField,
-  FormInput,
-  FormSection,
-  ChipGroup,
-  StepperWizard,
-  SearchableChipGroup,
-} from '@/components/ui/form';
-import type { WizardStep } from '@/components/ui/form';
+import { StepperWizard } from '@/components/ui/form';
 import { useVolunteerOnboarding } from '@/hooks';
+import { Button } from '@/lib/common';
+import Link from 'next/link';
+import { CardBackground } from '@/components/volunteers/onboarding/CardBackground';
+import { SaveIndicator } from '@/components/ui';
+import { StaggerItem } from '@/components/common/StaggerItem';
 
-const VOLUNTEER_INTEREST_OPTIONS = [
-  { value: 'yes', label: 'Yes' },
-  { value: 'no', label: 'No' },
-];
-
-function SaveIndicator({ status }: { status: string }) {
-  if (status === 'saving') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-foreground/50">
-        <Loader2 className="h-3 w-3 animate-spin" />
-        Saving…
-      </span>
-    );
-  }
-  if (status === 'saved') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-jad-primary">
-        <Check className="h-3 w-3" />
-        Saved
-      </span>
-    );
-  }
-  return null;
-}
+const staggerContainer = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.05,
+    },
+  },
+};
 
 export default function VolunteerOnboardingPage() {
   const router = useRouter();
@@ -52,141 +33,76 @@ export default function VolunteerOnboardingPage() {
     useVolunteerOnboarding();
   const [activeStep, setActiveStep] = useState('interest');
 
-  if (!isReady || isLoading || !user) {
-    return <FormPageSkeleton />;
-  }
+  if (!isReady || isLoading || !user) return <FormPageSkeleton />;
 
   if (!isAuthenticated) {
     router.replace('/login?redirect=/onboarding/volunteer');
     return null;
   }
 
-  const steps: WizardStep[] = [
-    {
-      id: 'interest',
-      label: 'Interest',
-      icon: <Heart className="h-5 w-5" />,
-      isComplete: true,
-      content: (
-        <FormSection
-          title="Are you interested in volunteering?"
-          description="Choose Yes to get matched with opportunities and apply. You can change this anytime from your profile."
-          icon={<Heart className="h-5 w-5" />}
-        >
-          <ChipGroup
-            options={VOLUNTEER_INTEREST_OPTIONS}
-            selected={form.isInterest ? ['yes'] : ['no']}
-            onChange={(value) => setIsInterest(value === 'yes')}
-          />
-        </FormSection>
-      ),
-    },
-    {
-      id: 'name',
-      label: 'Basic info',
-      icon: <User className="h-5 w-5" />,
-      isComplete: !!form.name.trim(),
-      content: (
-        <FormSection
-          title="Basic info"
-          description="We'll use this to personalise your experience"
-          icon={<User className="h-5 w-5" />}
-        >
-          <FormField label="Full name" htmlFor="name" required>
-            <FormInput
-              id="name"
-              type="text"
-              value={form.name}
-              onChange={(e) => updateName(e.target.value)}
-              placeholder="Your name"
-            />
-          </FormField>
-        </FormSection>
-      ),
-    },
-    {
-      id: 'causes',
-      label: 'Causes',
-      icon: <Heart className="h-5 w-5" />,
-      isComplete: form.causes.length > 0,
-      content: (
-        <FormSection
-          title="Causes you care about"
-          description="Select all that resonate with you"
-          icon={<Heart className="h-5 w-5" />}
-        >
-          <SearchableChipGroup
-            options={causeOptions}
-            selected={form.causes}
-            onChange={toggleCause}
-            placeholder="Search causes…"
-          />
-        </FormSection>
-      ),
-    },
-    {
-      id: 'skills',
-      label: 'Skills',
-      icon: <Sparkles className="h-5 w-5" />,
-      isComplete: form.skills.length > 0,
-      content: (
-        <FormSection
-          title="Skills (optional)"
-          description="Add skills that could help organisations"
-          icon={<Sparkles className="h-5 w-5" />}
-        >
-          <SearchableChipGroup
-            options={VOLUNTEER_SKILLS.map((s) => ({ value: s, label: s }))}
-            selected={form.skills}
-            onChange={toggleSkill}
-            placeholder="Search skills…"
-            variant="mint"
-          />
-        </FormSection>
-      ),
-    },
-  ];
+  const isZoomed = form.name.trim().length > 0;
 
-  const allDone = !!form.name.trim() && form.causes.length > 0;
+  const steps = useVolunteerSteps({
+    form,
+    activeStep,
+    setActiveStep,
+    updateName,
+    setIsInterest,
+    toggleCause,
+    toggleSkill,
+  });
 
   return (
-    <div className="container">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-jad-mint text-jad-primary shadow-lg shadow-jad-primary/10">
-          <Heart className="h-7 w-7" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-jad-foreground sm:text-3xl">Volunteer profile</h1>
-          <p className="mt-1 text-sm text-foreground/70">
-            Tell us about yourself so we can match you with the right opportunities.
-          </p>
-        </div>
-      </div>
-
-      <StepperWizard
-        steps={steps}
-        activeStep={activeStep}
-        onStepChange={setActiveStep}
-        headerExtra={<SaveIndicator status={saveStatus} />}
-      />
-
-      {/* Navigation actions */}
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Link
-          href="/profile"
-          className="order-2 sm:order-1 text-center text-sm font-medium text-foreground/70 hover:text-jad-primary"
-        >
-          Back to profile
-        </Link>
-        {allDone && (
-          <Link
-            href="/opportunities"
-            className="order-1 sm:order-2 flex items-center justify-center gap-2 rounded-xl bg-jad-primary px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-jad-primary/25 transition-all hover:bg-jad-dark hover:shadow-xl"
-          >
-            Browse opportunities →
+    <div className="flex w-full h-full fixed top-0 z-[10000]">
+      <div className="w-full md:w-1/2 h-full bg-white flex flex-col overflow-y-auto">
+        <div className="w-full top-0 sticky pt-10 md:px-[4.5rem] md:py-10">
+          <Link href="/dashboard">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back
+            </Button>
           </Link>
-        )}
+        </div>
+        <motion.div
+          className="flex flex-col gap-4 md:gap-5 w-full max-w-sm md:max-w-none mx-auto md:mx-0 pt-10 md:px-[4.5rem] md:py-14"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <StaggerItem className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-jad-mint text-jad-primary shadow-sm">
+              <Heart className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-jad-foreground">
+                Volunteer profile
+              </h1>
+              <p className="text-xs text-foreground/60">Tell us about yourself</p>
+            </div>
+          </StaggerItem>
+          <StaggerItem>
+            <StepperWizard
+              steps={steps}
+              activeStep={activeStep}
+              onStepChange={(id) => setActiveStep(id)}
+              headerExtra={<SaveIndicator status={saveStatus} />}
+            />
+          </StaggerItem>
+        </motion.div>
       </div>
+      <CardBackground
+        isZoomed={isZoomed}
+        isOnCausesOrSkills={activeStep === 'causes' || activeStep === 'skills'}
+        name={form.name}
+        causes={form.causes}
+        skills={form.skills}
+        userId={user.id}
+        userEmail={user.email ?? ''}
+      />
     </div>
   );
 }

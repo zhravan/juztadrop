@@ -131,3 +131,13 @@ body {
     display: none;
   }
 }
+
+::selection {
+  background-color: #d8f8e8;
+  color: #3f4c45;
+}
+
+::-moz-selection {
+  background-color: #d8f8e8;
+  color: #3f4c45;
+}

@@ -1,7 +1,10 @@
 'use client';
-
 import { cn } from '@/lib/common';
-import type { CauseOption } from '@/hooks/useCauses';
+
+export interface CauseOption {
+  value: string;
+  label: string;
+}
 
 export interface VolunteerCardData {
   id: string;
@@ -11,7 +14,6 @@ export interface VolunteerCardData {
   skills: Array<{ name: string; expertise: string }>;
 }
 
-/** Max causes and skills to show on card. Keeps layout consistent. */
 const MAX_CAUSES = 2;
 const MAX_SKILLS = 2;
 
@@ -40,7 +42,7 @@ function getInitials(name: string | null, email: string): string {
     }
     return name.slice(0, 2).toUpperCase();
   }
-  return email ? email.slice(0, 2).toUpperCase() : '?';
+  return email ? email.slice(0, 2).toUpperCase() : '';
 }
 
 function getCauseLabel(value: string, causeOptions?: CauseOption[]): string {
@@ -61,7 +63,7 @@ export function VolunteerCard({
   className?: string;
 }) {
   const initials = getInitials(volunteer.name, volunteer.email);
-  const displayName = volunteer.name || 'Volunteer';
+  const displayName = volunteer.name;
   const colorClass = AVATAR_COLORS[hashCode(volunteer.id) % AVATAR_COLORS.length];
   const causes = (volunteer.causes ?? []).slice(0, MAX_CAUSES);
   const skills = (volunteer.skills ?? []).slice(0, MAX_SKILLS).map((s) => s.name);
@@ -70,44 +72,23 @@ export function VolunteerCard({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-2xl border border-foreground/10 bg-white p-4 shadow-lg shadow-foreground/5 hover:shadow-xl',
+        'flex flex-col items-center gap-0 rounded-2xl pt-5 pl-5 pr-5 text-center transition-all',
         className
       )}
     >
-      <div className="flex flex-col items-center text-center">
+      <div className="flex flex-col items-center gap-3">
         <div
           className={cn(
-            'flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold',
+            'flex h-20 w-20 items-center justify-center rounded-full text-xl font-bold shadow-md bg-white border-white border-solid border-8 cursor-pointer',
             colorClass
           )}
         >
           {initials}
         </div>
-        <p className="mt-2 truncate w-full font-semibold text-jad-foreground text-sm">
-          {displayName}
-        </p>
-      </div>
-
-      {hasTags && (
-        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-          {causes.map((c) => (
-            <span
-              key={c}
-              className="rounded-full bg-jad-mint/50 px-2 py-0.5 text-xs font-medium text-jad-foreground"
-            >
-              {getCauseLabel(c, causeOptions)}
-            </span>
-          ))}
-          {skills.map((name) => (
-            <span
-              key={name}
-              className="rounded-full bg-foreground/10 px-2 py-0.5 text-xs text-foreground/80"
-            >
-              {name}
-            </span>
-          ))}
+        <div className="min-w-0 w-full">
+          <p className="truncate text-base font-semibold text-jad-foreground">{displayName}</p>
         </div>
-      )}
+      </div>
     </div>
   );
 }

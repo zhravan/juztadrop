@@ -2,7 +2,7 @@
 
 ### Changes
 
-* feat: get users &  moderator user ban workflow (#90) (4dc5128)
+- feat: get users & moderator user ban workflow (#90) (4dc5128)
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### Changes
 
-* feat: fetch volunteer by userID (#88) (9bbbcae)
+- feat: fetch volunteer by userID (#88) (9bbbcae)
 
 ---
 
@@ -18,7 +18,7 @@
 
 ### Changes
 
-* fix: dashboard login UI (#83) (0926734)
+- fix: dashboard login UI (#83) (0926734)
 
 ---
 
