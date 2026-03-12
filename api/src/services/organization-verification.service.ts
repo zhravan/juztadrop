@@ -26,6 +26,8 @@ const ACTION_TO_STATUS: Record<
   reinstate: 'verified',
 };
 
+const ACTIONS_REQUIRING_DESCRIPTION: OrgVerificationAction[] = ['rejected', 'suspended'];
+
 export interface ApplyVerificationActionInput {
   organizationId: string;
   moderatorId: string;
@@ -68,17 +70,22 @@ export class OrganizationVerificationService {
       input.action === 'request_for_change' ? currentStatus : ACTION_TO_STATUS[input.action];
 
     const description = input.description?.trim() || null;
-    if ((input.action === 'rejected' || input.action === 'suspended') && !description) {
+    if (ACTIONS_REQUIRING_DESCRIPTION.includes(input.action) && !description) {
       throw new ValidationError(`Description is required for action '${input.action}'.`);
     }
 
-    if (input.action !== 'request_for_change') {
+    let updatedOrg: Organization;
+    if (input.action === 'request_for_change') {
+      updatedOrg = org;
+    } else {
       const verifiedAt = toStatus === 'verified' ? new Date() : null;
-      await this.organizationRepository.updateVerificationStatus(
+      const result = await this.organizationRepository.updateVerificationStatus(
         input.organizationId,
         toStatus,
         verifiedAt
       );
+      if (!result) throw new Error('Organization not found after update');
+      updatedOrg = result;
     }
 
     const historyEntry = await this.historyRepository.create({
@@ -91,9 +98,6 @@ export class OrganizationVerificationService {
       moderatorName: input.moderatorName,
       metadata: input.metadata ?? null,
     });
-
-    const updatedOrg = await this.organizationRepository.findById(input.organizationId);
-    if (!updatedOrg) throw new Error('Organization not found after update');
 
     return { organization: updatedOrg, historyEntry };
   }

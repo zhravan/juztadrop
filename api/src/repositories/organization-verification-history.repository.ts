@@ -1,14 +1,13 @@
 import { db } from '../db/index.js';
-import { organizationVerificationHistory } from '../db/schema.js';
+import {
+  organizationVerificationHistory,
+  ORGANIZATION_VERIFICATION_ACTION_VALUES,
+  type OrganizationStatus,
+} from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 
-export const ORG_VERIFICATION_ACTIONS = [
-  'request_for_change',
-  'verified',
-  'rejected',
-  'suspended',
-  'reinstate',
-] as const;
+/** Re-export from schema (single source of truth). */
+export const ORG_VERIFICATION_ACTIONS = ORGANIZATION_VERIFICATION_ACTION_VALUES;
 export type OrgVerificationAction = (typeof ORG_VERIFICATION_ACTIONS)[number];
 
 export interface VerificationHistoryEntry {
@@ -55,8 +54,8 @@ export class OrganizationVerificationHistoryRepository {
     const row: typeof organizationVerificationHistory.$inferInsert = {
       organizationId: data.organizationId,
       action: data.action,
-      fromStatus: data.fromStatus as 'pending' | 'verified' | 'rejected' | 'suspended',
-      toStatus: data.toStatus as 'pending' | 'verified' | 'rejected' | 'suspended',
+      fromStatus: data.fromStatus as OrganizationStatus,
+      toStatus: data.toStatus as OrganizationStatus,
       description: data.description ?? null,
       moderatorId: data.moderatorId,
       moderatorName: data.moderatorName,
