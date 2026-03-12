@@ -117,12 +117,24 @@ export const moderatorSessions = pgTable(
   })
 );
 
-export const organizationStatusEnum = pgEnum('organization_status', [
-  'pending',
-  'verified',
-  'rejected',
-  'suspended',
-]);
+/** Single source of truth for organization verification status. Used by organizations.verification_status and history fromStatus/toStatus. */
+export const ORGANIZATION_STATUS_VALUES = ['pending', 'verified', 'rejected', 'suspended'] as const;
+
+export type OrganizationStatus = (typeof ORGANIZATION_STATUS_VALUES)[number];
+
+export const organizationStatusEnum = pgEnum('organization_status', ORGANIZATION_STATUS_VALUES);
+
+/** Moderator actions. Status-changing actions use same values as ORGANIZATION_STATUS_VALUES where applicable; request_for_change (stays pending) and reinstate (→ verified) are action-only. */
+export const ORGANIZATION_VERIFICATION_ACTION_VALUES = [
+  'request_for_change',
+  ...ORGANIZATION_STATUS_VALUES.filter((s) => s !== 'pending'),
+  'reinstate',
+] as ['request_for_change', 'verified', 'rejected', 'suspended', 'reinstate'];
+
+export const organizationVerificationActionEnum = pgEnum(
+  'organization_verification_action',
+  ORGANIZATION_VERIFICATION_ACTION_VALUES
+);
 
 /**
  * Lookup table for organization types (NGO, NPO, Trust, etc.).
@@ -485,6 +497,38 @@ export const moderators = pgTable(
   (table) => ({
     userIdIdx: index('moderators_user_id_idx').on(table.userId),
     isActiveIdx: index('moderators_is_active_idx').on(table.isActive),
+  })
+);
+
+/** Audit log for org verification workflow: request_for_change, verified, rejected, suspended, reinstate. */
+export const organizationVerificationHistory = pgTable(
+  'organization_verification_history',
+  {
+    id: text('id')
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    action: organizationVerificationActionEnum('action').notNull(),
+    fromStatus: organizationStatusEnum('from_status').notNull(),
+    toStatus: organizationStatusEnum('to_status').notNull(),
+    description: text('description'), // Feedback for request_for_change, reason for rejected/suspended
+    moderatorId: text('moderator_id')
+      .notNull()
+      .references(() => moderators.id, { onDelete: 'restrict' }),
+    moderatorName: text('moderator_name').notNull(),
+    metadata: jsonb('metadata'), // Optional extra meta
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => ({
+    organizationIdIdx: index('org_verification_history_org_id_idx').on(table.organizationId),
+    moderatorIdIdx: index('org_verification_history_moderator_id_idx').on(table.moderatorId),
+    createdAtIdx: index('org_verification_history_created_at_idx').on(table.createdAt),
+    descriptionLengthCheck: check(
+      'org_verification_history_description_length_check',
+      sql`${table.description} IS NULL OR char_length(${table.description}) <= 5000`
+    ),
   })
 );
 
