@@ -22,44 +22,6 @@ services:
       - justadrop-network-dev
     restart: unless-stopped
 
-  api:
-    image: oven/bun:1.2-alpine
-    container_name: justadrop-api-dev
-    working_dir: /app
-    command: bun --watch src/index.ts
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-justadrop}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-justadrop}
-      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
-      API_PORT: ${API_PORT:-3001}
-      SECRETS_BACKEND: ${SECRETS_BACKEND:-env}
-      INFISICAL_TOKEN: ${INFISICAL_TOKEN}
-      INFISICAL_PROJECT_ID: ${INFISICAL_PROJECT_ID}
-      INFISICAL_ENVIRONMENT: ${INFISICAL_ENVIRONMENT:-dev}
-      LOG_LEVEL: ${LOG_LEVEL:-debug}
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
-      RESEND_FROM_NAME: ${RESEND_FROM_NAME}
-      CORS_ORIGIN: ${CORS_ORIGIN}
-    ports:
-      - '${API_PORT:-3001}:3001'
-    volumes:
-      - ./api:/app
-      - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - justadrop-network-dev
-    restart: unless-stopped
-
 volumes:
   postgres_data_dev:
 
