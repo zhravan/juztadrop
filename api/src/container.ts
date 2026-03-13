@@ -9,7 +9,9 @@ import { CauseRepository } from './repositories/cause.repository';
 import { OpportunityRepository } from './repositories/opportunity.repository';
 import { ApplicationRepository } from './repositories/application.repository';
 import { FeedbackRepository } from './repositories/feedback.repository';
+import { OrganizationVerificationHistoryRepository } from './repositories/organization-verification-history.repository';
 import { EmailService } from './services/email.service';
+import { OrganizationVerificationService } from './services/organization-verification.service';
 import { OtpService } from './services/otp.service';
 import { SessionService } from './services/session.service';
 import { ModeratorSessionService } from './services/moderatorSession.service';
@@ -35,6 +37,7 @@ class Container {
     opportunity: OpportunityRepository;
     application: ApplicationRepository;
     feedback: FeedbackRepository;
+    organizationVerificationHistory: OrganizationVerificationHistoryRepository;
   } | null = null;
 
   private _services: {
@@ -47,6 +50,7 @@ class Container {
     moderatorAuth: ModeratorAuthService;
     storage: StorageService;
     moderator: ModeratorService;
+    organizationVerification: OrganizationVerificationService;
   } | null = null;
 
   private _controllers: {
@@ -69,6 +73,7 @@ class Container {
         opportunity: new OpportunityRepository(),
         application: new ApplicationRepository(),
         feedback: new FeedbackRepository(),
+        organizationVerificationHistory: new OrganizationVerificationHistoryRepository(),
       };
     }
     return this._repositories;
@@ -101,6 +106,10 @@ class Container {
         this.repositories.user,
         this.repositories.moderator
       );
+      const organizationVerificationService = new OrganizationVerificationService(
+        this.repositories.organization,
+        this.repositories.organizationVerificationHistory
+      );
 
       this._services = {
         email: emailService,
@@ -112,6 +121,7 @@ class Container {
         storage: new StorageService(),
         moderator: moderatorService,
         moderatorAuth: moderatorAuthService,
+        organizationVerification: organizationVerificationService,
       };
     }
     return this._services;

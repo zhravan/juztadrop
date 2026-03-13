@@ -20,6 +20,7 @@ const moderatorController = container.getControllers().moderator;
 const userRepository = container.getRepositories().user;
 const organizationRepository = container.getRepositories().organization;
 const applicationRepository = container.getRepositories().application;
+const organizationVerificationService = container.getServices().organizationVerification;
 
 const GENDER_VALUES = ['male', 'female', 'other', 'prefer_not_to_say'] as const;
 
@@ -128,6 +129,47 @@ export const moderatorRouter = new Elysia({ prefix: '/moderator', tags: ['modera
       return { applications };
     },
     { params: t.Object({ orgId: t.String() }) }
+  )
+  .get(
+    '/organizations/:orgId/verification-history',
+    async ({ params }) => {
+      const history = await organizationVerificationService.getHistory(params.orgId);
+      return { history };
+    },
+    { params: t.Object({ orgId: t.String() }) }
+  )
+  .patch(
+    '/organizations/:orgId/verification',
+    async ({ params, body, moderatorId, userId }) => {
+      const user = await userRepository.findById(userId);
+      const moderatorName = user?.name?.trim() || user?.email || 'Moderator';
+      const result = await organizationVerificationService.applyAction({
+        organizationId: params.orgId,
+        moderatorId,
+        moderatorName,
+        action: body.action,
+        description: body.description ?? null,
+        metadata: body.metadata ?? null,
+      });
+      return {
+        organization: result.organization,
+        historyEntry: result.historyEntry,
+      };
+    },
+    {
+      params: t.Object({ orgId: t.String() }),
+      body: t.Object({
+        action: t.Union([
+          t.Literal('request_for_change'),
+          t.Literal('verified'),
+          t.Literal('rejected'),
+          t.Literal('suspended'),
+          t.Literal('reinstate'),
+        ]),
+        description: t.Optional(t.String()),
+        metadata: t.Optional(t.Record(t.String(), t.Unknown())),
+      }),
+    }
   )
   .get(
     '/organizations/:orgId',

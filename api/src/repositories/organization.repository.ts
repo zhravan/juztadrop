@@ -4,6 +4,8 @@ import {
   organizationMembers,
   organizationDocuments,
   documentTypeEnum,
+  ORGANIZATION_STATUS_VALUES,
+  type OrganizationStatus,
 } from '../db/schema.js';
 import { eq, inArray, and, isNull, desc, sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
@@ -33,8 +35,9 @@ export interface Organization {
   updatedAt: Date;
 }
 
-export const ORG_VERIFICATION_STATUSES = ['pending', 'verified', 'rejected', 'suspended'] as const;
-export type OrgVerificationStatus = (typeof ORG_VERIFICATION_STATUSES)[number];
+/** Re-export from schema (single source of truth for org verification status). */
+export const ORG_VERIFICATION_STATUSES = ORGANIZATION_STATUS_VALUES;
+export type OrgVerificationStatus = OrganizationStatus;
 
 export interface OrganizationListFilters {
   verificationStatus?: OrgVerificationStatus;
@@ -261,5 +264,24 @@ export class OrganizationRepository {
       where: eq(organizations.createdBy, userId),
     });
     return list.map((org) => this.mapRow(org));
+  }
+
+  /** Updates organization verification status and verifiedAt (cleared when not verified). */
+  async updateVerificationStatus(
+    id: string,
+    status: OrgVerificationStatus,
+    verifiedAt?: Date | null
+  ): Promise<Organization | null> {
+    const [updated] = await db
+      .update(organizations)
+      .set({
+        verificationStatus: status,
+        verifiedAt: verifiedAt ?? null,
+        updatedAt: new Date(),
+      })
+      .where(eq(organizations.id, id))
+      .returning();
+    if (!updated) return null;
+    return this.mapRow(updated);
   }
 }

@@ -57,6 +57,13 @@
       "when": 1773260616774,
       "tag": "0007_last_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773324418984,
+      "tag": "0008_groovy_madelyne_pryor",
+      "breakpoints": true
     }
   ]
 }
