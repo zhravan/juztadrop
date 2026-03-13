@@ -4,8 +4,10 @@ import {
   organizationMembers,
   organizationDocuments,
   documentTypeEnum,
+  ORGANIZATION_STATUS_VALUES,
+  type OrganizationStatus,
 } from '../db/schema.js';
-import { eq, inArray, and } from 'drizzle-orm';
+import { eq, inArray, and, isNull, desc, sql } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
 const ORG_OWNER_ROLE = 'owner' as const;
@@ -27,8 +29,24 @@ export interface Organization {
   state: string | null;
   country: string | null;
   verificationStatus: string;
+  isCsrEligible?: boolean;
+  isFcraRegistered?: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** Re-export from schema (single source of truth for org verification status). */
+export const ORG_VERIFICATION_STATUSES = ORGANIZATION_STATUS_VALUES;
+export type OrgVerificationStatus = OrganizationStatus;
+
+export interface OrganizationListFilters {
+  verificationStatus?: OrgVerificationStatus;
+  type?: string;
+  causes?: string[];
+  isCsrEligible?: boolean;
+  isFcraRegistered?: boolean;
+  limit: number;
+  offset: number;
 }
 
 export class OrganizationRepository {
@@ -97,26 +115,7 @@ export class OrganizationRepository {
 
     if (!org) throw new Error('Failed to create organization');
 
-    return {
-      id: org.id,
-      createdBy: org.createdBy,
-      orgName: org.orgName,
-      type: org.type ?? null,
-      description: org.description,
-      causes: org.causes,
-      website: org.website,
-      registrationNumber: org.registrationNumber,
-      contactPersonName: org.contactPersonName,
-      contactPersonEmail: org.contactPersonEmail,
-      contactPersonNumber: org.contactPersonNumber,
-      address: org.address,
-      city: org.city,
-      state: org.state,
-      country: org.country,
-      verificationStatus: org.verificationStatus,
-      createdAt: org.createdAt,
-      updatedAt: org.updatedAt,
-    };
+    return this.mapRow(org);
   }
 
   async findById(id: string): Promise<Organization | null> {
@@ -124,6 +123,53 @@ export class OrganizationRepository {
       where: eq(organizations.id, id),
     });
     if (!org) return null;
+    return this.mapRow(org);
+  }
+
+  async findManyWithFilters(
+    filters: OrganizationListFilters
+  ): Promise<{ items: Organization[]; total: number }> {
+    const conditions = [isNull(organizations.deletedAt)];
+    if (filters.verificationStatus != null) {
+      conditions.push(eq(organizations.verificationStatus, filters.verificationStatus));
+    }
+    if (filters.type != null) {
+      conditions.push(eq(organizations.type, filters.type));
+    }
+    if (filters.causes != null && filters.causes.length > 0) {
+      conditions.push(
+        sql`${organizations.causes} && ARRAY[${sql.join(
+          filters.causes.map((c) => sql`${c}`),
+          sql`, `
+        )}]::text[]`
+      );
+    }
+    if (typeof filters.isCsrEligible === 'boolean') {
+      conditions.push(eq(organizations.isCsrEligible, filters.isCsrEligible));
+    }
+    if (typeof filters.isFcraRegistered === 'boolean') {
+      conditions.push(eq(organizations.isFcraRegistered, filters.isFcraRegistered));
+    }
+    const whereClause = and(...conditions);
+
+    const [items, countResult] = await Promise.all([
+      db.query.organizations.findMany({
+        where: whereClause,
+        orderBy: desc(organizations.createdAt),
+        limit: filters.limit,
+        offset: filters.offset,
+      }),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(organizations)
+        .where(whereClause),
+    ]);
+
+    const total = countResult[0]?.count ?? 0;
+    return { items: items.map((org) => this.mapRow(org)), total };
+  }
+
+  private mapRow(org: typeof organizations.$inferSelect): Organization {
     return {
       id: org.id,
       createdBy: org.createdBy,
@@ -141,6 +187,8 @@ export class OrganizationRepository {
       state: org.state,
       country: org.country,
       verificationStatus: org.verificationStatus,
+      isCsrEligible: org.isCsrEligible,
+      isFcraRegistered: org.isFcraRegistered,
       createdAt: org.createdAt,
       updatedAt: org.updatedAt,
     };
@@ -162,26 +210,7 @@ export class OrganizationRepository {
     const list = await db.query.organizations.findMany({
       where: inArray(organizations.id, orgIds),
     });
-    return list.map((org) => ({
-      id: org.id,
-      createdBy: org.createdBy,
-      orgName: org.orgName,
-      type: org.type ?? null,
-      description: org.description,
-      causes: org.causes,
-      website: org.website,
-      registrationNumber: org.registrationNumber,
-      contactPersonName: org.contactPersonName,
-      contactPersonEmail: org.contactPersonEmail,
-      contactPersonNumber: org.contactPersonNumber,
-      address: org.address,
-      city: org.city,
-      state: org.state,
-      country: org.country,
-      verificationStatus: org.verificationStatus,
-      createdAt: org.createdAt,
-      updatedAt: org.updatedAt,
-    }));
+    return list.map((org) => this.mapRow(org));
   }
 
   async update(
@@ -211,26 +240,7 @@ export class OrganizationRepository {
       .where(eq(organizations.id, id))
       .returning();
     if (!updated) return null;
-    return {
-      id: updated.id,
-      createdBy: updated.createdBy,
-      orgName: updated.orgName,
-      type: updated.type ?? null,
-      description: updated.description,
-      causes: updated.causes,
-      website: updated.website,
-      registrationNumber: updated.registrationNumber,
-      contactPersonName: updated.contactPersonName,
-      contactPersonEmail: updated.contactPersonEmail,
-      contactPersonNumber: updated.contactPersonNumber,
-      address: updated.address,
-      city: updated.city,
-      state: updated.state,
-      country: updated.country,
-      verificationStatus: updated.verificationStatus,
-      createdAt: updated.createdAt,
-      updatedAt: updated.updatedAt,
-    };
+    return this.mapRow(updated);
   }
 
   async hasManageAccess(ngoId: string, userId: string): Promise<boolean> {
@@ -253,25 +263,25 @@ export class OrganizationRepository {
     const list = await db.query.organizations.findMany({
       where: eq(organizations.createdBy, userId),
     });
-    return list.map((org) => ({
-      id: org.id,
-      createdBy: org.createdBy,
-      orgName: org.orgName,
-      type: org.type ?? null,
-      description: org.description,
-      causes: org.causes,
-      website: org.website,
-      registrationNumber: org.registrationNumber,
-      contactPersonName: org.contactPersonName,
-      contactPersonEmail: org.contactPersonEmail,
-      contactPersonNumber: org.contactPersonNumber,
-      address: org.address,
-      city: org.city,
-      state: org.state,
-      country: org.country,
-      verificationStatus: org.verificationStatus,
-      createdAt: org.createdAt,
-      updatedAt: org.updatedAt,
-    }));
+    return list.map((org) => this.mapRow(org));
+  }
+
+  /** Updates organization verification status and verifiedAt (cleared when not verified). */
+  async updateVerificationStatus(
+    id: string,
+    status: OrgVerificationStatus,
+    verifiedAt?: Date | null
+  ): Promise<Organization | null> {
+    const [updated] = await db
+      .update(organizations)
+      .set({
+        verificationStatus: status,
+        verifiedAt: verifiedAt ?? null,
+        updatedAt: new Date(),
+      })
+      .where(eq(organizations.id, id))
+      .returning();
+    if (!updated) return null;
+    return this.mapRow(updated);
   }
 }

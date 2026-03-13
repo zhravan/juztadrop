@@ -4,6 +4,7 @@ import { container } from '../container';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { CAUSE_VALUES } from '../constants/causes.js';
 import { NotFoundError, ForbiddenError } from '../utils/errors.js';
+import { parseOrgListFilters } from '../utils/org-list-query.js';
 
 const organizationRepository = container.getRepositories().organization;
 
@@ -74,14 +75,33 @@ export const organizationsRouter = new Elysia({ prefix: '/organizations', tags: 
     return { organizations: orgs };
   })
   .get(
+    '/',
+    async (ctx: any) => {
+      const filters = parseOrgListFilters(ctx.query, { verificationStatus: 'verified' });
+      const result = await organizationRepository.findManyWithFilters(filters);
+      return { organizations: result.items, total: result.total };
+    },
+    {
+      query: t.Object({
+        type: t.Optional(t.String()),
+        causes: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+        isCsrEligible: t.Optional(t.String()),
+        isFcraRegistered: t.Optional(t.String()),
+        limit: t.Optional(t.String()),
+        offset: t.Optional(t.String()),
+      }),
+    }
+  )
+  .get(
     '/:id',
     async (ctx: any) => {
       const { userId } = ctx;
       const { id } = ctx.params;
-      const hasAccess = await organizationRepository.hasManageAccess(id, userId);
-      if (!hasAccess) throw new ForbiddenError('You do not have access to this organization');
       const org = await organizationRepository.findById(id);
       if (!org) throw new NotFoundError('Organization not found');
+      const hasAccess = await organizationRepository.hasManageAccess(id, userId);
+      const canView = hasAccess || org.verificationStatus === 'verified';
+      if (!canView) throw new ForbiddenError('You do not have access to this organization');
       return { organization: org };
     },
     { params: t.Object({ id: t.String() }) }

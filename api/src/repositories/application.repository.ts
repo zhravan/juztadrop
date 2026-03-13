@@ -1,10 +1,5 @@
 import { db } from '../db/index.js';
-import {
-  opportunityApplications,
-  opportunities,
-  organizations,
-  users,
-} from '../db/schema.js';
+import { opportunityApplications, opportunities, organizations, users } from '../db/schema.js';
 import { eq, and, desc } from 'drizzle-orm';
 import { createId } from '@paralleldrive/cuid2';
 
@@ -31,6 +26,14 @@ export interface ApplicationWithOpportunity extends Application {
   opportunityStartDate: Date | null;
   opportunityEndDate: Date | null;
   orgName: string;
+}
+
+export interface ApplicationWithUserAndOpportunity extends Application {
+  userName: string | null;
+  userEmail: string;
+  opportunityTitle: string;
+  opportunityStartDate: Date | null;
+  opportunityEndDate: Date | null;
 }
 
 function rowToApplication(row: typeof opportunityApplications.$inferSelect): Application {
@@ -84,6 +87,31 @@ export class ApplicationRepository {
       ...rowToApplication(r.app),
       userName: r.userName,
       userEmail: r.userEmail,
+    }));
+  }
+
+  async findByOrganizationId(organizationId: string): Promise<ApplicationWithUserAndOpportunity[]> {
+    const rows = await db
+      .select({
+        app: opportunityApplications,
+        userName: users.name,
+        userEmail: users.email,
+        opportunityTitle: opportunities.title,
+        opportunityStartDate: opportunities.startDate,
+        opportunityEndDate: opportunities.endDate,
+      })
+      .from(opportunityApplications)
+      .innerJoin(opportunities, eq(opportunityApplications.opportunityId, opportunities.id))
+      .innerJoin(users, eq(opportunityApplications.userId, users.id))
+      .where(eq(opportunities.ngoId, organizationId))
+      .orderBy(desc(opportunityApplications.createdAt));
+    return rows.map((r) => ({
+      ...rowToApplication(r.app),
+      userName: r.userName,
+      userEmail: r.userEmail,
+      opportunityTitle: r.opportunityTitle,
+      opportunityStartDate: r.opportunityStartDate,
+      opportunityEndDate: r.opportunityEndDate,
     }));
   }
 
