@@ -1,3 +1,45 @@
+# [0.0.29](https://github.com/juztadrop/juztadrop/compare/v0.0.29...v0.0.29) (2026-03-13)
+
+### Changes
+
+- feat(api): organization verification workflow & org listing api for moderator and user (#96) (8b9b4cf)
+
+---
+
+# [0.0.28](https://github.com/juztadrop/juztadrop/compare/v0.0.27...v0.0.28) (2026-03-12)
+
+### Changes
+
+- feat(view): ui for volunteer onboarding & volunteer details (#92) (7639a84)
+- Revert "feat(view): ui for volunteer onboarding & volunteer details" (#91) (620de03)
+- feat(view): ui for volunteer onboarding & volunteer details (#87) (16a9faf)
+
+---
+
+# [0.0.27](https://github.com/juztadrop/juztadrop/compare/v0.0.26...v0.0.27) (2026-03-11)
+
+### Changes
+
+- feat: get users & moderator user ban workflow (#90) (4dc5128)
+
+---
+
+# [0.0.26](https://github.com/juztadrop/juztadrop/compare/v0.0.25...v0.0.26) (2026-03-11)
+
+### Changes
+
+- feat: fetch volunteer by userID (#88) (9bbbcae)
+
+---
+
+# [0.0.25](https://github.com/juztadrop/juztadrop/compare/v0.0.24...v0.0.25) (2026-03-03)
+
+### Changes
+
+- fix: dashboard login UI (#83) (0926734)
+
+---
+
 # [0.0.24](https://github.com/juztadrop/juztadrop/compare/v0.0.22...v0.0.24) (2026-03-03)
 
 ### Changes
