@@ -1,6 +1,6 @@
 {
   "name": "juztadrop",
-  "version": "0.0.25",
+  "version": "0.0.30",
   "private": false,
   "scripts": {
     "prepare": "husky",
