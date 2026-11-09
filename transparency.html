@@ -1342,6 +1342,21 @@
         .top { background: rgba(255, 253, 247, .96) !important; }
       }
 
+    
+      /* Stronger, visibly translucent glass on sticky navigation */
+      .top {
+        background: rgba(255, 253, 247, .48) !important;
+        -webkit-backdrop-filter: blur(22px) saturate(1.45) !important;
+        backdrop-filter: blur(22px) saturate(1.45) !important;
+        border-color: rgba(37, 35, 43, .88) !important;
+        box-shadow:
+          0 5px 0 rgba(37, 35, 43, .94),
+          0 12px 28px rgba(37, 35, 43, .13) !important;
+      }
+      @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+        .top { background: rgba(255, 253, 247, .88) !important; }
+      }
+
     </style>
   </head>
   <body>
