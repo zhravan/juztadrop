@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering a contribution to Just-a-Drop. Small, focused improvements are welcome, including documentation, accessibility, responsive layout, bug fixes, security hardening and tests.
+Thanks for considering a contribution to Juzt A Drop. Small, focused improvements are welcome, including documentation, accessibility, responsive layout, bug fixes, security hardening and tests.
 
 ## Before you start
 
