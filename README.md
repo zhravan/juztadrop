@@ -1,4 +1,4 @@
-# JustADrop — Public Ledger
+# JustADrop - Public Ledger
 
 A lean, open-source transparency layer for the JustADrop community.
 
@@ -43,7 +43,7 @@ For expenses, set `type` to `expense`, provide `project`, `description`, `notes`
 
 The site computes the summary from verified entries. `status` must be `verified`; pending, failed or refunded payments must not be counted as received. Refunds and corrections should be represented as separate, clearly described ledger records rather than silently rewriting history.
 
-## PayU integration — secure architecture
+## PayU integration - secure architecture
 
 GitHub Pages is static hosting. **Never put PayU salt, client secret, merchant key with privileged access, webhook signing secret, or other credentials in HTML/JavaScript, JSON, Git history, or GitHub Pages.** A browser-only PayU integration cannot securely verify payment status.
 
@@ -64,4 +64,4 @@ Fields: `id`, `type` (`income|expense`), `status` (`verified|pending|failed|refu
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
