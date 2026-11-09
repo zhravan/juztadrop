@@ -4,7 +4,7 @@
     .drop {
       transform-box: fill-box;
       transform-origin: center;
-      animation: drop-bounce 2.6s ease-in-out infinite;
+      animation:none;
     }
 
     .ripple {
@@ -15,7 +15,7 @@
       opacity: 0;
       transform-box: fill-box;
       transform-origin: center;
-      animation: ripple 2.6s ease-out infinite;
+      animation:none;
     }
 
     @keyframes drop-bounce {
