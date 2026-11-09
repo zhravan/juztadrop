@@ -1065,7 +1065,7 @@
                 return !suffix || !ledgerReferences.has(suffix);
               })
               .map((transaction) => ({
-                id: 'payu-' + String(transaction.reference || transaction.date || Math.random()),
+                id: 'payu-' + String(transaction.reference || transaction.date || 'entry'),
                 type: 'income',
                 status: 'verified',
                 date: String(transaction.date || '').slice(0, 10),
