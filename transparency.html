@@ -830,7 +830,9 @@
         border-radius: 6px;
         background: #fff;
         color: var(--ink);
-        font: 700 11px 'Nunito Sans', sans-serif;
+        font:
+          700 11px 'Nunito Sans',
+          sans-serif;
         cursor: pointer;
       }
       .page-button:hover:not(:disabled) {
@@ -888,7 +890,6 @@
           padding: 0 7px;
         }
       }
-
     </style>
   </head>
   <body>
@@ -914,7 +915,8 @@
         <div class="eyebrow">TRANSPARENCY</div>
         <h1>Every contribution, accounted for.</h1>
         <p class="lead">
-          A clear record of community contributions and verified expenses. Contributions are shown anonymously.
+          A clear record of community contributions and verified expenses. Contributions are shown
+          anonymously.
         </p>
         <p class="history-note">
           <strong>A note on historical records:</strong> The integrated payment and transparency
@@ -1163,7 +1165,11 @@
               : entry.description || entry.project || 'Community entry';
             const meta = [
               formatDate(entry.date),
-              isExpense ? (entry.project ? esc(entry.project) : 'Verified expense') : 'Anonymous contributor',
+              isExpense
+                ? entry.project
+                  ? esc(entry.project)
+                  : 'Verified expense'
+                : 'Anonymous contributor',
             ];
             if (entry.paymentMode) {
               meta.push('<span class="method-pill">' + esc(entry.paymentMode) + '</span>');
@@ -1359,8 +1365,6 @@
                   Number.isFinite(entry.amount) &&
                   entry.amount > 0,
               );
-
-
           } catch (error) {
             setPayUStatus(
               'Live PayU transactions are not available yet. ' +
