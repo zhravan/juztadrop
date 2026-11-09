@@ -8,7 +8,7 @@ Security reports are welcome for the current default branch and the live website
 
 **Please do not report exploitable security vulnerabilities in a public GitHub issue, discussion or pull request.**
 
-Use GitHub's private vulnerability reporting feature for this repository when it is enabled. Otherwise, email **justadrop2020@gmail.com** with the subject line `[Security] Just-a-Drop vulnerability report`.
+Use GitHub's private vulnerability reporting feature for this repository when it is enabled. Otherwise, email **justadrop2020@gmail.com** with the subject line `[Security] Juzt A Drop vulnerability report`.
 
 Include, where possible:
 
