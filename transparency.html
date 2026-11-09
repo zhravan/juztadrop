@@ -265,14 +265,18 @@
         background: #fff;
         padding: 0 8px;
         color: var(--ink);
-        font: 12px 'Nunito Sans', sans-serif;
+        font:
+          12px 'Nunito Sans',
+          sans-serif;
       }
       .filter-action,
       .filter-reset {
         height: 44px;
         border-radius: 8px;
         padding: 0 12px;
-        font: 700 12px 'Nunito Sans', sans-serif;
+        font:
+          700 12px 'Nunito Sans',
+          sans-serif;
         white-space: nowrap;
         cursor: pointer;
       }
@@ -286,8 +290,14 @@
         background: #fff;
         color: var(--muted);
       }
-      .filter-action:hover { background: #6d294b; border-color: #6d294b; }
-      .filter-reset:hover { border-color: #dca1bb; color: var(--red); }
+      .filter-action:hover {
+        background: #6d294b;
+        border-color: #6d294b;
+      }
+      .filter-reset:hover {
+        border-color: #dca1bb;
+        color: var(--red);
+      }
       .payu-status {
         margin: -2px 0 16px;
         padding: 11px 14px;
@@ -302,7 +312,9 @@
         background: #fff9ed;
         color: #795d2f;
       }
-      .payu-status[hidden] { display: none; }
+      .payu-status[hidden] {
+        display: none;
+      }
       .period-note {
         font-size: 11px;
         color: var(--muted);
@@ -842,7 +854,8 @@
       const esc = (value) =>
         String(value ?? '').replace(
           /[&<>"']/g,
-          (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
+          (character) =>
+            ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
         );
       const formatDate = (value) => {
         if (!value) return 'Date not listed';
@@ -887,7 +900,10 @@
       const payuStatus = document.querySelector('#payuStatus');
 
       function normalisedReference(value) {
-        return String(value || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-6);
+        return String(value || '')
+          .replace(/[^a-zA-Z0-9]/g, '')
+          .toUpperCase()
+          .slice(-6);
       }
 
       function setPayUStatus(message, warning = false) {
@@ -916,7 +932,9 @@
               (entry.date || '') >= from &&
               (entry.date || '') <= to &&
               [entry.contributor, entry.description, entry.project, entry.reference].some((value) =>
-                String(value || '').toLocaleLowerCase().includes(query),
+                String(value || '')
+                  .toLocaleLowerCase()
+                  .includes(query),
               ),
           )
           .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -986,7 +1004,11 @@
         render();
       });
       document.querySelector('#allDates').addEventListener('click', () => {
-        const firstDate = entries.map((entry) => entry.date).filter(Boolean).sort()[0] || PAYU_START_DATE;
+        const firstDate =
+          entries
+            .map((entry) => entry.date)
+            .filter(Boolean)
+            .sort()[0] || PAYU_START_DATE;
         setRange(firstDate, todayIST());
       });
 
@@ -1077,7 +1099,10 @@
             );
           }
         } else {
-          setPayUStatus('PayU reporting will begin from ' + formatDate(PAYU_START_DATE) + '.', true);
+          setPayUStatus(
+            'PayU reporting will begin from ' + formatDate(PAYU_START_DATE) + '.',
+            true,
+          );
         }
 
         entries = [...ledgerEntries, ...payuEntries];
