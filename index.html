@@ -968,6 +968,32 @@
         .top { background: rgba(255, 253, 247, .88) !important; }
       }
 
+    
+      /* Extend the glass surface into the breathing space above the sticky bar */
+      .top {
+        position: sticky !important;
+        isolation: isolate;
+      }
+      .top::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        left: 0;
+        right: 0;
+        top: -22px;
+        height: 22px;
+        background: rgba(255, 253, 247, .48);
+        -webkit-backdrop-filter: blur(22px) saturate(1.45);
+        backdrop-filter: blur(22px) saturate(1.45);
+        pointer-events: none;
+      }
+      @media (max-width: 700px) {
+        .top::before {
+          top: -12px;
+          height: 12px;
+        }
+      }
+
     </style>
   </head>
   <body>
