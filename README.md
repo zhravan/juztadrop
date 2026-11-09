@@ -39,7 +39,7 @@ Edit `data/ledger.json` and commit a reconciled entry. Example schema:
 }
 ```
 
-For expenses, set `type` to `expense`, provide `project`, `description`, `notes`, and a public `proof_url` where appropriate. Do not publish bank account numbers, UPI IDs, phone numbers, email addresses, full payer identifiers, addresses, private receipts, or beneficiary-sensitive details.
+For expenses, set `type` to `expense`, provide `project`, `description`, `notes`, and a public `proof_url` where appropriate. Do not publish bank account numbers, UPI IDs, phone numbers, email addresses, full payer identifiers, addresses, private receipts, or beneficiary-sensitive details. The `contributor` string is displayed publicly as entered (HTML-escaped, but not automatically shortened); use only a consented display name or `Anonymous contributor`.
 
 The site computes the summary from verified entries. `status` must be `verified`; pending, failed or refunded payments must not be counted as received. Refunds and corrections should be represented as separate, clearly described ledger records rather than silently rewriting history.
 
@@ -49,14 +49,14 @@ The public site is hosted on GitHub Pages. It reads the existing verified manual
 
 `https://payu-transparency.zhravann.workers.dev/api/public/transactions`
 
-The Worker is the only component that talks to PayU. It stores the PayU Merchant Key and Salt as Cloudflare Worker secrets, authenticates to PayU's transaction reporting API, and returns a sanitised list of captured transactions. The GitHub Pages frontend contains only the public Worker URL; it never receives PayU credentials.
+The Worker is the only component that talks to PayU. It stores the PayU Merchant Key and Salt as Cloudflare Worker secrets, authenticates to PayU's transaction reporting API, and returns a sanitised list of captured transactions. The GitHub Pages frontend contains only the public Worker URL; it never receives PayU credentials. The current Worker derives a shortened display name whenever PayU returns a first/last name; the PayU response used here has no consent flag, and this code does not verify consent. Obtain and record contributor permission separately before publishing names. If permission is unavailable, keep contributions anonymous by removing the name mapping in the Worker.
 
 This integration is intentionally read-only:
 - It retrieves captured/successful transactions only and subtracts refunds that PayU marks as successfully processed; queued or pending refunds do not affect the total until PayU confirms success.
 - It exposes a limited contributor display name (first name and surname initial, when PayU supplies them; otherwise `Anonymous contributor`), date, amount, payment mode, and masked reference.
 - It does not create payment links or payment orders.
 - It does not initiate refunds, cancellations, or transaction modifications.
-- It does not publish full payer names, phone numbers, email addresses, UPI IDs, bank references, or raw PayU responses. The shortened name is personal information: publish it only when the contributor has been told and has agreed; otherwise keep the record anonymous.
+- It does not publish full payer names, phone numbers, email addresses, UPI IDs, bank references, or raw PayU responses. The shortened name is still personal information.
 - It does not write PayU data back into `data/ledger.json`; the feed is fetched live by the public page.
 
 Configure `PAYU_MERCHANT_KEY` and `PAYU_MERCHANT_SALT` only as Cloudflare Worker secrets. Never put them in HTML, JavaScript, JSON, Git history, or GitHub Pages. The PayU reporting credential must be rotated if it has been exposed. Public pages consume only the Worker’s sanitised GET endpoint.
