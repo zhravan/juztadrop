@@ -1105,6 +1105,24 @@
         .way-card p, .impact p, .footer, .period-note { font-size:16px; }
       }
 
+    
+      /* Static presentation: disable all motion site-wide */
+      html, body { scroll-behavior:auto !important; }
+      *, *::before, *::after {
+        animation:none !important;
+        transition:none !important;
+        scroll-behavior:auto !important;
+        caret-color:auto;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        *, *::before, *::after {
+          animation-duration:0s !important;
+          animation-delay:0s !important;
+          transition-duration:0s !important;
+          transition-delay:0s !important;
+        }
+      }
+
     </style>
   </head>
   <body>
@@ -1361,7 +1379,6 @@
       const sceneCards = Array.from(document.querySelectorAll('.art-scene'));
       const sceneDots = Array.from(document.querySelectorAll('.scene-dot'));
       const sceneCount = document.querySelector('#sceneCount');
-      const scenePause = document.querySelector('#scenePause');
       let activeScene = 0;
       let sceneTimer;
       let sceneIsPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
