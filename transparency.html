@@ -705,6 +705,190 @@
           margin-top: 1px;
         }
       }
+
+      /* Contribution ledger: compact, scannable rows and clear pagination */
+      .ledger-results-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 15px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        border-radius: 8px 8px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .ledger-results-bar strong {
+        color: var(--ink);
+        font-weight: 800;
+      }
+      .activity-list {
+        border-radius: 0 0 8px 8px;
+      }
+      .activity {
+        min-height: 76px;
+        padding: 14px 16px;
+        gap: 16px;
+      }
+      .activity-main {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+      .activity-mark {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #fff2f7;
+        color: var(--red);
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .activity-mark.expense-mark {
+        background: #f5f0f2;
+        color: #766b70;
+      }
+      .activity-copy {
+        min-width: 0;
+      }
+      .activity-copy strong {
+        font-size: 14px;
+        line-height: 1.35;
+      }
+      .activity-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .activity-meta .method-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 7px;
+        border-radius: 20px;
+        background: #f8f1f4;
+        color: #765d69;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+      }
+      .activity-meta a {
+        color: var(--red);
+        font-weight: 800;
+      }
+      .activity-value {
+        flex: 0 0 auto;
+        text-align: right;
+      }
+      .activity-value small {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .amount {
+        font-size: 15px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 15px;
+        border: 1px solid var(--line);
+        border-top: 0;
+        border-radius: 0 0 8px 8px;
+        background: #fff;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .pagination.single-page {
+        justify-content: flex-start;
+      }
+      .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .page-button {
+        min-width: 34px;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        font: 700 11px 'Nunito Sans', sans-serif;
+        cursor: pointer;
+      }
+      .page-button:hover:not(:disabled) {
+        border-color: #dca1bb;
+        color: var(--red);
+      }
+      .page-button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .page-indicator {
+        min-width: 66px;
+        text-align: center;
+        font-weight: 800;
+      }
+      @media (max-width: 700px) {
+        .ledger-results-bar {
+          padding: 10px 12px;
+        }
+        .activity {
+          padding: 12px 11px;
+          gap: 8px;
+        }
+        .activity-mark {
+          width: 34px;
+          height: 34px;
+          flex-basis: 34px;
+        }
+        .activity-copy strong {
+          font-size: 12px;
+        }
+        .activity-meta {
+          gap: 3px 6px;
+          font-size: 10px;
+        }
+        .activity-value small {
+          font-size: 9px;
+        }
+        .amount {
+          font-size: 13px;
+        }
+        .pagination {
+          padding: 11px;
+        }
+      }
+      @media (max-width: 360px) {
+        .activity-main {
+          gap: 8px;
+        }
+        .activity-mark {
+          display: none;
+        }
+        .page-button {
+          min-width: 30px;
+          padding: 0 7px;
+        }
+      }
+
     </style>
   </head>
   <body>
@@ -728,9 +912,9 @@
     <main class="wrap">
       <section class="page">
         <div class="eyebrow">TRANSPARENCY</div>
-        <h1>Every rupee, accounted for.</h1>
+        <h1>Every contribution, accounted for.</h1>
         <p class="lead">
-          See verified contributions and expenses. Receipts are shared wherever available.
+          A clear record of community contributions and verified expenses. Contributions are shown anonymously.
         </p>
         <p class="history-note">
           <strong>A note on historical records:</strong> The integrated payment and transparency
@@ -913,6 +1097,9 @@
         payuStatus.hidden = false;
       }
 
+      const PAGE_SIZE = 8;
+      let currentPage = 1;
+
       function render() {
         const income = entries.filter((entry) => entry.type === 'income');
         const expenses = entries.filter((entry) => entry.type === 'expense');
@@ -932,7 +1119,14 @@
               (activeType === 'all' || entry.type === activeType) &&
               (entry.date || '') >= from &&
               (entry.date || '') <= to &&
-              [entry.contributor, entry.description, entry.project, entry.reference].some((value) =>
+              [
+                entry.contributor,
+                entry.description,
+                entry.project,
+                entry.reference,
+                entry.paymentMode,
+                entry.source === 'PayU' ? 'anonymous contribution' : '',
+              ].some((value) =>
                 String(value || '')
                   .toLocaleLowerCase()
                   .includes(query),
@@ -954,34 +1148,108 @@
           return;
         }
 
+        const pageCount = Math.ceil(filtered.length / PAGE_SIZE);
+        currentPage = Math.min(Math.max(currentPage, 1), pageCount);
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const pageItems = filtered.slice(startIndex, startIndex + PAGE_SIZE);
+        const endIndex = Math.min(startIndex + PAGE_SIZE, filtered.length);
+
+        const rows = pageItems
+          .map((entry) => {
+            const isExpense = entry.type === 'expense';
+            const isPayU = entry.source === 'PayU';
+            const title = isPayU
+              ? 'Community contribution'
+              : entry.description || entry.project || 'Community entry';
+            const meta = [
+              formatDate(entry.date),
+              isExpense ? (entry.project ? esc(entry.project) : 'Verified expense') : 'Anonymous contributor',
+            ];
+            if (entry.paymentMode) {
+              meta.push('<span class="method-pill">' + esc(entry.paymentMode) + '</span>');
+            }
+            if (entry.reference) {
+              meta.push('Ref: ' + esc(entry.reference));
+            }
+            if (entry.proof_url) {
+              meta.push(
+                '<a href="' +
+                  safeUrl(entry.proof_url) +
+                  '" target="_blank" rel="noopener">View receipt ↗</a>',
+              );
+            }
+            return (
+              '<article class="activity"><div class="activity-main"><span class="activity-mark ' +
+              (isExpense ? 'expense-mark' : '') +
+              '" aria-hidden="true">' +
+              (isExpense ? 'OUT' : 'IN') +
+              '</span><div class="activity-copy"><strong>' +
+              esc(title) +
+              '</strong><div class="activity-meta">' +
+              meta.join('<span aria-hidden="true">·</span>') +
+              '</div></div></div><div class="activity-value"><small>' +
+              (isExpense ? 'Expense' : 'Contribution') +
+              '</small><span class="amount ' +
+              (isExpense ? 'spent' : 'received') +
+              '">' +
+              (isExpense ? '−' : '+') +
+              money(Number(entry.amount)) +
+              '</span></div></article>'
+            );
+          })
+          .join('');
+
+        const pager =
+          pageCount > 1
+            ? '<nav class="pagination" aria-label="Contribution pages"><span>Showing ' +
+              (startIndex + 1) +
+              '–' +
+              endIndex +
+              ' of ' +
+              filtered.length +
+              ' entries</span><div class="pagination-controls"><button class="page-button" id="previousPage" type="button" ' +
+              (currentPage === 1 ? 'disabled' : '') +
+              ' aria-label="Previous page">Previous</button><span class="page-indicator">Page ' +
+              currentPage +
+              ' of ' +
+              pageCount +
+              '</span><button class="page-button" id="nextPage" type="button" ' +
+              (currentPage === pageCount ? 'disabled' : '') +
+              ' aria-label="Next page">Next</button></div></nav>'
+            : '<div class="pagination single-page">Showing all ' +
+              filtered.length +
+              ' ' +
+              (filtered.length === 1 ? 'entry' : 'entries') +
+              '</div>';
+
         root.innerHTML =
-          '<div class="activity-list">' +
-          filtered
-            .map(
-              (entry) =>
-                '<article class="activity"><div class="activity-info"><strong>' +
-                esc(entry.description || entry.project || entry.contributor || 'Community entry') +
-                '</strong><small>' +
-                formatDate(entry.date) +
-                (entry.paymentMode ? ' · ' + esc(entry.paymentMode) : '') +
-                (entry.reference ? ' · Ref: ' + esc(entry.reference) : '') +
-                (entry.proof_url
-                  ? ' · <a href="' +
-                    safeUrl(entry.proof_url) +
-                    '" target="_blank" rel="noopener">View receipt ↗</a>'
-                  : '') +
-                '</small></div><span class="amount ' +
-                (entry.type === 'expense' ? 'spent' : 'received') +
-                '">' +
-                (entry.type === 'expense' ? '−' : '+') +
-                money(Number(entry.amount)) +
-                '</span></article>',
-            )
-            .join('') +
-          '</div>';
+          '<div class="ledger-results-bar"><span><strong>' +
+          filtered.length +
+          '</strong> verified ' +
+          (filtered.length === 1 ? 'entry' : 'entries') +
+          '</span><span>Newest first</span></div><div class="activity-list">' +
+          rows +
+          '</div>' +
+          pager;
+
+        const previous = root.querySelector('#previousPage');
+        const next = root.querySelector('#nextPage');
+        if (previous) {
+          previous.addEventListener('click', () => {
+            currentPage -= 1;
+            render();
+          });
+        }
+        if (next) {
+          next.addEventListener('click', () => {
+            currentPage += 1;
+            render();
+          });
+        }
       }
 
       function setRange(start, end) {
+        currentPage = 1;
         fromInput.value = start;
         toInput.value = end;
         render();
@@ -993,15 +1261,20 @@
             .querySelectorAll('.tab')
             .forEach((item) => item.classList.toggle('active', item === button));
           activeType = button.dataset.type;
+          currentPage = 1;
           render();
         }),
       );
-      searchInput.addEventListener('input', render);
+      searchInput.addEventListener('input', () => {
+        currentPage = 1;
+        render();
+      });
       document.querySelector('#applyFilters').addEventListener('click', () => {
         if (!fromInput.value || !toInput.value || fromInput.value > toInput.value) {
           setPayUStatus('Choose a valid date range.', true);
           return;
         }
+        currentPage = 1;
         render();
       });
       document.querySelector('#allDates').addEventListener('click', () => {
@@ -1087,11 +1360,7 @@
                   entry.amount > 0,
               );
 
-            setPayUStatus(
-              payuEntries.length
-                ? 'PayU connected · ' + payuEntries.length + ' successful payments loaded.'
-                : 'PayU connected · No successful payments recorded yet.',
-            );
+
           } catch (error) {
             setPayUStatus(
               'Live PayU transactions are not available yet. ' +
@@ -1099,11 +1368,6 @@
               true,
             );
           }
-        } else {
-          setPayUStatus(
-            'PayU reporting will begin from ' + formatDate(PAYU_START_DATE) + '.',
-            true,
-          );
         }
 
         entries = [...ledgerEntries, ...payuEntries];
