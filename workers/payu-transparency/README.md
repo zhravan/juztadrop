@@ -32,6 +32,8 @@ curl --url 'https://payu-transparency.zhravann.workers.dev/api/public/transactio
 
 For HTTP 403, check whether PayU has enabled the Transaction Reporting API for the merchant account and confirm the production Key/Salt pair and signing scheme with PayU. Retrying a 403 will not resolve a permission or authentication rejection.
 
+The Worker signs v4 reporting requests using PayU's detailed SHA-512 authentication specification: `SHA512(rawRequestBody + "|" + GMTDate + "|" + merchantSalt)`, encoded as lowercase hexadecimal. The Authorization header uses `algorithm="sha512"` and `headers="date"`. A SHA-256 Base64 `Digest` header is also sent because it appears in PayU's sample request, but it is not included in the SHA-512 signing string. PayU's documentation contains conflicting sample snippets, so if this still returns 403, ask PayU to confirm the exact signing variant and reporting entitlement for the merchant account.
+
 ## Prerequisites
 
 - Node.js supported by the current Wrangler release.
