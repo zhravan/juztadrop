@@ -1466,6 +1466,31 @@
         .filter-action,.filter-reset { width:100%; padding:0 8px !important; }
       }
 
+    
+      /* Match the transparency content column to the site navigation width */
+      main.wrap {
+        width: min(calc(100% - 48px), 1080px) !important;
+        max-width: 1080px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      main.wrap > .page {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .summary,
+      .ledger-panel,
+      .history-note,
+      .privacy-note {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      @media (max-width: 700px) {
+        main.wrap {
+          width: calc(100% - 30px) !important;
+        }
+      }
+
     </style>
   </head>
   <body>
