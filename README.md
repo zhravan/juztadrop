@@ -43,20 +43,23 @@ For expenses, set `type` to `expense`, provide `project`, `description`, `notes`
 
 The site computes the summary from verified entries. `status` must be `verified`; pending, failed or refunded payments must not be counted as received. Refunds and corrections should be represented as separate, clearly described ledger records rather than silently rewriting history.
 
-## PayU integration - secure architecture
+## PayU integration - read-only transparency feed
 
-GitHub Pages is static hosting. **Never put PayU salt, client secret, merchant key with privileged access, webhook signing secret, or other credentials in HTML/JavaScript, JSON, Git history, or GitHub Pages.** A browser-only PayU integration cannot securely verify payment status.
+The public site is hosted on GitHub Pages. It reads the existing verified manual ledger from `data/ledger.json` and combines it at runtime with successful PayU transactions returned by the Cloudflare Worker:
 
-Recommended flow:
+`https://payu-transparency.zhravann.workers.dev/api/public/transactions`
 
-1. The browser asks a server-side endpoint to create a PayU payment order.
-2. The backend signs the request with PayU credentials stored as server-side secrets and returns the checkout details.
-3. PayU redirects/webhooks to the backend.
-4. The backend verifies the callback/hash and reconciles the transaction with PayU's transaction verification API.
-5. Only verified, settled transactions are written to the public ledger. Never trust the browser redirect alone.
-6. Publish a sanitised ledger record; keep raw webhook payloads and private payer details in restricted storage.
+The Worker is the only component that talks to PayU. It stores the PayU Merchant Key and Salt as Cloudflare Worker secrets, authenticates to PayU's transaction reporting API, and returns a sanitised list of captured transactions. The GitHub Pages frontend contains only the public Worker URL; it never receives PayU credentials.
 
-A small serverless backend (Cloudflare Workers, AWS Lambda, or equivalent) is required for this. Add secrets there, not in Pages. The public frontend already reads the published `data/ledger.json` feed.
+This integration is intentionally read-only:
+- It retrieves captured/successful transactions only.
+- It exposes an anonymous contribution label, date, amount, payment mode, and masked reference.
+- It does not create payment links or payment orders.
+- It does not initiate refunds, cancellations, or transaction modifications.
+- It does not publish payer names, phone numbers, email addresses, UPI IDs, bank references, or raw PayU responses.
+- It does not write PayU data back into `data/ledger.json`; the feed is fetched live by the public page.
+
+Configure `PAYU_MERCHANT_KEY` and `PAYU_MERCHANT_SALT` only as Cloudflare Worker secrets. Never put them in HTML, JavaScript, JSON, Git history, or GitHub Pages. The PayU reporting credential must be rotated if it has been exposed. Public pages consume only the Worker’s sanitised GET endpoint.
 
 ## Data contract
 
