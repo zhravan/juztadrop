@@ -119,7 +119,7 @@ function retryDelay(response, attempt) {
 function cacheBypassRequested(request, url) {
   if (url.searchParams.get("fresh") === "1") return true;
   const directives = (request.headers.get("cache-control") || "")
-    .toLowerCase().split(",").map(value => value.trim().split("=")[0]);
+    .toLowerCase().split(",").map(value => value.trim());
   const pragma = (request.headers.get("pragma") || "").toLowerCase();
   return directives.some(value => value === "no-cache" || value === "no-store" || value === "max-age=0")
     || pragma.split(",").some(value => value.trim() === "no-cache");
@@ -185,6 +185,7 @@ async function getPage(pageNumber, from, to, key, salt) {
         message: "PayU reporting returned a retryable status",
         status: response.status, page: pageNumber, attempt, maxAttempts
       }));
+      await response.body?.cancel();
       await sleep(retryDelay(response, attempt));
       continue;
     }
