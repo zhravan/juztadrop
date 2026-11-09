@@ -505,21 +505,55 @@
         }),
       );
       async function load() {
+        let entries = [];
         try {
-          const r = await fetch('./data/ledger.json', { cache: 'no-store' });
-          if (!r.ok) return;
-          const j = await r.json(),
-            e = (j.entries || []).filter((x) => x.status === 'verified'),
-            i = e.filter((x) => x.type === 'income').reduce((s, x) => s + Number(x.amount || 0), 0),
-            o = e
-              .filter((x) => x.type === 'expense')
-              .reduce((s, x) => s + Number(x.amount || 0), 0);
-          document.querySelector('#balance').textContent = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0,
-          }).format(i - o);
-        } catch (e) {}
+          const response = await fetch('./data/ledger.json', { cache: 'no-store' });
+          if (response.ok) {
+            const data = await response.json();
+            entries = (data.entries || []).filter((entry) => entry.status === 'verified');
+          }
+        } catch (error) {}
+
+        const income = entries
+          .filter((entry) => entry.type === 'income')
+          .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+        const expenses = entries
+          .filter((entry) => entry.type === 'expense')
+          .reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+        let payuIncome = 0;
+
+        try {
+          const today = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(new Date());
+          const url = new URL('https://payu-transparency.zhravann.workers.dev/api/public/transactions');
+          url.searchParams.set('from', '2026-11-09');
+          url.searchParams.set('to', today);
+          const response = await fetch(url, { cache: 'no-store' });
+          if (response.ok) {
+            const data = await response.json();
+            const existingRefs = new Set(
+              entries
+                .map((entry) => String(entry.reference || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-6))
+                .filter(Boolean),
+            );
+            payuIncome = (data.transactions || [])
+              .filter((transaction) => {
+                const suffix = String(transaction.reference || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-6);
+                return !suffix || !existingRefs.has(suffix);
+              })
+              .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+          }
+        } catch (error) {}
+
+        document.querySelector('#balance').textContent = new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR',
+          maximumFractionDigits: 0,
+        }).format(income + payuIncome - expenses);
       }
       load();
     </script>
