@@ -1,5 +1,4 @@
 {
-  "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
   "name": "payu-transparency",
   "main": "./src/index.js",
   "compatibility_date": "2026-11-09",
