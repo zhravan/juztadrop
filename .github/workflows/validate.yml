@@ -1,0 +1,77 @@
+name: Validate contributions
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Worker JavaScript syntax
+        run: node --check workers/payu-transparency/src/index.js
+
+      - name: Validate public ledger and Wrangler configuration
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          ledger = json.loads(Path("data/ledger.json").read_text())
+          config = json.loads(Path("workers/payu-transparency/wrangler.jsonc").read_text())
+
+          assert ledger.get("schema_version") == 1, "Unsupported ledger schema_version"
+          assert ledger.get("currency") == "INR", "The public ledger currency must be INR"
+          assert isinstance(ledger.get("entries"), list), "ledger.entries must be an array"
+
+          seen_ids = set()
+          for index, entry in enumerate(ledger["entries"]):
+              where = f"ledger.entries[{index}]"
+              assert isinstance(entry, dict), f"{where} must be an object"
+              assert entry.get("type") in {"income", "expense"}, f"{where}.type is invalid"
+              assert entry.get("status") in {"verified", "pending", "failed", "refunded"}, f"{where}.status is invalid"
+              assert isinstance(entry.get("id"), str) and entry["id"].strip(), f"{where}.id is required"
+              assert entry["id"] not in seen_ids, f"Duplicate public ledger id: {entry['id']}"
+              seen_ids.add(entry["id"])
+              assert re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", str(entry.get("date", ""))), f"{where}.date must use YYYY-MM-DD"
+              amount = entry.get("amount")
+              assert isinstance(amount, (int, float)) and not isinstance(amount, bool) and amount >= 0, f"{where}.amount must be a non-negative number"
+
+          assert config.get("name") == "payu-transparency", "Unexpected Worker name"
+          assert config.get("main") == "./src/index.js", "Unexpected Worker entry point"
+          required_secrets = set(config.get("secrets", {}).get("required", []))
+          assert required_secrets == {"PAYU_MERCHANT_KEY", "PAYU_MERCHANT_SALT"}, "Declare the expected secret names only"
+          print(f"Validated {len(ledger['entries'])} ledger entries and Wrangler configuration.")
+          PY
+
+      - name: Ensure local secret files are not tracked
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import PurePosixPath
+
+          tracked = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\\0")
+          forbidden = []
+          for path in filter(None, tracked):
+              name = PurePosixPath(path).name
+              if name in {".dev.vars", ".env"}:
+                  forbidden.append(path)
+              elif name.startswith(".dev.vars.") and name != ".dev.vars.example":
+                  forbidden.append(path)
+              elif name.startswith(".env.") and name != ".env.example":
+                  forbidden.append(path)
+
+          if forbidden:
+              raise SystemExit("Local secret files must not be committed: " + ", ".join(forbidden))
+          print("No local .dev.vars or .env secret files are tracked.")
+          PY
