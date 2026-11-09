@@ -1532,6 +1532,61 @@
         .contributor-option { min-height:42px;font-size:16px; }
       }
 
+    
+      /* Clean, accessible ledger table */
+      .ledger-table-wrap {
+        width:100%;
+        overflow-x:auto;
+        border:1.5px solid var(--ink);
+        border-radius:0 0 10px 10px;
+        background:#fffdf7;
+        -webkit-overflow-scrolling:touch;
+      }
+      .ledger-table {
+        width:100%;
+        min-width:700px;
+        border-collapse:collapse;
+        table-layout:auto;
+        color:var(--ink);
+        font-size:15px;
+      }
+      .ledger-table thead { background:#eee8fb; }
+      .ledger-table th {
+        padding:13px 15px;
+        border-bottom:2px solid var(--ink);
+        color:#66556f;
+        font-size:11px;
+        font-weight:900;
+        letter-spacing:.09em;
+        text-align:left;
+        text-transform:uppercase;
+        white-space:nowrap;
+      }
+      .ledger-table td {
+        padding:15px;
+        border-bottom:1px solid rgba(37,35,43,.17);
+        vertical-align:middle;
+      }
+      .ledger-table tbody tr:last-child td { border-bottom:0; }
+      .ledger-table tbody tr:hover { background:#fff9e7; }
+      .ledger-table .table-date { width:130px;white-space:nowrap;color:#625e69; }
+      .table-activity strong { display:block;font-size:15px;font-weight:800; }
+      .table-subtitle { display:block;margin-top:3px;color:#706b76;font-size:13px; }
+      .ledger-table .method-pill { display:inline-flex;align-items:center;padding:4px 9px;border:1px solid var(--ink);border-radius:999px;background:#f7e9a9;color:var(--ink);font-size:11px;font-weight:900;white-space:nowrap; }
+      .table-reference { color:#625e69;font-size:13px;white-space:nowrap; }
+      .table-muted { color:#aaa3ad; }
+      .receipt-link { margin-left:7px;color:#59477c;font-weight:800;text-decoration:none; }
+      .receipt-link:hover { text-decoration:underline; }
+      .ledger-table .table-amount { text-align:right;white-space:nowrap;font-weight:900; }
+      .ledger-table .amount { font-size:16px;font-weight:900; }
+      .ledger-table .amount.received { color:#32664e; }
+      .ledger-table .amount.spent { color:var(--red); }
+      .ledger-table .amount-heading { text-align:right; }
+      @media(max-width:700px) {
+        .ledger-table { font-size:14px; }
+        .ledger-table th,.ledger-table td { padding:12px 11px; }
+      }
+
     </style>
   </head>
   <body>
@@ -1834,44 +1889,27 @@
             const title = isPayU
               ? 'Community contribution'
               : entry.description || entry.project || 'Community entry';
-            const meta = [
-              formatDate(entry.date),
-              isExpense
-                ? entry.project
-                  ? esc(entry.project)
-                  : 'Verified expense'
-                : esc(entry.contributor || 'Anonymous contributor'),
-            ];
-            if (entry.paymentMode) {
-              meta.push('<span class="method-pill">' + esc(entry.paymentMode) + '</span>');
-            }
-            if (entry.reference) {
-              meta.push('Ref: ' + esc(entry.reference));
-            }
-            if (entry.proof_url) {
-              meta.push(
-                '<a href="' +
-                  safeUrl(entry.proof_url) +
-                  '" target="_blank" rel="noopener">View receipt ↗</a>',
-              );
-            }
+            const contributorName = isExpense
+              ? entry.project || 'Community expense'
+              : entry.contributor || 'Anonymous contributor';
+            const method = entry.paymentMode || '—';
+            const reference = entry.reference
+              ? esc(entry.reference)
+              : '<span class="table-muted">—</span>';
+            const receipt = entry.proof_url
+              ? ' <a class="receipt-link" href="' + safeUrl(entry.proof_url) + '" target="_blank" rel="noopener">Receipt ↗</a>'
+              : '';
             return (
-              '<article class="activity"><div class="activity-main"><span class="activity-mark ' +
-              (isExpense ? 'expense-mark' : '') +
-              '" aria-hidden="true">' +
-              (isExpense ? 'OUT' : 'IN') +
-              '</span><div class="activity-copy"><strong>' +
-              esc(title) +
-              '</strong><div class="activity-meta">' +
-              meta.join('<span aria-hidden="true">·</span>') +
-              '</div></div></div><div class="activity-value"><small>' +
-              (isExpense ? 'Expense' : 'Contribution') +
-              '</small><span class="amount ' +
-              (isExpense ? 'spent' : 'received') +
-              '">' +
-              (isExpense ? '−' : '+') +
-              money(Number(entry.amount)) +
-              '</span></div></article>'
+              '<tr>' +
+                '<td class="table-date">' + formatDate(entry.date) + '</td>' +
+                '<td class="table-activity"><strong>' + esc(title) + '</strong>' +
+                  '<span class="table-subtitle">' + esc(contributorName) + '</span></td>' +
+                '<td><span class="method-pill">' + esc(method) + '</span></td>' +
+                '<td class="table-reference">' + reference + receipt + '</td>' +
+                '<td class="table-amount"><span class="amount ' + (isExpense ? 'spent' : 'received') + '">' +
+                  (isExpense ? '−' : '+') + money(Number(entry.amount)) +
+                '</span></td>' +
+              '</tr>'
             );
           })
           .join('');
@@ -1904,9 +1942,13 @@
           filtered.length +
           '</strong> verified ' +
           (filtered.length === 1 ? 'entry' : 'entries') +
-          '</span><span>Newest first</span></div><div class="activity-list">' +
-          rows +
-          '</div>' +
+          '</span><span>Newest first</span></div>' +
+          '<div class="ledger-table-wrap"><table class="ledger-table">' +
+            '<thead><tr><th scope="col">Date</th><th scope="col">Activity</th>' +
+            '<th scope="col">Method</th><th scope="col">Reference</th>' +
+            '<th scope="col" class="amount-heading">Amount</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table></div>' +
           pager;
 
         const previous = root.querySelector('#previousPage');
