@@ -529,7 +529,9 @@
             month: '2-digit',
             day: '2-digit',
           }).format(new Date());
-          const url = new URL('https://payu-transparency.zhravann.workers.dev/api/public/transactions');
+          const url = new URL(
+            'https://payu-transparency.zhravann.workers.dev/api/public/transactions',
+          );
           url.searchParams.set('from', '2026-11-09');
           url.searchParams.set('to', today);
           const response = await fetch(url, { cache: 'no-store' });
@@ -537,12 +539,20 @@
             const data = await response.json();
             const existingRefs = new Set(
               entries
-                .map((entry) => String(entry.reference || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-6))
+                .map((entry) =>
+                  String(entry.reference || '')
+                    .replace(/[^a-zA-Z0-9]/g, '')
+                    .toUpperCase()
+                    .slice(-6),
+                )
                 .filter(Boolean),
             );
             payuIncome = (data.transactions || [])
               .filter((transaction) => {
-                const suffix = String(transaction.reference || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-6);
+                const suffix = String(transaction.reference || '')
+                  .replace(/[^a-zA-Z0-9]/g, '')
+                  .toUpperCase()
+                  .slice(-6);
                 return !suffix || !existingRefs.has(suffix);
               })
               .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
