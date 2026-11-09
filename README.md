@@ -52,7 +52,7 @@ The public site is hosted on GitHub Pages. It reads the existing verified manual
 The Worker is the only component that talks to PayU. It stores the PayU Merchant Key and Salt as Cloudflare Worker secrets, authenticates to PayU's transaction reporting API, and returns a sanitised list of captured transactions. The GitHub Pages frontend contains only the public Worker URL; it never receives PayU credentials.
 
 This integration is intentionally read-only:
-- It retrieves captured/successful transactions only.
+- It retrieves captured/successful transactions only and subtracts refunds that PayU marks as successfully processed; queued or pending refunds do not affect the total until PayU confirms success.
 - It exposes an anonymous contribution label, date, amount, payment mode, and masked reference.
 - It does not create payment links or payment orders.
 - It does not initiate refunds, cancellations, or transaction modifications.
