@@ -43,6 +43,14 @@ For expenses, set `type` to `expense`, provide `project`, `description`, `notes`
 
 The site computes the summary from verified entries. `status` must be `verified`; pending, failed or refunded payments must not be counted as received. Refunds and corrections should be represented as separate, clearly described ledger records rather than silently rewriting history.
 
+## Cloudflare Worker source
+
+The Cloudflare Worker source is version-controlled in [`workers/payu-transparency/`](workers/payu-transparency/). The deployed Worker is named `payu-transparency`; its entry point and required secret *names* are declared in `wrangler.jsonc`.
+
+No PayU credential values or Cloudflare API tokens belong in this repository. Use Cloudflare Secret bindings for production and an untracked local `.dev.vars` file for local development. See the [Worker README](workers/payu-transparency/README.md) for setup, secret rotation and deployment instructions.
+
+The `.dev.vars.example` file contains placeholders only. The root `.gitignore` excludes real `.dev.vars`, `.env`, Wrangler state and local credential files.
+
 ## PayU integration - read-only transparency feed
 
 The public site is hosted on GitHub Pages. It reads the existing verified manual ledger from `data/ledger.json` and combines it at runtime with successful PayU transactions returned by the Cloudflare Worker:
