@@ -241,6 +241,68 @@
         border-color: #dca1bb;
         background-color: #fffafd;
       }
+      .filter-tools {
+        display: grid;
+        grid-template-columns: minmax(125px, 1fr) 112px 112px auto auto;
+        gap: 8px;
+        flex: 1;
+        align-items: end;
+      }
+      .date-input {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .date-input input {
+        width: 100%;
+        height: 44px;
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 0 8px;
+        color: var(--ink);
+        font: 12px 'Nunito Sans', sans-serif;
+      }
+      .filter-action,
+      .filter-reset {
+        height: 44px;
+        border-radius: 8px;
+        padding: 0 12px;
+        font: 700 12px 'Nunito Sans', sans-serif;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .filter-action {
+        border: 1px solid var(--red);
+        background: var(--red);
+        color: #fff;
+      }
+      .filter-reset {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+      }
+      .filter-action:hover { background: #6d294b; border-color: #6d294b; }
+      .filter-reset:hover { border-color: #dca1bb; color: var(--red); }
+      .payu-status {
+        margin: -2px 0 16px;
+        padding: 11px 14px;
+        border: 1px solid #dcebe0;
+        border-radius: 7px;
+        background: #f2f8f3;
+        color: #416d4e;
+        font-size: 12px;
+      }
+      .payu-status.warning {
+        border-color: #f0dfbd;
+        background: #fff9ed;
+        color: #795d2f;
+      }
+      .payu-status[hidden] { display: none; }
       .period-note {
         font-size: 11px;
         color: var(--muted);
@@ -423,12 +485,21 @@
           display: grid;
           grid-template-columns: 1fr 1fr;
         }
-        .search,
-        .month-filter {
+        .search {
+          grid-column: 1 / -1;
           width: 100%;
           min-width: 0;
           height: 44px;
           font-size: 12px;
+        }
+        .date-input input {
+          width: 100%;
+          min-width: 0;
+          font-size: 11px;
+        }
+        .filter-action,
+        .filter-reset {
+          width: 100%;
         }
         .activity {
           padding: 13px 11px;
@@ -684,13 +755,21 @@
                 type="search"
                 placeholder="Search activity"
                 aria-label="Search ledger"
-              /><select class="month-filter" id="month" aria-label="Filter by month">
-                <option value="last-month">Last month</option>
-                <option value="all">All time</option>
-              </select>
+              />
+              <label class="date-input" for="fromDate">
+                <span>From</span>
+                <input id="fromDate" type="date" aria-label="From date" />
+              </label>
+              <label class="date-input" for="toDate">
+                <span>To</span>
+                <input id="toDate" type="date" aria-label="To date" />
+              </label>
+              <button class="filter-action" id="applyFilters" type="button">Apply</button>
+              <button class="filter-reset" id="allDates" type="button">All dates</button>
             </div>
           </div>
-          <p class="period-note" id="periodNote">Showing activity from last month.</p>
+          <p class="period-note" id="periodNote">Showing verified activity in the last 30 days.</p>
+          <div class="payu-status" id="payuStatus" role="status" aria-live="polite" hidden></div>
           <div id="ledger"><p class="empty">Loading verified records…</p></div>
         </section>
         <p class="privacy-note">
@@ -745,170 +824,266 @@
           menuButton.setAttribute('aria-expanded', 'false');
         }),
       );
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
           siteNav.classList.remove('open');
           menuButton.setAttribute('aria-expanded', 'false');
         }
       });
-      const money = (n) =>
+
+      const PAYU_API = 'https://payu-transparency.zhravann.workers.dev';
+      const PAYU_START_DATE = '2026-11-09';
+      const money = (value) =>
         new Intl.NumberFormat('en-IN', {
           style: 'currency',
           currency: 'INR',
           maximumFractionDigits: 0,
-        }).format(n);
-      const esc = (s) =>
-        String(s ?? '').replace(
+        }).format(Number(value) || 0);
+      const esc = (value) =>
+        String(value ?? '').replace(
           /[&<>"']/g,
-          (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+          (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
         );
-      const formatDate = (s) => {
-        if (!s) return 'Date not listed';
-        const d = new Date(s + 'T00:00:00');
-        return Number.isNaN(d.getTime())
+      const formatDate = (value) => {
+        if (!value) return 'Date not listed';
+        const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
+        if (!match) return 'Date not listed';
+        const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+        return Number.isNaN(date.getTime())
           ? 'Date not listed'
-          : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+          : new Intl.DateTimeFormat('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              timeZone: 'UTC',
+            }).format(date);
       };
-      const safeUrl = (s) => {
+      const safeUrl = (value) => {
         try {
-          const u = new URL(s, location.href);
-          return u.protocol === 'https:' ? u.href : '#';
+          const url = new URL(value, location.href);
+          return url.protocol === 'https:' ? url.href : '#';
         } catch {
           return '#';
         }
       };
-      let entries = [],
-        activeType = 'all';
-      const monthSelect = document.querySelector('#month'),
-        searchInput = document.querySelector('#search');
-      function monthKey(d) {
-        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      const todayIST = () =>
+        new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Asia/Kolkata',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }).format(new Date());
+      const shiftDate = (value, amount) => {
+        const date = new Date(value + 'T12:00:00Z');
+        date.setUTCDate(date.getUTCDate() + amount);
+        return date.toISOString().slice(0, 10);
+      };
+
+      let entries = [];
+      let activeType = 'all';
+      const searchInput = document.querySelector('#search');
+      const fromInput = document.querySelector('#fromDate');
+      const toInput = document.querySelector('#toDate');
+      const payuStatus = document.querySelector('#payuStatus');
+
+      function normalisedReference(value) {
+        return String(value || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(-6);
       }
-      function lastMonthKey() {
-        const d = new Date();
-        d.setDate(1);
-        d.setMonth(d.getMonth() - 1);
-        return monthKey(d);
+
+      function setPayUStatus(message, warning = false) {
+        payuStatus.textContent = message;
+        payuStatus.className = warning ? 'payu-status warning' : 'payu-status';
+        payuStatus.hidden = false;
       }
-      function monthLabel(key) {
-        const d = new Date(key + '-01T00:00:00');
-        return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
-      }
-      function buildMonthOptions() {
-        const months = [
-          ...new Set(
-            entries.map((x) => (x.date || '').slice(0, 7)).filter((x) => /^\d{4}-\d{2}$/.test(x)),
-          ),
-        ]
-          .sort()
-          .reverse();
-        const last = lastMonthKey();
-        const keys = [...new Set([last, ...months])];
-        monthSelect.innerHTML =
-          '<option value="last-month">Last month · ' +
-          monthLabel(last) +
-          '</option>' +
-          keys
-            .filter((x) => x !== last)
-            .map((x) => '<option value="' + x + '">' + monthLabel(x) + '</option>')
-            .join('') +
-          '<option value="all">All time</option>';
-        monthSelect.value = 'last-month';
-      }
+
       function render() {
-        const income = entries.filter((x) => x.type === 'income'),
-          expenses = entries.filter((x) => x.type === 'expense');
-        const received = income.reduce((s, x) => s + Number(x.amount || 0), 0),
-          spent = expenses.reduce((s, x) => s + Number(x.amount || 0), 0);
+        const income = entries.filter((entry) => entry.type === 'income');
+        const expenses = entries.filter((entry) => entry.type === 'expense');
+        const received = income.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+        const spent = expenses.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+
         document.querySelector('#balance').textContent = money(received - spent);
         document.querySelector('#received').textContent = money(received);
         document.querySelector('#spent').textContent = money(spent);
-        const selected = monthSelect.value || 'last-month',
-          key = selected === 'last-month' ? lastMonthKey() : selected;
+
+        const from = fromInput.value || '0001-01-01';
+        const to = toInput.value || todayIST();
         const query = searchInput.value.trim().toLocaleLowerCase();
         const filtered = entries
           .filter(
-            (x) =>
-              (activeType === 'all' || x.type === activeType) &&
-              (selected === 'all' || (x.date || '').slice(0, 7) === key) &&
-              [x.contributor, x.description, x.project, x.reference].some((v) =>
-                String(v || '')
-                  .toLocaleLowerCase()
-                  .includes(query),
+            (entry) =>
+              (activeType === 'all' || entry.type === activeType) &&
+              (entry.date || '') >= from &&
+              (entry.date || '') <= to &&
+              [entry.contributor, entry.description, entry.project, entry.reference].some((value) =>
+                String(value || '').toLocaleLowerCase().includes(query),
               ),
           )
           .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
         document.querySelector('#periodNote').textContent =
-          selected === 'all'
-            ? 'Showing all verified activity.'
-            : 'Showing verified activity from ' + monthLabel(key) + '.';
+          'Showing verified activity from ' + formatDate(from) + ' to ' + formatDate(to) + '.';
+
         const root = document.querySelector('#ledger');
         if (!filtered.length) {
           root.innerHTML =
             '<div class="empty">' +
             (entries.length
-              ? 'No matching activity for this period. Try another month or filter.'
+              ? 'No matching activity for this period. Try another date range or filter.'
               : 'No verified transactions have been published yet.') +
             '</div>';
           return;
         }
+
         root.innerHTML =
           '<div class="activity-list">' +
           filtered
             .map(
-              (x) =>
+              (entry) =>
                 '<article class="activity"><div class="activity-info"><strong>' +
-                esc(x.description || x.project || x.contributor || 'Community entry') +
+                esc(entry.description || entry.project || entry.contributor || 'Community entry') +
                 '</strong><small>' +
-                formatDate(x.date) +
-                (x.reference ? ' · Ref: ' + esc(x.reference) : '') +
-                (x.proof_url
+                formatDate(entry.date) +
+                (entry.paymentMode ? ' · ' + esc(entry.paymentMode) : '') +
+                (entry.reference ? ' · Ref: ' + esc(entry.reference) : '') +
+                (entry.proof_url
                   ? ' · <a href="' +
-                    safeUrl(x.proof_url) +
+                    safeUrl(entry.proof_url) +
                     '" target="_blank" rel="noopener">View receipt ↗</a>'
                   : '') +
                 '</small></div><span class="amount ' +
-                (x.type === 'expense' ? 'spent' : 'received') +
+                (entry.type === 'expense' ? 'spent' : 'received') +
                 '">' +
-                (x.type === 'expense' ? '−' : '+') +
-                money(Number(x.amount)) +
+                (entry.type === 'expense' ? '−' : '+') +
+                money(Number(entry.amount)) +
                 '</span></article>',
             )
             .join('') +
           '</div>';
       }
+
+      function setRange(start, end) {
+        fromInput.value = start;
+        toInput.value = end;
+        render();
+      }
+
       document.querySelectorAll('.tab').forEach((button) =>
         button.addEventListener('click', () => {
           document
             .querySelectorAll('.tab')
-            .forEach((x) => x.classList.toggle('active', x === button));
+            .forEach((item) => item.classList.toggle('active', item === button));
           activeType = button.dataset.type;
           render();
         }),
       );
-      monthSelect.addEventListener('change', render);
       searchInput.addEventListener('input', render);
+      document.querySelector('#applyFilters').addEventListener('click', () => {
+        if (!fromInput.value || !toInput.value || fromInput.value > toInput.value) {
+          setPayUStatus('Choose a valid date range.', true);
+          return;
+        }
+        render();
+      });
+      document.querySelector('#allDates').addEventListener('click', () => {
+        const firstDate = entries.map((entry) => entry.date).filter(Boolean).sort()[0] || PAYU_START_DATE;
+        setRange(firstDate, todayIST());
+      });
+
       async function load() {
         const root = document.querySelector('#ledger');
+        const today = todayIST();
+        fromInput.value = shiftDate(today, -29);
+        toInput.value = today;
+
+        let ledgerEntries = [];
         try {
           const response = await fetch('./data/ledger.json', { cache: 'no-store' });
-          if (!response.ok) throw new Error('Ledger unavailable');
+          if (!response.ok) throw new Error('Published ledger is unavailable.');
           const data = await response.json();
-          entries = (Array.isArray(data.entries) ? data.entries : []).filter(
-            (x) =>
-              ['income', 'expense'].includes(x.type) &&
-              x.status === 'verified' &&
-              Number.isFinite(Number(x.amount)) &&
-              Number(x.amount) >= 0 &&
-              /^\d{4}-\d{2}-\d{2}$/.test(x.date || ''),
+          ledgerEntries = (Array.isArray(data.entries) ? data.entries : []).filter(
+            (entry) =>
+              ['income', 'expense'].includes(entry.type) &&
+              entry.status === 'verified' &&
+              Number.isFinite(Number(entry.amount)) &&
+              Number(entry.amount) >= 0 &&
+              /^\d{4}-\d{2}-\d{2}$/.test(entry.date || ''),
           );
-          buildMonthOptions();
-          render();
         } catch (error) {
-          root.innerHTML =
-            '<div class="empty">Financial records are not available right now.</div>';
+          setPayUStatus('The published ledger could not be loaded. ' + (error.message || ''), true);
         }
+
+        let payuEntries = [];
+        if (today >= PAYU_START_DATE) {
+          try {
+            const url = new URL('/api/public/transactions', PAYU_API);
+            url.searchParams.set('from', PAYU_START_DATE);
+            url.searchParams.set('to', today);
+            const response = await fetch(url.toString(), {
+              method: 'GET',
+              headers: { Accept: 'application/json' },
+              cache: 'no-store',
+            });
+            const data = await response.json();
+            if (!response.ok) {
+              throw new Error(
+                data.message ||
+                  (response.status === 503
+                    ? 'PayU credentials have not been configured on the secure Worker yet.'
+                    : 'PayU transaction feed is unavailable.'),
+              );
+            }
+
+            const ledgerReferences = new Set(
+              ledgerEntries.map((entry) => normalisedReference(entry.reference)).filter(Boolean),
+            );
+            payuEntries = (Array.isArray(data.transactions) ? data.transactions : [])
+              .filter((transaction) => {
+                const suffix = normalisedReference(transaction.reference);
+                return !suffix || !ledgerReferences.has(suffix);
+              })
+              .map((transaction) => ({
+                id: 'payu-' + String(transaction.reference || transaction.date || Math.random()),
+                type: 'income',
+                status: 'verified',
+                date: String(transaction.date || '').slice(0, 10),
+                contributor: 'Anonymous',
+                description:
+                  String(transaction.paymentMode || '').toUpperCase() === 'UPI'
+                    ? 'Community contribution · UPI'
+                    : 'Community contribution · ' + String(transaction.paymentMode || 'PayU'),
+                paymentMode: String(transaction.paymentMode || 'PayU').toUpperCase(),
+                amount: Number(transaction.amount),
+                reference: String(transaction.reference || ''),
+                source: 'PayU',
+              }))
+              .filter(
+                (entry) =>
+                  /^\d{4}-\d{2}-\d{2}$/.test(entry.date) &&
+                  Number.isFinite(entry.amount) &&
+                  entry.amount > 0,
+              );
+
+            setPayUStatus(
+              payuEntries.length
+                ? 'PayU connected · ' + payuEntries.length + ' successful payments loaded.'
+                : 'PayU connected · No successful payments recorded yet.',
+            );
+          } catch (error) {
+            setPayUStatus(
+              'Live PayU transactions are not available yet. ' +
+                (error instanceof Error ? error.message : 'Please try again later.'),
+              true,
+            );
+          }
+        } else {
+          setPayUStatus('PayU reporting will begin from ' + formatDate(PAYU_START_DATE) + '.', true);
+        }
+
+        entries = [...ledgerEntries, ...payuEntries];
+        render();
       }
+
       load();
     </script>
   </body>
