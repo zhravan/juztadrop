@@ -1,7 +1,7 @@
 <samp>
 
 <p align="center">
-  <img src="assets/justadrop-logo.svg" alt="Just-a-Drop" width="260" />
+  <img src="assets/justadrop-logo.svg" alt="Juzt A Drop" width="260" />
 </p>
 
 <h2 align="center">Small contributions. Shared impact.</h2>
@@ -17,7 +17,7 @@
 
 ## About
 
-Just-a-Drop is a community initiative that brings people together to support people in need through small contributions.
+Juzt A Drop is a community initiative that brings people together to support people in need through small contributions.
 
 This repository contains the website and its public transparency layer. Built with plain HTML, CSS and JavaScript.
 
