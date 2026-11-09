@@ -1,0 +1,21 @@
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Cloudflare / Wrangler local state
+.wrangler/
+workers/**/.wrangler/
+
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+
+# Local machine files
+.DS_Store
+*.pem
+*.key
