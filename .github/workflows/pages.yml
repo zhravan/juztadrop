@@ -1,4 +1,4 @@
-name: Deploy Just-a-Drop to GitHub Pages
+name: Deploy Juzt A Drop to GitHub Pages
 
 on:
   push:
