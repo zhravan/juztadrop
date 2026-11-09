@@ -12,6 +12,26 @@ This directory contains the Cloudflare Worker used by the Just A Drop public led
 - Only captured payments are included. Successful refunds are deducted before totals are returned.
 - The response is an explicit public projection; it does not return raw PayU records, contact details, UPI IDs, or bank data.
 
+## Cache behavior and troubleshooting
+
+- Successful transaction summaries are cached for up to five minutes at the Worker edge. Cache keys use only the requested `from` and `to` dates.
+- Error responses use `Cache-Control: no-store` and are not cached.
+- Send `Cache-Control: no-cache` (or `Pragma: no-cache`) to bypass the Worker cache. The explicit `fresh=1` query parameter is also supported and is useful for diagnostics.
+- A successful forced-refresh request refreshes the shared edge cache, while its response to that caller is marked `no-store`.
+- The Worker retries network errors and PayU HTTP 408, 429, and 5xx responses up to three total attempts with bounded backoff. It does not retry 400, 401, or 403 responses.
+- A failed upstream request returns a stable error `code` and, when available, `upstreamStatus`. The logs capture an allowlisted, redacted error summary and safe request headers; they never record Authorization, merchant credentials, or raw transaction data.
+
+Force a live PayU request:
+
+```sh
+curl --url 'https://payu-transparency.zhravann.workers.dev/api/public/transactions?from=2026-11-09&to=2026-11-09&fresh=1' \\
+  -H 'accept: application/json' \\
+  -H 'cache-control: no-cache' \\
+  -H 'pragma: no-cache'
+```
+
+For HTTP 403, check whether PayU has enabled the Transaction Reporting API for the merchant account and confirm the production Key/Salt pair and signing scheme with PayU. Retrying a 403 will not resolve a permission or authentication rejection.
+
 ## Prerequisites
 
 - Node.js supported by the current Wrangler release.
