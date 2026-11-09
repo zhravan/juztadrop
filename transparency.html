@@ -971,7 +971,7 @@
           <div id="ledger"><p class="empty">Loading verified records…</p></div>
         </section>
         <p class="privacy-note">
-          Personal and beneficiary details are kept private. Only captured PayU payments are shown,
+          Contributor names are shown as first name and surname initial where available; otherwise they appear as Anonymous contributor. Contact and beneficiary details remain private. Only captured PayU payments are shown,
           net of refunds successfully processed by PayU. Pending and failed payments are excluded.
         </p>
       </section>
@@ -1169,7 +1169,7 @@
                 ? entry.project
                   ? esc(entry.project)
                   : 'Verified expense'
-                : 'Anonymous contributor',
+                : esc(entry.contributor || 'Anonymous contributor'),
             ];
             if (entry.paymentMode) {
               meta.push('<span class="method-pill">' + esc(entry.paymentMode) + '</span>');
@@ -1349,7 +1349,7 @@
                 type: 'income',
                 status: 'verified',
                 date: String(transaction.date || '').slice(0, 10),
-                contributor: 'Anonymous',
+                contributor: String(transaction.contributor || 'Anonymous contributor'),
                 description:
                   String(transaction.paymentMode || '').toUpperCase() === 'UPI'
                     ? 'Community contribution · UPI'
