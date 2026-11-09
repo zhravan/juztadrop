@@ -25,15 +25,21 @@ function base64(buffer) {
 }
 async function auth(body, date, key, salt) {
   const encoder = new TextEncoder();
+
+  // PayU v4 Transaction Reporting API authentication:
+  // SHA512(request body + "|" + GMT date + "|" + merchant salt), lowercase hex.
+  // Digest is retained because PayU's request examples include it, but it is
+  // not part of the signing string in the documented SHA512 scheme.
   const digest = base64(await crypto.subtle.digest("SHA-256", encoder.encode(body)));
-  const signingString = "date: " + date + "\ndigest: " + digest;
-  const secretKey = await crypto.subtle.importKey(
-    "raw", encoder.encode(salt), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-  );
-  const signature = base64(await crypto.subtle.sign("HMAC", secretKey, encoder.encode(signingString)));
+  const signingString = body + "|" + date + "|" + salt;
+  const signatureBuffer = await crypto.subtle.digest("SHA-512", encoder.encode(signingString));
+  const signature = Array.from(new Uint8Array(signatureBuffer))
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("");
+
   return {
     digest,
-    authorization: 'hmac username="' + key + '", algorithm="hmac-sha256", headers="date digest", signature="' + signature + '"'
+    authorization: 'hmac username="' + key + '", algorithm="sha512", headers="date", signature="' + signature + '"'
   };
 }
 function sleep(ms) {
