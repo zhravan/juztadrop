@@ -1409,6 +1409,24 @@
         .way-card p, .impact p, .footer, .period-note { font-size:16px; }
       }
 
+    
+      /* Let the transparency dashboard use the available page width */
+      main.wrap {
+        width: min(calc(100% - 48px), 1600px) !important;
+      }
+      main.wrap > .page {
+        width: 100% !important;
+        max-width: none !important;
+      }
+      .summary, .ledger-panel, .history-note, .privacy-note {
+        width: 100%;
+      }
+      @media (max-width: 700px) {
+        main.wrap {
+          width: min(calc(100% - 30px), 1600px) !important;
+        }
+      }
+
     </style>
   </head>
   <body>
