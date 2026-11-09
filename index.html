@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#fffaf4"><meta name="description" content="Just a Drop of water might fill someone’s thirst. Save ₹1 every day, contribute together, and help make someone’s life better.">
-<title>Just A Drop — Together We Can</title>
+<title>Just A Drop , Together We Can</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -56,7 +56,7 @@
 </section>
 <section class="wrap section" id="spending">
 <div class="section-head"><div><div class="eyebrow">EXPENSES</div><h2>Expenses</h2></div><p>Recorded expenses and receipts.</p></div>
-<div class="spend-grid" id="spendGrid"><article class="spend"><div class="topline"><span>PROJECT 001</span><span>—</span></div><h3>No expenses yet</h3><p>Expense details and available receipts will be listed here.</p><div class="spend-foot"><span>₹0</span><span class="evidence">No records yet</span></div></article></div>
+<div class="spend-grid" id="spendGrid"><article class="spend"><div class="topline"><span>PROJECT 001</span><span>,</span></div><h3>No expenses yet</h3><p>Expense details and available receipts will be listed here.</p><div class="spend-foot"><span>₹0</span><span class="evidence">No records yet</span></div></article></div>
 </section>
 <section class="transparency" id="how"><div class="wrap transparency-grid"><div><div class="eyebrow">ACCOUNTABILITY</div><h2>How funds are used</h2><p>Monthly contributions are listed here alongside expenses and available receipts.</p><p>Personal and beneficiary details are kept private.</p></div><div class="principles"><div class="principle"><span>01 &nbsp; Receipts, not estimates</span><span>VERIFIED</span></div><div class="principle"><span>02 &nbsp; Every expense has a purpose</span><span>ITEMISED</span></div><div class="principle"><span>03 &nbsp; Proof wherever possible</span><span>RECEIPTS</span></div><div class="principle"><span>04 &nbsp; Corrections stay visible</span><span>UPDATES</span></div><div class="principle"><span>05 &nbsp; Privacy with accountability</span><span>PRIVACY</span></div></div></div></section>
 </main>
@@ -75,7 +75,7 @@
 const DATA_URL = './data/ledger.json';
 let entries=[], activeTab='all';
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(n)||0);
-const dateFmt=s=>{if(!s)return '—';const d=new Date(s+'T00:00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
+const dateFmt=s=>{if(!s)return ',';const d=new Date(s+'T00:00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
 function render(){
  const income=entries.filter(x=>x.type==='income'&&x.status==='verified'), expenses=entries.filter(x=>x.type==='expense'&&x.status==='verified');
  const totalIn=income.reduce((a,x)=>a+Number(x.amount||0),0), totalOut=expenses.reduce((a,x)=>a+Number(x.amount||0),0);
@@ -86,10 +86,10 @@ function render(){
  const months=[...new Set(entries.map(x=>(x.date||'').slice(0,7)).filter(Boolean))].sort().reverse();const sel=document.querySelector('#month'), current=sel.value;sel.innerHTML='<option value="">All dates</option>'+months.map(m=>'<option value="'+m+'">'+new Date(m+'-01T00:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'})+'</option>').join('');sel.value=current;
  const q=document.querySelector('#search').value.toLowerCase(), month=sel.value;
  const rows=entries.filter(x=>(activeTab==='all'||x.type===activeTab)&&( !month||(x.date||'').startsWith(month))&&[x.contributor,x.description,x.reference,x.project].join(' ').toLowerCase().includes(q)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
- document.querySelector('#ledgerRows').innerHTML=rows.map(x=>'<tr><td><span class="person">'+esc(x.contributor||x.description||'Community entry')+'</span><span class="sub">'+esc(x.description||x.project||'')+'</span></td><td>'+dateFmt(x.date)+'</td><td><span class="mono">'+esc(x.reference||'—')+'</span></td><td><span class="tag '+(x.type==='expense'?'out':'')+'">'+(x.type==='expense'?'Expense':'Contribution')+'</span></td><td class="amount">'+(x.type==='expense'?'−':'+')+money(x.amount)+'</td><td>'+(x.proof_url?'<a class="proof" href="'+safeUrl(x.proof_url)+'" target="_blank" rel="noopener">View proof ↗</a>':'<span class="sub">—</span>')+'</td></tr>').join('');
+ document.querySelector('#ledgerRows').innerHTML=rows.map(x=>'<tr><td><span class="person">'+esc(x.contributor||x.description||'Community entry')+'</span><span class="sub">'+esc(x.description||x.project||'')+'</span></td><td>'+dateFmt(x.date)+'</td><td><span class="mono">'+esc(x.reference||',')+'</span></td><td><span class="tag '+(x.type==='expense'?'out':'')+'">'+(x.type==='expense'?'Expense':'Contribution')+'</span></td><td class="amount">'+(x.type==='expense'?'−':'+')+money(x.amount)+'</td><td>'+(x.proof_url?'<a class="proof" href="'+safeUrl(x.proof_url)+'" target="_blank" rel="noopener">View proof ↗</a>':'<span class="sub">,</span>')+'</td></tr>').join('');
  document.querySelector('#emptyState').style.display=rows.length?'none':'block';
  const cards=expenses.map(x=>'<article class="spend"><div class="topline"><span>'+esc(x.project||'COMMUNITY EXPENSE')+'</span><span>'+dateFmt(x.date)+'</span></div><h3>'+esc(x.description||'Community expense')+'</h3><p>'+esc(x.notes||'Recorded community expenditure.')+'</p><div class="spend-foot"><span>'+money(x.amount)+'</span>'+(x.proof_url?'<a class="evidence" href="'+safeUrl(x.proof_url)+'" target="_blank" rel="noopener">VIEW DOCUMENT ↗</a>':'<span class="evidence">DOCUMENT PENDING</span>')+'</div></article>');
- document.querySelector('#spendGrid').innerHTML=cards.join('')||'<article class="spend"><div class="topline"><span>NO ENTRIES</span><span>—</span></div><h3>No expenses published yet</h3><p>Expenses will be itemised here as they are approved and reconciled.</p><div class="spend-foot"><span>₹0</span><span class="evidence">Awaiting records</span></div></article>';
+ document.querySelector('#spendGrid').innerHTML=cards.join('')||'<article class="spend"><div class="topline"><span>NO ENTRIES</span><span>,</span></div><h3>No expenses published yet</h3><p>Expenses will be itemised here as they are approved and reconciled.</p><div class="spend-foot"><span>₹0</span><span class="evidence">Awaiting records</span></div></article>';
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function safeUrl(s){try{const u=new URL(s,location.href);return ['https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
