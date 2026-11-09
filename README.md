@@ -89,7 +89,7 @@ The actual `.dev.vars` file is ignored by Git. Never use production merchant cre
 
 The initial ledger is intentionally empty. Do not add invented, example, estimated or unreconciled financial figures to the live data file.
 
-A ledger entry has this shape:
+A ledger entry has this shape. The values below are illustrative schema examples only; do not copy them into the live ledger as real financial records.
 
 ```json
 {
