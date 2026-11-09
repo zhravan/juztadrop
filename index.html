@@ -91,7 +91,7 @@ th{background:#fff5f8;color:#826f79;border-color:var(--line)}td{border-color:#f3
 </section>
 <section class="wrap section" id="spending">
 <div class="section-head"><div><div class="eyebrow">EXPENSES</div><h2>Expenses</h2></div><p>Recorded expenses and receipts.</p></div>
-<div class="spend-grid" id="spendGrid"><article class="spend"><div class="topline"><span>COMMUNITY EXPENSE</span><span></span></div><h3>No expenses yet</h3><p>Expense details and available receipts will be listed here.</p><div class="spend-foot"><span>₹0</span><span class="evidence">No records yet</span></div></article></div>
+<div class="spend-grid" id="spendGrid"><article class="spend"><div class="topline"><span>COMMUNITY EXPENSE</span><span></span></div><h3>No expenses recorded</h3><p>Expense details and available receipts will be listed here.</p><div class="spend-foot"><span>₹0</span><span class="evidence">No records yet</span></div></article></div>
 </section>
 <section class="transparency" id="how"><div class="wrap transparency-grid"><div><div class="eyebrow">ACCOUNTABILITY</div><h2>How funds are used</h2><p>Monthly contributions are listed here alongside expenses and available receipts.</p><p>Personal and beneficiary details are kept private.</p></div><div class="principles"><div class="principle"><span>01 &nbsp; Receipts, not estimates</span><span>VERIFIED</span></div><div class="principle"><span>02 &nbsp; Every expense has a purpose</span><span>ITEMISED</span></div><div class="principle"><span>03 &nbsp; Proof wherever possible</span><span>RECEIPTS</span></div><div class="principle"><span>04 &nbsp; Corrections stay visible</span><span>UPDATES</span></div><div class="principle"><span>05 &nbsp; Privacy with accountability</span><span>PRIVACY</span></div></div></div></section>
 </main>
@@ -110,21 +110,21 @@ th{background:#fff5f8;color:#826f79;border-color:var(--line)}td{border-color:#f3
 const DATA_URL = './data/ledger.json';
 let entries=[], activeTab='all';
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(n)||0);
-const dateFmt=s=>{if(!s)return ',';const d=new Date(s+'T00:00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
+const dateFmt=s=>{if(!s)return 'Date not listed';const d=new Date(s+'T00:00:00');return isNaN(d)?'Date not listed':d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
 function render(){
  const income=entries.filter(x=>x.type==='income'&&x.status==='verified'), expenses=entries.filter(x=>x.type==='expense'&&x.status==='verified');
  const totalIn=income.reduce((a,x)=>a+Number(x.amount||0),0), totalOut=expenses.reduce((a,x)=>a+Number(x.amount||0),0);
  document.querySelector('#totalIn').textContent=money(totalIn);document.querySelector('#totalOut').textContent=money(totalOut);document.querySelector('#balance').textContent=money(totalIn-totalOut);
  document.querySelector('#people').textContent=new Set(income.map(x=>x.contributor_id||x.contributor).filter(Boolean)).size;
- document.querySelector('#ledgerStatus').textContent=entries.length?'Published ledger':'Awaiting verified records';
- document.querySelector('#asOf').textContent=entries.length?'Last updated '+new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})+'. Only verified records are included in totals.':'No verified entries published yet.';
+ document.querySelector('#ledgerStatus').textContent=entries.length?'Verified records':'No verified records yet';
+ document.querySelector('#asOf').textContent=entries.length?'Only verified records are included in these totals.':'Financial records will appear here once verified.';
  const months=[...new Set(entries.map(x=>(x.date||'').slice(0,7)).filter(Boolean))].sort().reverse();const sel=document.querySelector('#month'), current=sel.value;sel.innerHTML='<option value="">All dates</option>'+months.map(m=>'<option value="'+m+'">'+new Date(m+'-01T00:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'})+'</option>').join('');sel.value=current;
  const q=document.querySelector('#search').value.toLowerCase(), month=sel.value;
  const rows=entries.filter(x=>(activeTab==='all'||x.type===activeTab)&&( !month||(x.date||'').startsWith(month))&&[x.contributor,x.description,x.reference,x.project].join(' ').toLowerCase().includes(q)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  document.querySelector('#ledgerRows').innerHTML=rows.map(x=>'<article class="activity-row"><div class="activity-icon '+(x.type==='expense'?'expense':'income')+'">'+(x.type==='expense'?'↗':'↙')+'</div><div class="activity-main"><strong>'+esc(x.contributor||x.description||'Community entry')+'</strong><span>'+esc(x.description||x.project||'')+'</span><small>'+dateFmt(x.date)+(x.reference?' · Ref: '+esc(x.reference):'')+'</small></div><div class="activity-side"><strong class="amount '+(x.type==='expense'?'spent':'received')+'">'+(x.type==='expense'?'−':'+')+money(x.amount)+'</strong>'+(x.proof_url?'<a class="proof" href="'+safeUrl(x.proof_url)+'" target="_blank" rel="noopener">View proof ↗</a>':'')+'</div></article>').join('');
- document.querySelector('#emptyState').style.display=rows.length?'none':'block';
+ document.querySelector('#emptyState').style.display=rows.length?'none':'block';document.querySelector('#emptyState').textContent=entries.length?'No matching records. Try another search or date.':'Financial records will appear here once verified.';
  const cards=expenses.map(x=>'<article class="spend"><div class="topline"><span>'+esc(x.project||'COMMUNITY EXPENSE')+'</span><span>'+dateFmt(x.date)+'</span></div><h3>'+esc(x.description||'Community expense')+'</h3><p>'+esc(x.notes||'Recorded community expenditure.')+'</p><div class="spend-foot"><span>'+money(x.amount)+'</span>'+(x.proof_url?'<a class="evidence" href="'+safeUrl(x.proof_url)+'" target="_blank" rel="noopener">VIEW DOCUMENT ↗</a>':'<span class="evidence">DOCUMENT PENDING</span>')+'</div></article>');
- document.querySelector('#spendGrid').innerHTML=cards.join('')||'<article class="spend"><div class="topline"><span>NO ENTRIES</span><span>,</span></div><h3>No expenses yet</h3><p>Expenses will be itemised here as they are approved and reconciled.</p><div class="spend-foot"><span>₹0</span><span class="evidence">Awaiting records</span></div></article>';
+ document.querySelector('#spendGrid').innerHTML=cards.join('')||'<article class="spend"><div class="topline"><span>NO ENTRIES</span><span>,</span></div><h3>No expenses yet</h3><p>Verified expenses and available receipts will appear here.</p><div class="spend-foot"><span>₹0</span><span class="evidence">Awaiting records</span></div></article>';
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function safeUrl(s){try{const u=new URL(s,location.href);return ['https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
