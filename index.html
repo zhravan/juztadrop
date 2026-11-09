@@ -1237,7 +1237,7 @@
               <button class="scene-dot" type="button" aria-label="Show care illustration" aria-pressed="false" data-go="3"></button>
             </div>
             <span class="scene-count" id="sceneCount">01 / 04</span>
-            <button class="scene-pause" id="scenePause" type="button" aria-label="Pause illustrations">Ⅱ</button>
+            
           </div>
         </div>
       </section>
@@ -1380,8 +1380,6 @@
       const sceneDots = Array.from(document.querySelectorAll('.scene-dot'));
       const sceneCount = document.querySelector('#sceneCount');
       let activeScene = 0;
-      let sceneTimer;
-      let sceneIsPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       function showScene(index) {
         activeScene = (index + sceneCards.length) % sceneCards.length;
         sceneCards.forEach((scene, i) => {
@@ -1396,27 +1394,7 @@
         });
         sceneCount.textContent = String(activeScene + 1).padStart(2, '0') + ' / 04';
       }
-      function stopSceneTimer() { window.clearInterval(sceneTimer); }
-      function startSceneTimer() {
-        stopSceneTimer();
-        if (!sceneIsPaused) sceneTimer = window.setInterval(() => showScene(activeScene + 1), 4800);
-      }
-      sceneDots.forEach(dot => dot.addEventListener('click', () => {
-        showScene(Number(dot.dataset.go));
-        startSceneTimer();
-      }));
-      scenePause.addEventListener('click', () => {
-        sceneIsPaused = !sceneIsPaused;
-        scenePause.textContent = sceneIsPaused ? '▶' : 'Ⅱ';
-        scenePause.setAttribute('aria-label', sceneIsPaused ? 'Play illustrations' : 'Pause illustrations');
-        startSceneTimer();
-      });
-      const visualCarousel = document.querySelector('.story-visual');
-      visualCarousel.addEventListener('mouseenter', stopSceneTimer);
-      visualCarousel.addEventListener('mouseleave', startSceneTimer);
-      visualCarousel.addEventListener('focusin', stopSceneTimer);
-      visualCarousel.addEventListener('focusout', startSceneTimer);
-      startSceneTimer();
+      sceneDots.forEach(dot => dot.addEventListener('click', () => showScene(Number(dot.dataset.go))));
 
       </script>
   </body>
