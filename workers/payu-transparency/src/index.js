@@ -2,13 +2,13 @@ const PAGE = "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Accept, Content-Type",
+  "Access-Control-Allow-Headers": "Accept, Content-Type, Cache-Control, Pragma",
   "Access-Control-Max-Age": "86400"
 };
 function reply(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), { status, headers: {
     ...CORS, "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": "public, max-age=60, s-maxage=300",
+    "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff", ...extra
   }});
 }
@@ -36,6 +36,99 @@ async function auth(body, date, key, salt) {
     authorization: 'hmac username="' + key + '", algorithm="hmac-sha256", headers="date digest", signature="' + signature + '"'
   };
 }
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+function redactDiagnosticText(value, secrets = []) {
+  let text = String(value ?? "");
+  for (const secret of secrets) {
+    if (secret) text = text.split(String(secret)).join("[redacted]");
+  }
+  return text
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[redacted-email]")
+    .replace(/\b\+?\d[\d\s().-]{8,}\d\b/g, "[redacted-number]")
+    .replace(/\bBearer\s+[A-Za-z0-9._~+\/-]+=*/gi, "Bearer [redacted]")
+    .replace(/(authorization|signature|merchant.?key|merchant.?salt|salt|key)(["'\s:=]+)[^,\s"'<>]+/gi, "$1$2[redacted]")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 280);
+}
+function extractPayUErrorDetails(responseText, key, salt) {
+  if (!responseText) return { responseBody: "empty" };
+  try {
+    const payload = JSON.parse(responseText);
+    const details = {};
+    const fields = [
+      "code", "errorCode", "error_code", "message", "msg", "error",
+      "errorMessage", "error_description", "description", "statusMessage"
+    ];
+    const collect = (value, prefix = "") => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return;
+      for (const field of fields) {
+        if (Object.prototype.hasOwnProperty.call(value, field)) {
+          const item = value[field];
+          if (typeof item === "string" || typeof item === "number" || typeof item === "boolean") {
+            details[prefix + field] = typeof item === "string"
+              ? redactDiagnosticText(item, [key, salt])
+              : item;
+          }
+        }
+      }
+    };
+    collect(payload);
+    if (payload.error && typeof payload.error === "object") collect(payload.error, "error.");
+    if (payload.data && typeof payload.data === "object") collect(payload.data, "data.");
+    if (Array.isArray(payload.errors)) {
+      details.errors = payload.errors.slice(0, 3).map(item => {
+        const safe = {};
+        if (item && typeof item === "object") {
+          for (const field of ["code", "message", "description"]) {
+            const value = item[field];
+            if (typeof value === "string" || typeof value === "number") {
+              safe[field] = typeof value === "string" ? redactDiagnosticText(value, [key, salt]) : value;
+            }
+          }
+        }
+        return safe;
+      });
+    }
+    return Object.keys(details).length ? details : { responseFormat: "json", fields: Object.keys(payload).slice(0, 12) };
+  } catch {
+    return { responseFormat: "text", preview: redactDiagnosticText(responseText, [key, salt]) };
+  }
+}
+function payUResponseHeaders(response) {
+  const output = {};
+  for (const name of ["date", "content-type", "x-request-id", "request-id", "x-correlation-id", "x-trace-id"]) {
+    const value = response.headers.get(name);
+    if (value) output[name] = value.slice(0, 160);
+  }
+  return output;
+}
+function retryDelay(response, attempt) {
+  const retryAfter = response?.headers?.get("retry-after");
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(2000, seconds * 1000);
+    const date = Date.parse(retryAfter);
+    if (Number.isFinite(date)) return Math.max(0, Math.min(2000, date - Date.now()));
+  }
+  return Math.min(1000, 250 * (2 ** (attempt - 1)));
+}
+function cacheBypassRequested(request, url) {
+  if (url.searchParams.get("fresh") === "1") return true;
+  const directives = (request.headers.get("cache-control") || "")
+    .toLowerCase().split(",").map(value => value.trim().split("=")[0]);
+  const pragma = (request.headers.get("pragma") || "").toLowerCase();
+  return directives.some(value => value === "no-cache" || value === "no-store" || value === "max-age=0")
+    || pragma.split(",").some(value => value.trim() === "no-cache");
+}
+function noStore(response) {
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "no-store");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
 function publicContributorName(firstValue, lastValue) {
   const clean = value => String(value || "")
     .replace(/[\u0000-\u001f\u007f]/g, " ")
@@ -52,22 +145,111 @@ async function getPage(pageNumber, from, to, key, salt) {
   const body = JSON.stringify({ pageNumber, startDate: from, endDate: to, totalRecord: 50 });
   const date = new Date().toUTCString();
   const authentication = await auth(body, date, key, salt);
-  const response = await fetch("https://info.payu.in/v4/reporting/transactions", {
+  const requestOptions = {
     method: "POST",
     headers: {
       "Accept": "application/json", "Content-Type": "application/json",
       "Date": date, "Digest": authentication.digest, "Authorization": authentication.authorization
     },
     body
-  });
-  if (!response.ok) {
-    console.error(JSON.stringify({ message: "PayU reporting API error", status: response.status, page: pageNumber }));
-    throw new Error("PayU reporting request failed. Check the merchant credentials and reporting API access.");
+  };
+  let response = null;
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      response = await fetch("https://info.payu.in/v4/reporting/transactions", requestOptions);
+    } catch (error) {
+      if (attempt < maxAttempts) {
+        console.warn(JSON.stringify({
+          message: "PayU reporting network attempt failed; retrying",
+          page: pageNumber, attempt, maxAttempts
+        }));
+        await sleep(retryDelay(null, attempt));
+        continue;
+      }
+      console.error(JSON.stringify({
+        message: "PayU reporting network failure",
+        page: pageNumber, attempts: attempt,
+        error: redactDiagnosticText(error instanceof Error ? error.message : "Network error", [key, salt])
+      }));
+      const failure = new Error("Unable to reach PayU reporting service after retrying. Please try again shortly.");
+      failure.code = "PAYU_NETWORK_ERROR";
+      throw failure;
+    }
+
+    if (response.ok) break;
+    const retryable = response.status === 408 || response.status === 429 || response.status >= 500;
+    if (retryable && attempt < maxAttempts) {
+      console.warn(JSON.stringify({
+        message: "PayU reporting returned a retryable status",
+        status: response.status, page: pageNumber, attempt, maxAttempts
+      }));
+      await sleep(retryDelay(response, attempt));
+      continue;
+    }
+
+    const responseText = await response.text();
+    console.error(JSON.stringify({
+      message: "PayU reporting API rejected request",
+      status: response.status,
+      page: pageNumber,
+      attempts: attempt,
+      responseHeaders: payUResponseHeaders(response),
+      responseDetails: extractPayUErrorDetails(responseText, key, salt)
+    }));
+
+    const failure = new Error(
+      response.status === 403
+        ? "PayU rejected the reporting request (HTTP 403). Verify that Transaction Reporting API access is enabled and that the merchant credentials are authorized."
+        : response.status === 401
+          ? "PayU authentication failed (HTTP 401). Verify the production merchant Key/Salt pair and configured signing method."
+          : response.status === 429
+            ? "PayU rate-limited the reporting request. Please retry shortly."
+            : "PayU reporting service returned HTTP " + response.status + ". Please retry later or contact PayU support."
+    );
+    failure.code = response.status === 403 ? "PAYU_FORBIDDEN"
+      : response.status === 401 ? "PAYU_UNAUTHORIZED"
+      : response.status === 429 ? "PAYU_RATE_LIMITED"
+      : response.status >= 500 ? "PAYU_UPSTREAM_ERROR"
+      : "PAYU_REQUEST_REJECTED";
+    failure.upstreamStatus = response.status;
+    throw failure;
   }
-  const data = await response.json();
+
+  if (!response || !response.ok) {
+    const failure = new Error("PayU reporting request failed.");
+    failure.code = "PAYU_REPORTING_ERROR";
+    throw failure;
+  }
+
+  const responseText = await response.text();
+  let data;
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    console.error(JSON.stringify({
+      message: "PayU reporting API returned invalid JSON",
+      page: pageNumber,
+      responseHeaders: payUResponseHeaders(response),
+      responseDetails: extractPayUErrorDetails(responseText, key, salt)
+    }));
+    const failure = new Error("PayU returned an invalid reporting response.");
+    failure.code = "PAYU_INVALID_RESPONSE";
+    failure.upstreamStatus = response.status;
+    throw failure;
+  }
   if (data.status !== 1 || !Array.isArray(data.result)) {
-    console.error(JSON.stringify({ message: "Unexpected PayU reporting response", page: pageNumber, status: data.status }));
-    throw new Error("PayU returned an unexpected reporting response.");
+    console.error(JSON.stringify({
+      message: "Unexpected PayU reporting response",
+      page: pageNumber,
+      status: data.status,
+      responseDetails: extractPayUErrorDetails(responseText, key, salt)
+    }));
+    const failure = new Error("PayU returned an unexpected reporting response.");
+    failure.code = "PAYU_UNEXPECTED_RESPONSE";
+    failure.upstreamStatus = response.status;
+    throw failure;
   }
   return data;
 }
@@ -94,9 +276,15 @@ export default {
     }
 
     const cache = caches.default;
-    const cacheKey = new Request(url.toString(), { method: "GET" });
-    const cached = await cache.match(cacheKey);
-    if (cached) return cached;
+    const cacheUrl = new URL(url.origin + url.pathname);
+    cacheUrl.searchParams.set("from", from);
+    cacheUrl.searchParams.set("to", to);
+    const cacheKey = new Request(cacheUrl.toString(), { method: "GET" });
+    const bypassCache = cacheBypassRequested(request, url);
+    if (!bypassCache) {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    }
     try {
       const all = [];
       let chunkStart = from;
@@ -143,12 +331,25 @@ export default {
       const count = transactions.length;
       const output = reply({ range: { from, to }, summary: {
         successfulPayments: count, totalAmount, averageAmount: count ? Math.round(totalAmount / count * 100) / 100 : 0, currency: "INR"
-      }, transactions, source: "PayU", statusFilter: "captured" });
+      }, transactions, source: "PayU", statusFilter: "captured" }, 200, {
+        "Cache-Control": "public, max-age=60, s-maxage=300"
+      });
       ctx.waitUntil(cache.put(cacheKey, output.clone()));
-      return output;
+      return bypassCache ? noStore(output) : output;
     } catch (error) {
-      console.error(JSON.stringify({ message: "Public transactions request failed", error: error instanceof Error ? error.message : "Unknown error" }));
-      return reply({ message: error instanceof Error ? error.message : "Unable to fetch payment data." }, 502);
+      const code = error && typeof error.code === "string" ? error.code : "PAYU_REPORTING_ERROR";
+      const upstreamStatus = error && Number.isInteger(error.upstreamStatus) ? error.upstreamStatus : undefined;
+      console.error(JSON.stringify({
+        message: "Public transactions request failed",
+        code,
+        upstreamStatus,
+        error: error instanceof Error ? error.message : "Unknown error"
+      }));
+      return reply({
+        message: error instanceof Error ? error.message : "Unable to fetch payment data.",
+        code,
+        ...(upstreamStatus ? { upstreamStatus } : {})
+      }, 502);
     }
   }
 };
