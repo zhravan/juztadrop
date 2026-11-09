@@ -60,7 +60,7 @@ jobs:
           import subprocess
           from pathlib import PurePosixPath
 
-          tracked = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\\0")
+          tracked = subprocess.check_output(["git", "ls-files", "-z"]).decode().split(chr(0))
           forbidden = []
           for path in filter(None, tracked):
               name = PurePosixPath(path).name
