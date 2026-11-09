@@ -1,17 +1,18 @@
-name: Deploy JustADrop ledger to GitHub Pages
+name: Deploy Just-a-Drop to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
-  group: pages
+  group: github-pages
   cancel-in-progress: true
 
 jobs:
@@ -21,25 +22,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v4
-      - name: Format HTML, CSS and JavaScript
-        run: npx --yes prettier@3.6.2 --write "**/*.html"
-      - name: Commit formatted HTML
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "*.html"
-          if ! git diff --cached --quiet; then
-            git commit -m "style: format HTML with Prettier [skip ci]"
-            git push
-          fi
-      - name: Configure Pages
+
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Upload site
+
+      - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - name: Deploy
+
+      - name: Deploy site
         id: deployment
         uses: actions/deploy-pages@v4
