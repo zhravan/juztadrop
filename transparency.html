@@ -1181,6 +1181,24 @@
         }
       }
 
+    
+      /* Keep the navigation in normal flow, then let it stick with breathing room */
+      .top {
+        position: sticky !important;
+        top: 18px !important;
+        margin-top: 18px !important;
+        border-top: 2px solid #25232b !important;
+        border-radius: 14px !important;
+      }
+      @media (max-width: 700px) {
+        .top {
+          top: 10px !important;
+          margin-top: 10px !important;
+          border-top: 2px solid #25232b !important;
+          border-radius: 12px !important;
+        }
+      }
+
     </style>
   </head>
   <body>
