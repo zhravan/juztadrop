@@ -53,12 +53,105 @@ th{background:#fff5f8;color:#826f79;border-color:var(--line)}td{border-color:#f3
 
 .steps-list{border-top:1px solid var(--line)}.step{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:18px;padding:20px 4px;border-bottom:1px solid var(--line)}.step-no{font-size:13px;font-weight:800;color:var(--red)}.step h3{font-size:18px;margin:0 0 3px}.step p{font-size:14px;color:var(--muted);margin:0}.step>a{font-size:13px;font-weight:800;color:var(--red)}
 @media(max-width:600px){.step{grid-template-columns:34px 1fr;gap:12px}.step>a{grid-column:2}}
+
+/* Mobile-first responsive refinements */
+html{scroll-padding-top:82px}
+img{max-width:100%;height:auto}
+body{overflow-x:hidden}
+.wrap{width:100%;min-width:0}
+.activity-main,.activity-side,.step>div,.hero-copy{min-width:0}
+.activity-main strong,.activity-main span,.activity-main small,.spend-foot span,.step p{overflow-wrap:anywhere}
+.menu-toggle{display:none}
+@media(max-width:900px){
+ .wrap{padding-left:24px;padding-right:24px}
+ .nav{gap:15px}
+ .brand img{width:170px}
+ .hero{gap:28px}
+ .spend{padding:19px}
+}
+@media(max-width:760px){
+ html{scroll-padding-top:72px}
+ .wrap{padding-left:18px;padding-right:18px}
+ .top{position:sticky;top:0;z-index:20;min-height:68px;padding-top:8px;padding-bottom:8px;background:rgba(255,250,247,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+ .brand img{width:150px}
+ .menu-toggle{display:flex;width:42px;height:42px;flex-direction:column;justify-content:center;align-items:center;gap:5px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer}
+ .menu-toggle span{width:18px;height:2px;background:var(--ink);border-radius:2px}
+ .nav{display:none;position:absolute;top:calc(100% - 1px);left:0;right:0;padding:12px 18px 18px;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:0 12px 18px rgba(50,30,40,.08);flex-direction:column;align-items:stretch;gap:0}
+ .nav.open{display:flex}
+ .nav a,.nav a:not(.cta){display:block;padding:13px 4px;border-bottom:1px solid var(--line);font-size:15px}
+ .nav .cta{margin-top:12px;text-align:center;border:0;padding:13px}
+ .hero{grid-template-columns:1fr;padding:34px 0 32px;gap:22px}
+ .hero-copy{padding:0}
+ .hero h1{font-size:clamp(34px,9vw,48px);line-height:1.12;margin:14px 0}
+ .intro{font-size:16px;line-height:1.65}
+ .hero-visual{min-height:clamp(180px,55vw,260px);background-position:center;border-radius:7px}
+ .ledger{padding:21px 18px;margin-bottom:46px;border-radius:8px}
+ .balance-summary{padding:3px 0 20px;gap:12px}
+ .balance-value{font-size:clamp(36px,10vw,48px);overflow-wrap:anywhere}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 0;padding-top:18px}
+ .stat,.stat:first-child{padding:0 12px;border-left:1px solid var(--line)}
+ .stat:nth-child(odd){padding-left:0;border-left:0}
+ .stat .num{font-size:clamp(20px,6vw,26px);overflow-wrap:anywhere}
+ .stat .label{font-size:10px;line-height:1.35}
+ .section{padding-bottom:48px}
+ .section-head{display:block;margin-bottom:16px}
+ .section-head h2{font-size:27px}
+ .section-head p{margin-top:5px;font-size:13px}
+ .steps-list{border-top:1px solid var(--line)}
+ .step{grid-template-columns:30px minmax(0,1fr);gap:10px;padding:17px 0}
+ .step>a{grid-column:2;justify-self:start;margin-top:2px}
+ .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+ .tab{padding:12px 5px;font-size:12px;white-space:nowrap}
+ .toolbar{display:grid;grid-template-columns:1fr;gap:9px;margin:14px 0}
+ .search,.filter{width:100%;min-height:44px;font-size:14px}
+ .activity-list{border-radius:7px}
+ .activity-row{padding:14px 12px;gap:10px}
+ .activity-icon{width:34px;height:34px;flex-basis:34px;font-size:17px}
+ .activity-main strong{font-size:13px;line-height:1.35}
+ .activity-main span{font-size:11px;line-height:1.35}
+ .activity-main small{font-size:10px;line-height:1.35}
+ .activity-side .amount{font-size:13px;white-space:nowrap}
+ .activity-side .proof{font-size:10px;white-space:nowrap}
+ .spend-grid{grid-template-columns:1fr;gap:11px}
+ .spend{min-height:0;padding:18px;border-radius:7px}
+ .spend h3{font-size:18px;margin:12px 0 5px}
+ .spend p{font-size:13px;margin-bottom:12px}
+ .spend-foot{flex-wrap:wrap;gap:8px;font-size:12px}
+ .transparency{padding:38px 0}
+ .transparency-grid{grid-template-columns:1fr;gap:22px}
+ .transparency h2{font-size:30px}
+ .principle{padding:13px 0;align-items:center}
+ .principle span:first-child{font-size:12px}
+ .principle span:last-child{font-size:9px;white-space:nowrap}
+ #contact{padding-top:42px!important}
+ #contact .spend-grid{gap:10px}
+ #contact .spend-foot span{max-width:65%}
+ .footer{padding-top:25px;padding-bottom:28px;gap:16px}
+ .footlinks{gap:10px 16px}
+ .modal{padding:12px;align-items:flex-end}
+ .modal-card{width:100%;padding:22px 18px;border-radius:12px 12px 7px 7px;max-height:90dvh;overflow:auto}
+ .formrow input,.formrow select,.formrow textarea{min-height:44px;font-size:16px}
+ .primary{min-height:44px;width:100%}
+}
+@media(max-width:380px){
+ .wrap{padding-left:14px;padding-right:14px}
+ .brand img{width:136px}
+ .hero h1{font-size:34px}
+ .ledger{padding:18px 14px}
+ .activity-row{gap:8px;padding:12px 9px}
+ .activity-icon{width:30px;height:30px;flex-basis:30px}
+ .activity-side .amount{font-size:12px}
+ .principle{gap:7px}
+ .principle span:first-child{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <header class="wrap top">
 <a class="brand" href="#" aria-label="Just-a-Drop"><img src="./assets/justadrop-logo.svg" alt="Just-a-Drop" style="display:block;width:190px;height:auto"></a>
-<nav class="nav"><a href="#initiative">Initiative</a><a href="#causes">Our approach</a><a href="#contributions">Transparency</a><a href="#contact">Contact</a><a class="cta" href="https://bit.ly/3oUz4lp" target="_blank" rel="noopener">Join the community ↗</a></nav>
+<button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="siteNav"><span></span><span></span><span></span></button>
+<nav class="nav" id="siteNav"><a href="#initiative">Initiative</a><a href="#causes">Our approach</a><a href="#contributions">Transparency</a><a href="#contact">Contact</a><a class="cta" href="https://bit.ly/3oUz4lp" target="_blank" rel="noopener">Join the community ↗</a></nav>
 </header>
 <main>
 <section class="wrap hero" id="initiative">
@@ -132,6 +225,11 @@ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{doc
 document.querySelector('#search').addEventListener('input',render);document.querySelector('#month').addEventListener('change',render);
 async function load(){try{const r=await fetch(DATA_URL,{cache:'no-store'});if(r.ok){const j=await r.json();if(Array.isArray(j.entries))entries=j.entries.filter(x=>['income','expense'].includes(x.type)&&x.status==='verified'&&Number(x.amount)>=0);}}catch(e){console.info('Ledger data not published yet.');}render();}
 load();
+const menuToggle=document.querySelector('#menuToggle'),siteNav=document.querySelector('#siteNav');
+menuToggle.addEventListener('click',()=>{const open=siteNav.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation':'Open navigation')});
+siteNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{siteNav.classList.remove('open');menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){siteNav.classList.remove('open');menuToggle.setAttribute('aria-expanded','false')}});
+
 const modal=document.querySelector('#payModal');document.querySelectorAll('a[href="#contributions"]').forEach(a=>a.addEventListener('click',()=>{}));document.querySelector('#closeModal').onclick=()=>modal.classList.remove('show');modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
 </script>
 </body></html>
