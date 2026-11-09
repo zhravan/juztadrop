@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#fffaf4"><meta name="description" content="Just a Drop of water might fill someone’s thirst. Save ₹1 every day, contribute together, and help make someone’s life better.">
 <title>Just A Drop | Community Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#fffaf4;--ink:#342d2a;--muted:#766b65;--line:#eee2d8;--red:#bd402e;--red-soft:#f8e9e4;--yellow:#f8edb9;--green:#56775c;--pink:#e52b8a;--shadow:0 8px 26px rgba(74,45,31,.06)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:'Balsamiq Sans',cursive;font-size:16px;line-height:1.6}a{color:inherit;text-decoration:none}button,input,select{font:inherit}.wrap{max-width:1120px;margin:auto;padding:0 28px}.mono{font-family:'DM Mono',monospace;letter-spacing:-.02em}
@@ -17,6 +17,31 @@
 .footer{padding:30px 0;display:flex;justify-content:space-between;align-items:center;gap:22px;color:#8b7e75;font-size:11px}.footer img{width:150px;height:auto}.footlinks{display:flex;gap:18px;flex-wrap:wrap}.footlinks a:hover{color:var(--red)}
 .modal{display:none;position:fixed;inset:0;background:#342d2ab0;z-index:5;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-card{background:#fffaf4;padding:28px;border-radius:8px;width:min(500px,100%);border:1px solid var(--line)}.modal-card h3{font:700 25px 'Balsamiq Sans',cursive}.modal-card p{font-size:13px;color:var(--muted);line-height:1.7}.close{float:right;border:0;background:none;font-size:22px;cursor:pointer}.formrow{display:grid;gap:6px;margin:13px 0}.formrow label{font:10px 'DM Mono',monospace;text-transform:uppercase;color:#877a72}.formrow input,.formrow select,.formrow textarea{width:100%;border:1px solid var(--line);padding:11px;border-radius:5px;background:#fff;font-size:13px}.primary{font-size:12px;cursor:pointer}.disclaimer{font-size:10px!important;color:#9b8f86!important;margin-top:15px}
 @media(max-width:760px){.wrap{padding:0 19px}.top{min-height:72px}.brand img{width:155px}.nav{gap:12px}.nav a:not(.cta){display:none}.hero{grid-template-columns:1fr;gap:25px;padding:48px 0 38px}.hero-side{padding:22px}.ledger{padding:24px 20px;margin-bottom:48px}.stats{grid-template-columns:1fr 1fr;gap:22px 0;margin-top:24px}.stat:nth-child(3){padding-left:0;border:0}.section-head{display:block}.section-head p{margin-top:8px}.spend-grid{grid-template-columns:1fr}.toolbar{align-items:stretch;flex-direction:column}.search{width:100%}.table-box{overflow:auto}table{min-width:660px}.transparency-grid{grid-template-columns:1fr;gap:30px}.transparency h2{font-size:32px}.footer{align-items:flex-start;flex-direction:column}.ledger-head{align-items:flex-start;flex-direction:column}}
+
+/* Refined Just-a-Drop palette and typography */
+:root{--paper:#fffaf7;--ink:#352b31;--muted:#766b70;--line:#eee2e7;--red:#bd1e68;--red-soft:#fbeaf2;--yellow:#f7edcf;--green:#52745e;--pink:#e52b8a;--shadow:0 7px 22px rgba(73,39,56,.055);--deep:#6d294b}
+body,button,input,select,textarea{font-family:'Nunito Sans',sans-serif}
+h1,h2,h3,.brand,.stat .num,.modal-card h3{font-family:'Nunito Sans',sans-serif}
+h1{font-weight:800;letter-spacing:-.035em}h2,h3{font-weight:750;letter-spacing:-.02em}
+.nav,.intro,.hero-side p,.spend p,.transparency p,td,.section-head p{font-family:'Nunito Sans',sans-serif}
+.mono,.eyebrow,.side-label,.status,.stat .label,.spend .topline,.spend-foot,th,.amount,.tag,.formrow label{font-family:'Nunito Sans',sans-serif;letter-spacing:.015em}
+.eyebrow,.side-label,.status,.stat .label,.spend .topline,th,.formrow label{font-weight:800;letter-spacing:.07em}
+.top{background:var(--paper)}.nav{color:#62545c;font-weight:700}
+.nav a:hover,.hero-side a,.evidence,.proof{color:var(--red)}
+.nav .cta,.primary{background:var(--red);color:#fff;font-weight:800}.nav .cta:hover,.primary:hover{background:#991650}
+.hero-side{background:#fff1e8;border-color:#f0ddd2}.hero-side h2{color:var(--ink)}
+.eyebrow{color:var(--red)}.dot{background:var(--green)}
+.ledger{background:#fff;border-color:var(--line)}.ledger-head .eyebrow{color:var(--green)}
+.status{background:#eff5ef;border-color:#dce8dd;color:var(--green)}.stat .num{color:var(--red)}.stat .label{color:#82757c}
+.spend,.table-box{background:#fff;border-color:var(--line);box-shadow:var(--shadow)}.spend .topline{color:#88777f}.spend h3{color:var(--ink)}
+.tab{font-family:'Nunito Sans',sans-serif;font-weight:700}.tab.active{color:var(--red);border-color:var(--red)}
+.search,.filter{font-family:'Nunito Sans',sans-serif;border-color:var(--line)}.search:focus,.filter:focus{border-color:#d77ca7}
+th{background:#fff5f8;color:#826f79;border-color:var(--line)}td{border-color:#f3eaf0}.sub{color:#93858d}
+.tag{background:#edf4ee;color:#456c50}.tag.out{background:#fbeaf0;color:#a23e63}.tag.pending{background:#fbf3dc;color:#806b35}
+.transparency{background:#f7edcf}.transparency p{color:#665a50}.principles,.principle{border-color:#e8dcb9}.principle span:last-child{color:#81714d}
+.footer{color:#84777e}.modal-card{border-color:var(--line)}.formrow input,.formrow select,.formrow textarea{font-family:'Nunito Sans',sans-serif}
+::selection{background:#f6d6e5;color:#4b1832}
+
 </style>
 </head>
 <body>
