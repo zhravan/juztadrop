@@ -43,7 +43,7 @@ jobs:
               assert isinstance(entry.get("id"), str) and entry["id"].strip(), f"{where}.id is required"
               assert entry["id"] not in seen_ids, f"Duplicate public ledger id: {entry['id']}"
               seen_ids.add(entry["id"])
-              assert re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", str(entry.get("date", ""))), f"{where}.date must use YYYY-MM-DD"
+              assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(entry.get("date", ""))), f"{where}.date must use YYYY-MM-DD"
               amount = entry.get("amount")
               assert isinstance(amount, (int, float)) and not isinstance(amount, bool) and amount >= 0, f"{where}.amount must be a non-negative number"
 
