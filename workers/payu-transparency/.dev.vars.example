@@ -1,0 +1,4 @@
+# Local-only placeholders. Replace values in your untracked .dev.vars file.
+# Never paste production credentials into this example file or commit .dev.vars.
+PAYU_MERCHANT_KEY="replace-with-a-local-development-key"
+PAYU_MERCHANT_SALT="replace-with-a-local-development-salt"
