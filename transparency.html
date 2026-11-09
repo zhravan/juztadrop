@@ -1161,6 +1161,26 @@
         *, *::before, *::after { transition-duration: .01ms !important; }
       }
  
+    
+      /* Sticky site navigation: opaque surface masks scrolling content */
+      .top {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        margin-top: 0 !important;
+        isolation: isolate;
+        background: #fffdf7 !important;
+        border-top: 0 !important;
+        border-radius: 0 0 14px 14px !important;
+        box-shadow: 0 5px 0 #25232b, 0 9px 18px rgba(37,35,43,.08) !important;
+      }
+      @media (max-width: 700px) {
+        .top {
+          top: 0 !important;
+          border-radius: 0 0 12px 12px !important;
+        }
+      }
+
     </style>
   </head>
   <body>
