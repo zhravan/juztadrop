@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Format HTML, CSS and JavaScript
+        run: npx --yes prettier@3.6.2 --write "**/*.html"
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
