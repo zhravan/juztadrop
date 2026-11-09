@@ -798,6 +798,24 @@
         .way-card p, .impact p, .footer, .period-note { font-size:16px; }
       }
 
+    
+      /* Static presentation: disable all motion site-wide */
+      html, body { scroll-behavior:auto !important; }
+      *, *::before, *::after {
+        animation:none !important;
+        transition:none !important;
+        scroll-behavior:auto !important;
+        caret-color:auto;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        *, *::before, *::after {
+          animation-duration:0s !important;
+          animation-delay:0s !important;
+          transition-duration:0s !important;
+          transition-delay:0s !important;
+        }
+      }
+
     </style>
   </head>
   <body>
