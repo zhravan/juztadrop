@@ -30,7 +30,7 @@ Edit `data/ledger.json` and commit a reconciled entry. Example schema:
   "type": "income",
   "status": "verified",
   "date": "2026-11-09",
-  "contributor": "Display name or Anonymous",
+  "contributor": "First name + surname initial (with consent) or Anonymous contributor",
   "contributor_id": "internal-non-identifying-key",
   "amount": 30,
   "reference": "PayU transaction reference",
@@ -53,10 +53,10 @@ The Worker is the only component that talks to PayU. It stores the PayU Merchant
 
 This integration is intentionally read-only:
 - It retrieves captured/successful transactions only and subtracts refunds that PayU marks as successfully processed; queued or pending refunds do not affect the total until PayU confirms success.
-- It exposes an anonymous contribution label, date, amount, payment mode, and masked reference.
+- It exposes a limited contributor display name (first name and surname initial, when PayU supplies them; otherwise `Anonymous contributor`), date, amount, payment mode, and masked reference.
 - It does not create payment links or payment orders.
 - It does not initiate refunds, cancellations, or transaction modifications.
-- It does not publish payer names, phone numbers, email addresses, UPI IDs, bank references, or raw PayU responses.
+- It does not publish full payer names, phone numbers, email addresses, UPI IDs, bank references, or raw PayU responses. The shortened name is personal information: publish it only when the contributor has been told and has agreed; otherwise keep the record anonymous.
 - It does not write PayU data back into `data/ledger.json`; the feed is fetched live by the public page.
 
 Configure `PAYU_MERCHANT_KEY` and `PAYU_MERCHANT_SALT` only as Cloudflare Worker secrets. Never put them in HTML, JavaScript, JSON, Git history, or GitHub Pages. The PayU reporting credential must be rotated if it has been exposed. Public pages consume only the Worker’s sanitised GET endpoint.
