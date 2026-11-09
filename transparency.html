@@ -1383,6 +1383,32 @@
         }
       }
 
+    
+      /* Site typography: Darker Grotesque */
+      @import url('https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@400;500;600;700;800;900&display=swap');
+      :root {
+        --font-ui: 'Darker Grotesque', sans-serif;
+      }
+      html, body, button, input, select, textarea {
+        font-family: 'Darker Grotesque', sans-serif !important;
+      }
+      body { font-size:19px; line-height:1.45; }
+      h1, h2, h3, h4, .eyebrow, .button, .nav, button, strong, .brand {
+        font-family:'Darker Grotesque',sans-serif !important;
+      }
+      h1 { font-weight:900; line-height:.98; letter-spacing:-.045em !important; }
+      h2 { font-weight:800; letter-spacing:-.035em; }
+      h3 { font-weight:800; letter-spacing:-.025em; }
+      p, li, label, input, .lead { font-weight:500; }
+      .eyebrow { font-weight:900; letter-spacing:.12em; }
+      .nav { font-weight:800; }
+      .button, button { font-weight:800; }
+      .way-card p, .impact p, .footer, .period-note { font-size:17px; }
+      @media(max-width:700px) {
+        body { font-size:18px; }
+        .way-card p, .impact p, .footer, .period-note { font-size:16px; }
+      }
+
     </style>
   </head>
   <body>
