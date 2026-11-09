@@ -700,6 +700,92 @@
         *, *::before, *::after { transition-duration: .01ms !important; }
       }
  
+    
+      /* Rotating hand-drawn community illustration carousel */
+      .story-visual {
+        position: relative;
+        overflow: hidden;
+        min-height: 0 !important;
+        height: clamp(430px, 39vw, 570px);
+        padding: 0;
+        background: #f7cbd8 !important;
+        border: 3px solid #25232b !important;
+        border-radius: 22px !important;
+        box-shadow: 9px 9px 0 #25232b !important;
+      }
+      .scene-track, .art-scene { position:absolute; inset:0; }
+      .art-scene {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        padding:42px 24px 54px;
+        opacity:0;
+        visibility:hidden;
+        transform:translateX(24px) rotate(1deg) scale(.97);
+        transition:opacity .55s ease, transform .65s cubic-bezier(.2,.8,.2,1), visibility .55s;
+      }
+      .art-scene.is-active {
+        opacity:1;
+        visibility:visible;
+        transform:translateX(0) rotate(0) scale(1);
+      }
+      .scene-water { background:#f7cbd8; }
+      .scene-hands { background:#ddd4f5; }
+      .scene-community { background:#cfe9d8; }
+      .scene-care { background:#cce5f3; }
+      .scene-kicker {
+        position:absolute;top:24px;left:25px;
+        font-size:10px;font-weight:1000;letter-spacing:.14em;
+        color:#25232b;
+      }
+      .scene-art { width:100%;height:auto;max-height:390px;overflow:visible; }
+      .art-sticker {
+        position:absolute;right:23px;top:60px;z-index:2;
+        padding:10px 12px;background:#fffdf7;border:2px solid #25232b;
+        border-radius:7px;box-shadow:3px 3px 0 #25232b;
+        font-size:10px;line-height:1.2;font-weight:1000;letter-spacing:.04em;
+        transform:rotate(7deg);
+      }
+      .sticker-two { background:#f7e9a9;transform:rotate(-7deg); }
+      .sticker-three { background:#f7cbd8; }
+      .sticker-four { background:#f7e9a9;transform:rotate(-6deg); }
+      .scene-caption {
+        position:absolute;bottom:68px;left:24px;right:24px;
+        text-align:center;font-size:clamp(13px,1.3vw,16px);
+        font-weight:900;letter-spacing:-.02em;color:#25232b;
+      }
+      .scene-controls {
+        position:absolute;z-index:5;bottom:15px;left:17px;right:17px;
+        display:flex;align-items:center;gap:12px;
+      }
+      .scene-dots { display:flex;gap:7px;align-items:center; }
+      .scene-dot {
+        width:23px;height:9px;padding:0;border:2px solid #25232b;
+        border-radius:20px;background:#fffdf7;cursor:pointer;
+        transition:width .2s ease,background .2s ease;
+      }
+      .scene-dot.active { width:39px;background:#25232b; }
+      .scene-count { margin-left:auto;font-size:10px;font-weight:1000;letter-spacing:.1em; }
+      .scene-pause {
+        width:29px;height:29px;border:2px solid #25232b;border-radius:7px;
+        background:#fffdf7;color:#25232b;font-weight:1000;cursor:pointer;
+        box-shadow:2px 2px 0 #25232b;
+      }
+      .scene-pause:active { transform:translate(2px,2px);box-shadow:none; }
+      @media(max-width:700px) {
+        .story-visual { height:clamp(330px,100vw,450px); }
+        .art-scene { padding:42px 14px 50px; }
+        .scene-art { max-height:275px; }
+        .art-sticker { top:58px;right:12px;font-size:8px;padding:7px 8px; }
+        .scene-kicker { top:18px;left:15px;font-size:9px; }
+        .scene-caption { bottom:62px;font-size:12px; }
+        .scene-controls { bottom:13px;left:13px;right:13px; }
+      }
+      @media(prefers-reduced-motion:reduce) {
+        .art-scene { transition:none; }
+      }
+
     </style>
   </head>
   <body>
@@ -728,7 +814,93 @@
           <p>Save ₹1 a day. Share what you can. Help someone in need.</p>
           <a class="button" href="./contribute.html">Volunteer with us</a>
         </div>
-        <div class="visual" role="img" aria-label="Just-a-Drop community initiative"></div>
+        <div class="visual story-visual" aria-label="Illustrated stories of community care" aria-roledescription="carousel">
+          <div class="scene-track" id="sceneTrack">
+            <article class="art-scene scene-water is-active" data-scene="0" aria-hidden="false">
+              <span class="scene-kicker">01 / EVERY DROP COUNTS</span>
+              <span class="art-sticker sticker-one">A LITTLE<br>GOES A LONG WAY</span>
+              <svg class="scene-art" viewBox="0 0 620 410" role="img" aria-label="A giant smiling water drop surrounded by ripples and tiny stars">
+                <path d="M306 47C306 47 190 181 190 253a116 116 0 0 0 232 0C422 181 306 47 306 47Z" fill="#9ed6e9" stroke="#25232b" stroke-width="8" stroke-linejoin="round"/>
+                <path d="M250 245c0-24 19-43 43-43" fill="none" stroke="#fffdf7" stroke-width="13" stroke-linecap="round"/>
+                <path d="M269 274q13 15 26 0M326 274q13 15 26 0" fill="none" stroke="#25232b" stroke-width="8" stroke-linecap="round"/>
+                <path d="M294 301q12 12 24 0" fill="none" stroke="#25232b" stroke-width="7" stroke-linecap="round"/>
+                <path d="M111 330q195 62 390 0" fill="none" stroke="#25232b" stroke-width="8" stroke-linecap="round"/>
+                <path d="M150 354q155 42 310 0" fill="none" stroke="#25232b" stroke-width="5" stroke-linecap="round"/>
+                <path d="m113 118 13 26 28 4-21 19 5 28-25-14-25 14 5-28-21-19 28-4Z" fill="#f7e9a9" stroke="#25232b" stroke-width="5" stroke-linejoin="round"/>
+                <path d="m487 119 9 19 21 3-15 15 4 21-19-10-19 10 4-21-15-15 21-3Z" fill="#f7cbd8" stroke="#25232b" stroke-width="5" stroke-linejoin="round"/>
+                <circle cx="470" cy="287" r="12" fill="#cfe9d8" stroke="#25232b" stroke-width="5"/>
+                <circle cx="147" cy="263" r="9" fill="#ddd4f5" stroke="#25232b" stroke-width="5"/>
+              </svg>
+              <span class="scene-caption">One small act. A ripple of good.</span>
+            </article>
+            <article class="art-scene scene-hands" data-scene="1" aria-hidden="true">
+              <span class="scene-kicker">02 / SHARE WHAT YOU CAN</span>
+              <span class="art-sticker sticker-two">GIVE A<br>HELPING HAND</span>
+              <svg class="scene-art" viewBox="0 0 620 410" role="img" aria-label="Two hands passing a heart-shaped gift">
+                <path d="M102 265c32-38 76-51 119-35l77 29 31-19c24-14 52-8 63 12 8 15 2 34-13 45l-84 61c-23 17-53 21-80 11l-93-34Z" fill="#f7cbd8" stroke="#25232b" stroke-width="8" stroke-linejoin="round"/>
+                <path d="m518 265-62-40c-31-20-73-18-102 5l-64 50 47 43 75-28 45 34Z" fill="#cce5f3" stroke="#25232b" stroke-width="8" stroke-linejoin="round"/>
+                <path d="M310 121c-32-37-91-13-81 34 6 28 81 80 81 80s75-52 81-80c10-47-49-71-81-34Z" fill="#a94d71" stroke="#25232b" stroke-width="8" stroke-linejoin="round"/>
+                <path d="M310 146c-12-13-32-8-35 8" fill="none" stroke="#fffdf7" stroke-width="8" stroke-linecap="round"/>
+                <path d="m115 116 13 25 28 4-21 19 5 28-25-14-25 14 5-28-21-19 28-4Z" fill="#f7e9a9" stroke="#25232b" stroke-width="5"/>
+                <circle cx="484" cy="132" r="14" fill="#cfe9d8" stroke="#25232b" stroke-width="5"/>
+                <path d="M120 337q190 60 380 0" fill="none" stroke="#25232b" stroke-width="7" stroke-linecap="round"/>
+              </svg>
+              <span class="scene-caption">You don't need a lot to make a difference.</span>
+            </article>
+            <article class="art-scene scene-community" data-scene="2" aria-hidden="true">
+              <span class="scene-kicker">03 / BETTER, TOGETHER</span>
+              <span class="art-sticker sticker-three">COMMUNITY<br>OVER EVERYTHING</span>
+              <svg class="scene-art" viewBox="0 0 620 410" role="img" aria-label="Three cheerful neighbours standing together around a growing plant">
+                <path d="M90 340h440" stroke="#25232b" stroke-width="8" stroke-linecap="round"/>
+                <path d="M170 341v-84q0-43 43-43t43 43v84Z" fill="#f7cbd8" stroke="#25232b" stroke-width="7"/>
+                <circle cx="213" cy="177" r="40" fill="#e9b78f" stroke="#25232b" stroke-width="7"/>
+                <path d="M174 171q3-44 43-44 33 0 39 36-28-12-82 8Z" fill="#25232b"/>
+                <path d="M195 183h1m34 0h1" stroke="#25232b" stroke-width="8" stroke-linecap="round"/>
+                <path d="M202 201q11 10 22 0" fill="none" stroke="#25232b" stroke-width="5" stroke-linecap="round"/>
+                <path d="M353 341v-96q0-43 43-43t43 43v96Z" fill="#cce5f3" stroke="#25232b" stroke-width="7"/>
+                <circle cx="396" cy="164" r="40" fill="#b97856" stroke="#25232b" stroke-width="7"/>
+                <path d="M357 160q5-42 43-42 33 0 39 35-28-11-82 7Z" fill="#25232b"/>
+                <path d="M378 170h1m34 0h1" stroke="#25232b" stroke-width="8" stroke-linecap="round"/>
+                <path d="M385 188q11 10 22 0" fill="none" stroke="#25232b" stroke-width="5" stroke-linecap="round"/>
+                <path d="M268 341v-64q0-34 34-34t34 34v64Z" fill="#ddd4f5" stroke="#25232b" stroke-width="7"/>
+                <circle cx="302" cy="212" r="32" fill="#e4b18a" stroke="#25232b" stroke-width="7"/>
+                <path d="M272 207q5-35 34-35 25 0 29 28-22-10-63 7Z" fill="#25232b"/>
+                <path d="M289 215h1m24 0h1" stroke="#25232b" stroke-width="6" stroke-linecap="round"/>
+                <path d="M293 231q9 8 18 0" fill="none" stroke="#25232b" stroke-width="4" stroke-linecap="round"/>
+                <path d="M302 116v-39m0 25q-43-45-67-9 25 33 67 9Zm0-9q33-48 68-18-22 39-68 18Z" fill="#a9d1ad" stroke="#25232b" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M284 341h36l-8 28h-20Z" fill="#f7e9a9" stroke="#25232b" stroke-width="6"/>
+              </svg>
+              <span class="scene-caption">Small contributions. Stronger communities.</span>
+            </article>
+            <article class="art-scene scene-care" data-scene="3" aria-hidden="true">
+              <span class="scene-kicker">04 / CARE IN ACTION</span>
+              <span class="art-sticker sticker-four">KINDNESS<br>IN MOTION</span>
+              <svg class="scene-art" viewBox="0 0 620 410" role="img" aria-label="A cheerful parcel of essentials with a heart and sparkles">
+                <path d="M180 183 310 117l130 66v151H180Z" fill="#f7e9a9" stroke="#25232b" stroke-width="8" stroke-linejoin="round"/>
+                <path d="m180 183 130 70 130-70M310 253v81" fill="none" stroke="#25232b" stroke-width="8" stroke-linejoin="round"/>
+                <path d="M267 139h86v-34h-86Z" fill="#f7cbd8" stroke="#25232b" stroke-width="7"/>
+                <path d="M310 139v-34" stroke="#25232b" stroke-width="7"/>
+                <path d="M310 193c-20-25-59-9-53 23 4 19 53 54 53 54s49-35 53-54c6-32-33-48-53-23Z" fill="#a94d71" stroke="#25232b" stroke-width="6"/>
+                <path d="m111 132 13 26 28 4-21 19 5 28-25-14-25 14 5-28-21-19 28-4Z" fill="#ddd4f5" stroke="#25232b" stroke-width="5"/>
+                <path d="m486 111 10 20 22 3-16 16 4 22-20-11-20 11 4-22-16-16 22-3Z" fill="#cfe9d8" stroke="#25232b" stroke-width="5"/>
+                <circle cx="480" cy="292" r="13" fill="#f7cbd8" stroke="#25232b" stroke-width="5"/>
+                <circle cx="139" cy="293" r="10" fill="#cce5f3" stroke="#25232b" stroke-width="5"/>
+                <path d="M130 352h360" stroke="#25232b" stroke-width="7" stroke-linecap="round"/>
+              </svg>
+              <span class="scene-caption">Real people. Practical help. Shared hope.</span>
+            </article>
+          </div>
+          <div class="scene-controls">
+            <div class="scene-dots" role="group" aria-label="Choose an illustration">
+              <button class="scene-dot active" type="button" aria-label="Show water illustration" aria-pressed="true" data-go="0"></button>
+              <button class="scene-dot" type="button" aria-label="Show helping hands illustration" aria-pressed="false" data-go="1"></button>
+              <button class="scene-dot" type="button" aria-label="Show community illustration" aria-pressed="false" data-go="2"></button>
+              <button class="scene-dot" type="button" aria-label="Show care illustration" aria-pressed="false" data-go="3"></button>
+            </div>
+            <span class="scene-count" id="sceneCount">01 / 04</span>
+            <button class="scene-pause" id="scenePause" type="button" aria-label="Pause illustrations">Ⅱ</button>
+          </div>
+        </div>
       </section>
       <section class="impact">
         <div>
@@ -837,6 +1009,50 @@
         }).format(income + payuIncome - expenses);
       }
       load();
-    </script>
+    
+      const sceneCards = Array.from(document.querySelectorAll('.art-scene'));
+      const sceneDots = Array.from(document.querySelectorAll('.scene-dot'));
+      const sceneCount = document.querySelector('#sceneCount');
+      const scenePause = document.querySelector('#scenePause');
+      let activeScene = 0;
+      let sceneTimer;
+      let sceneIsPaused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function showScene(index) {
+        activeScene = (index + sceneCards.length) % sceneCards.length;
+        sceneCards.forEach((scene, i) => {
+          const active = i === activeScene;
+          scene.classList.toggle('is-active', active);
+          scene.setAttribute('aria-hidden', String(!active));
+        });
+        sceneDots.forEach((dot, i) => {
+          const active = i === activeScene;
+          dot.classList.toggle('active', active);
+          dot.setAttribute('aria-pressed', String(active));
+        });
+        sceneCount.textContent = String(activeScene + 1).padStart(2, '0') + ' / 04';
+      }
+      function stopSceneTimer() { window.clearInterval(sceneTimer); }
+      function startSceneTimer() {
+        stopSceneTimer();
+        if (!sceneIsPaused) sceneTimer = window.setInterval(() => showScene(activeScene + 1), 4800);
+      }
+      sceneDots.forEach(dot => dot.addEventListener('click', () => {
+        showScene(Number(dot.dataset.go));
+        startSceneTimer();
+      }));
+      scenePause.addEventListener('click', () => {
+        sceneIsPaused = !sceneIsPaused;
+        scenePause.textContent = sceneIsPaused ? '▶' : 'Ⅱ';
+        scenePause.setAttribute('aria-label', sceneIsPaused ? 'Play illustrations' : 'Pause illustrations');
+        startSceneTimer();
+      });
+      const visualCarousel = document.querySelector('.story-visual');
+      visualCarousel.addEventListener('mouseenter', stopSceneTimer);
+      visualCarousel.addEventListener('mouseleave', startSceneTimer);
+      visualCarousel.addEventListener('focusin', stopSceneTimer);
+      visualCarousel.addEventListener('focusout', startSceneTimer);
+      startSceneTimer();
+
+      </script>
   </body>
 </html>
